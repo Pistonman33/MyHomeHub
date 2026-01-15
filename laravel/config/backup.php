@@ -35,6 +35,7 @@ return [
                  * Determines if symlinks should be followed.
                  */
                 'followLinks' => false,
+                'relative_path' => null,
             ],
 
             /*
