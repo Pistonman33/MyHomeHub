@@ -1,0 +1,97 @@
+#upload{
+  width: 400px;
+  height: 200px;
+  border: 4px dashed #3097D1;
+}
+#upload p{
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 170px;
+  color: #3097D1;
+  font-family: Arial;
+  font-weight:900;
+  font-size:18px;
+}
+#upload input{
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  width: 400px;
+  height: 200px;
+  outline: none;
+  opacity: 0;
+}
+
+.list-group-item .transaction_date{
+  margin-right: 5px;
+  padding-top: 0px;
+  line-height: normal;
+  color: #cdd3d8;
+}
+.list-group-item .transaction_date .transaction_date_day {
+  display: block;
+  font-size: 26px;
+  text-transform: uppercase;
+  text-align: center;
+
+}
+
+.list-group-item .transaction_date .transaction_month {
+  display: block;
+  text-align: center;
+  padding-top: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.list-group-item .libelle{
+  font-size: 16px;
+}
+.list-group-item .amount {
+  font-size: 16px;
+}
+.orange{
+  color:#ff6400;
+}
+
+.list-group-item.transaction {
+  padding: .40rem 0;
+}
+
+.list-group.list-group-striped li:nth-of-type(odd){
+     background: #F5F7FA;
+}
+
+.td_date{
+  padding:0px 0px 0px 5px !important;
+}
+
+.all_transaction_date {
+  position: relative;
+  width: 65px;
+  color: #cdd3d8;
+ }
+
+.all_transaction_date_day {
+  position: absolute;
+  font-size: 26px;
+  top: 15px;
+  }
+
+.all_transaction_date_month {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 16px;
+  }
+
+.all_transaction_date_year {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  font-size: 20px;
+  rotation: -90deg !important;
+  /* ** Hacks ** */
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  }

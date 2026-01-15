@@ -1,0 +1,26 @@
+.thumbnails {
+  overflow: hidden;
+}
+.thumbnails li {
+  float: left;
+  width: 12%;
+  position: relative;
+  min-height: 250px;
+  overflow: hidden;
+  margin: 0 2px 2px 2px;
+}
+.thumbnails li img {
+  padding: 3px;
+  max-width: 100%;
+  display: block;
+  position: absolute;
+  max-height: 250px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+}
+
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
