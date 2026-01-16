@@ -41,6 +41,110 @@ Ce projet est conçu pour :
 
 ---
 
+## 🧭 Environment Variables
+
+All environment variables are stored on the `.env` root file for 
+
+```
+laravel
+MakeFile
+```
+
+---
+## 🚀 Déploiement — Docker
+
+Execute the project following the environment.
+Here the list of commands.
+
+```
+make up
+make down
+make build
+make restart
+make logs
+make ps
+```
+
+Services:
+
+```
+docker-compose.yml
+├── traefik
+├── nginx
+├── laravel
+├── python
+├── mysql
+└── mailhog
+```
+
+### Traefik
+
+Reverse proxy service that manages routes and certificates.
+Need to add following records on /etc/hosts for web domain
+
+```
+127.0.0.1       traefik.myhome.hub.test
+127.0.0.1       myhome.hub.test
+127.0.0.1       mailhog.myhome.hub.test
+```
+
+Traefik [dashboard](https://traefik.myhome.hub.test/dashboard/#/)
+
+
+### Nginx
+
+In this project, Nginx acts as the web server in front of the Laravel application.
+
+Laravel itself does not serve HTTP requests directly. It requires a web server to:
+- Serve static files (CSS, JS, images)
+- Forward PHP requests to PHP-FPM
+- Define the correct web root (/public)
+
+### Laravel
+
+In dev environment the log are sent to the docker logs
+
+```
+LOG_CHANNEL=stderr
+LOG_LEVEL=debug
+```
+
+All environment variable is on the root of the project and not of laravel.
+
+MyHomeHub [dashboard](https://myhome.hub.test/)
+
+
+### Mysql
+
+Laravel project needs mysql database.
+There are also command line to manage db:
+
+```
+make db
+make db-dump FILE=prod-2026-01-15.sql
+make db-restore FILE=prod-2026-01-15.sql
+```
+
+There is also an `docker/mysql/init` folder that can contains a init backup file launching when we rebuild the mysql container.
+All database data are store in `docker/mysql/data`.
+And we can do backup and restore with makefile in the folder `docker/mysql/dumps`.
+
+### Mailhog
+
+MailHog is a simple email testing tool used in local development. It captures outgoing emails sent by your application so you can view them in a web interface instead of sending them to real recipients.
+
+Why we use it in this project:
+
+- Allows developers to safely test email functionality (like registration, password reset, notifications) without spamming real inboxes.
+- Provides a web interface to easily inspect, search, and debug emails.
+- Useful for local development and testing, but not needed in production.
+
+Access (local dev):
+- MailHog [Mail](https://mailhog.myhome.hub.test) 
+
+---
+
+
 ## 🟢 Qui fait quoi
 
 ### 🟩 Laravel — Backend principal
@@ -163,22 +267,6 @@ foreach ($fakeAmis as $ami) {
 
 ---
 
-## 🚀 Déploiement — Docker
-
-Le projet s’exécute via Docker Compose :
-
-```
-docker-compose.yml
-├── reverse-proxy
-├── laravel-app
-├── python-api
-├── db
-└── redis
-```
-
-Le reverse proxy (Traefik ou Nginx) gère les routes vers Laravel et Python.
-
----
 
 ## 🛠️ Mise en production — VPS OVH
 
@@ -258,3 +346,4 @@ portfolio-project/
 - être maintenue et déployée facilement
 - utiliser Docker et VPS Cloud
 
+#TODO Makefile pour mysql php artisan ????

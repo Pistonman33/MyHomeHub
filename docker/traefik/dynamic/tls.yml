@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/myhome.hub.test.pem
+      keyFile: /certs/myhome.hub.test-key.pem

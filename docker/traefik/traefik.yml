@@ -1,0 +1,16 @@
+entryPoints:
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+
+api:
+  dashboard: true
+
+tls:
+  certificates:
+    - certFile: /traefik/certs/myhome.hub.test.pem
+      keyFile: /traefik/certs/myhome.hub.test-key.pem
+

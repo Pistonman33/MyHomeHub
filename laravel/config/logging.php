@@ -65,6 +65,7 @@ return [
             'with' => [
                 'stream' => 'php://stderr',
             ],
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
         'syslog' => [
