@@ -1,22 +1,22 @@
-# 📘 MyHomeHub — Portfolio Laravel + Python + Docker
+# 📘 MyHomeHub — Laravel + Python + Docker Portfolio
 
-**MyHomeHub centralise tous mes projets personnels et techniques : films, séries, finances, blog et anniversaires. C’est un tableau de bord complet, modulable et conçu pour démontrer mes compétences en Laravel, Python et Docker.**
+**MyHomeHub centralizes all my personal and technical projects: movies, series, finances, blog, and birthdays. It is a complete, modular dashboard designed to showcase my skills in Laravel, Python, and Docker.**
 
-Ce document présente la structure, les choix techniques, les responsabilités des composants et le plan de déploiement de ce projet portfolio public.
-
----
-
-## 🎯 Objectif du projet
-
-Ce projet est conçu pour :
-- **Montrer mes compétences en développement web (Laravel / PHP)**
-- **Démontrer ma maîtrise de Python pour des services automatisés**
-- **Présenter une architecture évolutive, maintenable et professionnelle**
-- **Inclure une mise en production sur VPS Cloud avec Docker**
+This document presents the structure, technical choices, component responsibilities, and deployment plan of this public portfolio project.
 
 ---
 
-## 🧭 Vue d’ensemble de l’architecture
+## 🎯 Project Goal
+
+This project is designed to:
+- **Showcase my web development skills (Laravel / PHP)**
+- **Demonstrate my proficiency in Python for automated services**
+- **Present a scalable, maintainable, and professional architecture**
+- **Include production deployment on a Cloud VPS using Docker**
+
+---
+
+## 🧭 Architecture Overview
 
 ```
                 ┌──────────────┐
@@ -145,25 +145,34 @@ Access (local dev):
 ---
 
 
-## 🟢 Qui fait quoi
+## 🟢 Who does what
 
-### 🟩 Laravel — Backend principal
+### 🟩 Laravel — Main Backend
 
-Laravel est le **système maître** qui :
-- gère le **domaine métier**
-- expose les **APIs principales**
-- sert l’UI du backend
-- orchestre les appels à Python
+Laravel is the **master system** that:
+- manages the **business domain**
+- exposes the **main APIs**
+       - Movies / TV showd save file from NAS
+- serves the backend UI
 
-Responsabilités :
-- Authentification & utilisateurs
-- Films / séries (API + backoffice)
-- Blog (articles / catégories / tags)
-- Finances
-- Appels APIs externes (TMDB, âge légal, etc.)
-- Validation métier
 
-Laravel utilise Eloquent, migrations, seeders et policies. Sa base de données principale stocke toutes les tables métier.
+Responsibilities:
+- Authentication & users
+- Financial information about my family
+       - stats by categories and see all transactions
+       - import transactions from txt file (ING transactions export)
+       - update transactions by categories
+              - Little logic that save transactions in the good category during import.
+- Movies / TV shows (API + admin panel)
+       - Show Movies and TV shows library 
+       - Assign movie/tv show info from TMDB for the good movie title
+
+- Blog (articles / categories / tags)
+- External API calls (TMDB, legal age, etc.)
+- Business logic validation
+
+
+Laravel uses Eloquent, migrations, seeders, and policies. Its main database stores all the business tables.
 
 ### Tables Laravel
 - `myhome_users`
