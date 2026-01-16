@@ -5,6 +5,8 @@ COMPOSE=docker compose -p myhomehub-dev -f docker/dev/docker-compose.yml
 
 DUMP_FILE = $(CONTAINER_DUMP_DIR)/$(FILE)
 
+.PHONY: artisan
+
 ## Docker
 up:
 	$(COMPOSE) up -d
@@ -28,7 +30,10 @@ ps:
 
 ## Laravel
 artisan:
-	$(COMPOSE) exec $(CONTAINER_LARAVEL) php artisan $(cmd)
+	@docker compose -p myhomehub-dev -f docker/dev/docker-compose.yml exec laravel php artisan $(filter-out $@,$(MAKECMDGOALS))
+
+%:
+	@:
 
 migrate:
 	$(COMPOSE) exec $(CONTAINER_LARAVEL) php artisan migrate

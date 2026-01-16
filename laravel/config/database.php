@@ -54,6 +54,8 @@ return [
             'engine' => null,
             'dump' => [
                 'use_single_transaction',
+                'dump_binary_path' => env('DB_DUMP_PATH', ''),
+                'skip_ssl' => true,
                 'timeout' => 60 * 5, // 5 minute timeout
                 //'exclude_tables' => ['myhome_info_movie'],
                 // 'add_extra_option' => '--optionname=optionvalue',

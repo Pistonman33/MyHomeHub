@@ -15,6 +15,8 @@ RUN apk add --no-cache \
     curl \
     shadow \
     libxml2-dev \
+    mysql-client \
+    mariadb-connector-c \
     libzip-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache
 
