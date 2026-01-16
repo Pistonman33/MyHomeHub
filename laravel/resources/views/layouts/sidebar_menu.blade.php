@@ -52,18 +52,6 @@
 				Import transactions
 			</a>
 		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('charge') }}">
-				<i class="fas fa-charging-station"></i>
-				Charge Info
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('charge.save') }}">
-				<i class="fas fa-save"></i>
-				Save Charge
-			</a>
-		</li>
   </ul>
 	<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
 		<span>Movies</span>

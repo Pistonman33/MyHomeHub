@@ -35,13 +35,6 @@ Route::prefix('finance')->group(function () {
 
 });
 
-Route::prefix('charge')->group(function () {
-  Route::get('','ChargeController@home')->name("charge")->middleware('auth');
-  Route::get('save','ChargeController@save')->name("charge.save")->middleware('auth');
-  Route::post('save','ChargeController@save')->name("charge.save_post")->middleware('auth');
-
-});
-
 Route::prefix('stats')->group(function () {
   Route::get('','StatsController@home')->name("stats")->middleware('auth');
   Route::get('category/{id}','StatsController@show')->name("stats.show")->middleware('auth');
