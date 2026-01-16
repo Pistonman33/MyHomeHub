@@ -117,13 +117,14 @@ class StatsController extends Controller
         return array(Display::amountForChart($total[0]));
       },$amounts);
     }
-    $chart = new Chart('ChartLineYear_'.$id,400,700);
-    $legends = array($name);
-    $chart->setlabelsDatasets($amounts);
+    $chart = new Chart('ChartLineYear_'.$id, 400, 700);
+    $legends = [$name];
+    $chart->setLabelsAndDatasets($amounts);
     $color = Categorie::getColorById($category_id);
-    $bkgcolor = Categorie::getColorRGBAWithOpacity($category_id,0.3);
-    $chart->line($legends,$color,$bkgcolor);
-    return $chart->display;
+    $bkgcolor = Categorie::getColorRGBAWithOpacity($category_id, 0.3);
+
+    $chart->line($legends, [$color], [$bkgcolor]);
+    return $chart->toJson();
   }
 
   private function manage_bar_depot_retrait_chart($id,$cats,$state){
@@ -168,10 +169,10 @@ class StatsController extends Controller
     $bkgcolors[] = array_fill(0,count(array_values($amounts)),'rgba(255, 99, 132, 0.2)');
     $legends = array("Remboursement","Payé");
 
-    $chart = new Chart($name,400,700);
-    $chart->setlabelsDatasets($amounts);
-    $chart->bar($legends,$bkgcolors);
-    return $chart->display;
+    $chart = new Chart($name, 400, 700);
+    $chart->setLabelsAndDatasets($amounts);
+    $chart->bar($legends, $bkgcolors);
+    return $chart->toJson();
   }
 
 }

@@ -2,113 +2,112 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Chart extends Model
+class Chart
 {
-    var $display;
+    public string $name;
+    public int $width;
+    public int $height;
 
-    var $name;
-    var $height;
-    var $width;
-    var $labels;
-    var $nbdatasets;
-    var $datas;
+    public array $labels = [];
+    public int $nbDatasets = 0;
+    public array $data = [];
 
-    public function __construct($name,$height,$width){
-      $this->name = $name;
-      $this->height = $height;
-      $this->width = $width;
+    public array $chartData = [];
+
+    public function __construct(string $name, int $width = 400, int $height = 400)
+    {
+        $this->name = $name;
+        $this->width = $width;
+        $this->height = $height;
     }
 
-    public function setlabelsDatasets($datas){
-      $this->labels = array_keys($datas);
-      $this->nbdatasets = count(array_values($datas)[0]);
-      $this->datas = array_values($datas);
+    public function setLabelsAndDatasets(array $datas): void
+    {
+        $this->labels = array_keys($datas);
+        $this->nbDatasets = count(reset($datas)); // nombre de colonnes
+        $this->data = array_values($datas);
     }
 
-    public function bar($label_name,$bkgcolors){
-      $datasets = array();
-      for($i=0;$i<$this->nbdatasets;$i++){
-        $dataset["label"] = $label_name[$i];
-        $dataset["backgroundColor"] = $bkgcolors[$i];
-        $dataset["data"] = array_column($this->datas,$i);
-        array_push($datasets,$dataset);
-      }
+    public function bar(array $labels, array $backgroundColors): void
+    {
+        $datasets = [];
+        for ($i = 0; $i < $this->nbDatasets; $i++) {
+            $datasets[] = [
+                'label' => $labels[$i],
+                'backgroundColor' => $backgroundColors[$i],
+                'data' => array_column($this->data, $i),
+            ];
+        }
 
-      $this->display = app()->chartjs
-         ->name($this->name)
-         ->type('bar')
-         ->size(['width' => $this->width, 'height' => $this->height])
-         ->labels($this->labels)
-         ->datasets($datasets)
-         ->options([]);
-
-       $this->display->optionsRaw("{
-                     legend: {
-                         display:false
-                         },scales: {
-                           yAxes: [{
-                               ticks: {
-                                   beginAtZero:true
-                               }
-                           }]
-                       }
-                     }");
+        $this->chartData = [
+            'type' => 'bar',
+            'data' => [
+                'labels' => $this->labels,
+                'datasets' => $datasets,
+            ],
+            'options' => [
+                'responsive' => true,
+                'plugins' => [
+                    'legend' => ['display' => false],
+                ],
+                'scales' => [
+                    'y' => ['beginAtZero' => true],
+                ],
+            ],
+        ];
     }
 
-    public function pie($labels,$bkgcolors,$hovercolors,$datas){
-      $datasets = array();
-      $dataset = array();
-      $dataset["hoverBackgroundColor"] = $hovercolors;
-      $dataset["backgroundColor"] = $bkgcolors;
-      $dataset["data"] = $datas;
-      array_push($datasets,$dataset);
+    public function line(array $labels, array $borderColors, array $backgroundColors = []): void
+    {
+        $datasets = [];
+        for ($i = 0; $i < $this->nbDatasets; $i++) {
+            $datasets[] = [
+                'label' => $labels[$i],
+                'borderColor' => $borderColors[$i],
+                'backgroundColor' => $backgroundColors[$i] ?? $borderColors[$i],
+                'fill' => false,
+                'data' => array_column($this->data, $i),
+            ];
+        }
 
-      $this->display = app()->chartjs
-        ->name($this->name)
-        ->type('pie')
-        ->size(['width' => $this->width, 'height' => $this->height])
-        ->labels($labels)
-        ->datasets($datasets)
-        ->options([]);
-      $this->display->optionsRaw("{
-                      legend: {
-                          display:false
-                          }
-                      }");
+        $this->chartData = [
+            'type' => 'line',
+            'data' => [
+                'labels' => $this->labels,
+                'datasets' => $datasets,
+            ],
+            'options' => [
+                'responsive' => true,
+                'plugins' => ['legend' => ['display' => false]],
+                'scales' => [
+                    'y' => ['beginAtZero' => true],
+                ],
+            ],
+        ];
     }
 
-    public function line($label_name,$color,$bkgcolor){
-      $datasets = array();
-      for($i=0;$i<$this->nbdatasets;$i++){
-        $dataset["label"] = $label_name[$i];
-        $dataset["backgroundColor"] = $bkgcolor;
-        $dataset["borderColor"] = $color;
-        $dataset["pointBorderColor"] = $color;
-        $dataset["pointBackgroundColor"] = $color;
-        $dataset["pointHoverBackgroundColor"] = $color;
-        $dataset["pointHoverBorderColor"] = $color;
-        $dataset["data"] = array_column($this->datas,$i);
-        array_push($datasets,$dataset);
-      }
-      $this->display = app()->chartjs
-          ->name($this->name)
-          ->type('line')
-          ->size(['width' => $this->width, 'height' => $this->height])
-          ->labels($this->labels)
-          ->datasets($datasets)
-          ->options([]);
-          $this->display->optionsRaw("{
-                        legend: {
-                            display:false
-                            },scales: {
-                              yAxes: [{
-                                  ticks: {
-                                      beginAtZero:true
-                                  }
-                              }]
-                          }
-                        }");
+    public function pie(array $labels, array $backgroundColors, array $hoverColors, array $data): void
+    {
+        $datasets = [[
+            'data' => $data,
+            'backgroundColor' => $backgroundColors,
+            'hoverBackgroundColor' => $hoverColors,
+        ]];
+
+        $this->chartData = [
+            'type' => 'pie',
+            'data' => [
+                'labels' => $labels,
+                'datasets' => $datasets,
+            ],
+            'options' => [
+                'plugins' => ['legend' => ['display' => false]],
+            ],
+        ];
+    }
+
+    public function toJson(): string
+    {
+        return json_encode($this->chartData);
     }
 }
