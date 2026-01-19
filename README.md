@@ -167,12 +167,64 @@ Responsibilities:
        - Show Movies and TV shows library 
        - Assign movie/tv show info from TMDB for the good movie title
 
-- Blog (articles / categories / tags)
+- Blog (posts / categories / tags)
 - External API calls (TMDB, legal age, etc.)
 - Business logic validation
 
 
 Laravel uses Eloquent, migrations, seeders, and policies. Its main database stores all the business tables.
+
+#### Blog Posts
+
+For this feature i have installed the livewire service from laravel to create component that manages js frontend for the posts backen management.
+
+
+##### Import posts from Wordpress
+
+Here is the query to export all posts from Wordpress to new Laravel blog system.
+
+```
+SELECT 
+    p.ID AS wordpress_id,
+    p.post_title,
+    p.post_name AS slug,
+    p.post_content,
+    p.post_status,
+    p.post_date,
+    
+    -- Catégories séparées par virgule
+    GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ', ') AS categories,
+    
+    -- Tags séparés par virgule
+    GROUP_CONCAT(DISTINCT t.name ORDER BY t.name ASC SEPARATOR ', ') AS tags
+
+FROM rayufat_posts p
+
+-- Catégories
+LEFT JOIN rayufat_term_relationships tr_c 
+    ON p.ID = tr_c.object_id
+LEFT JOIN rayufat_term_taxonomy tt_c 
+    ON tr_c.term_taxonomy_id = tt_c.term_taxonomy_id 
+    AND tt_c.taxonomy = 'category'
+LEFT JOIN rayufat_terms c 
+    ON tt_c.term_id = c.term_id
+
+-- Tags
+LEFT JOIN rayufat_term_relationships tr_t 
+    ON p.ID = tr_t.object_id
+LEFT JOIN rayufat_term_taxonomy tt_t 
+    ON tr_t.term_taxonomy_id = tt_t.term_taxonomy_id 
+    AND tt_t.taxonomy = 'post_tag'
+LEFT JOIN rayufat_terms t 
+    ON tt_t.term_id = t.term_id
+
+WHERE p.post_type = 'post'
+  AND p.post_status IN ('publish', 'draft')
+
+GROUP BY p.ID, p.post_title, p.post_name, p.post_content, p.post_status, p.post_date
+ORDER BY p.post_date DESC;
+```
+
 
 ### Tables Laravel
 - `myhome_users`

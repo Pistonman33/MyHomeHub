@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Record;
+use App\Http\Livewire\Posts\PostList;
+use App\Http\Livewire\Posts\PostForm;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,12 +102,13 @@ Route::prefix('admin')
 
         /*
         |--------------------------------------------------------------------------
-        | Blog
+        | Blog / Posts
         |--------------------------------------------------------------------------
         */
         Route::prefix('blog')->name('blog.')->group(function () {
-
-            Route::get('articles', 'BlogController@home')->name('articles');
+            Route::get('posts',  'BlogController@index')->name('posts');
+            Route::get('posts/create', 'BlogController@create')->name('posts.create');
+            Route::get('posts/{article}/edit', 'BlogController@edit')->name('posts.edit');        
         });
 
 

@@ -29,6 +29,9 @@ ps:
 	$(COMPOSE) ps
 
 ## Laravel
+laravel-shell:
+	$(COMPOSE) exec $(CONTAINER_LARAVEL) sh -c "cd /var/www/ && exec sh"
+
 artisan:
 	@docker compose -p myhomehub-dev -f docker/dev/docker-compose.yml exec laravel php artisan $(filter-out $@,$(MAKECMDGOALS))
 

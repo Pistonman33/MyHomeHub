@@ -15,9 +15,9 @@
 	</h6>
 	<ul class="nav flex-column mb-2">
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('admin.blog.articles') }}">
-				<i class="fas fa-barcode"></i>
-				Articles
+			<a class="nav-link" href="{{ route('admin.blog.posts') }}">
+				<i class="fas fa-copy"></i>
+				Posts
 			</a>
 		</li>
 	</ul>

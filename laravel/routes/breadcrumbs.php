@@ -95,21 +95,28 @@ Breadcrumbs::for('admin.library.scan', function (BreadcrumbTrail $trail) {
 | Blog
 |--------------------------------------------------------------------------
 */
-Breadcrumbs::for('admin.blog.articles', function (BreadcrumbTrail $trail) {
+
+Breadcrumbs::for('admin.blog.posts', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
-    $trail->push('Blog articles', route('admin.blog.articles'));
+    $trail->push('Blog posts', route('admin.blog.posts'));
 });
+
+Breadcrumbs::for('admin.blog.posts.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.blog.posts');
+    $trail->push('Create post', route('admin.blog.posts.create'));
+});
+
+Breadcrumbs::for('admin.blog.posts.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.blog.posts');
+    $trail->push('Edit post', route('admin.blog.posts.edit'));
+});
+
 
 /*
 |--------------------------------------------------------------------------
 | Movies
 |--------------------------------------------------------------------------
 */
-Breadcrumbs::for('movies.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('admin.dashboard');
-    $trail->push('Movies', route('movies.index'));
-});
-
 Breadcrumbs::for('admin.movies.all', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Movies', route('admin.movies.all'));
