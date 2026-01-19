@@ -3,7 +3,7 @@
 <section>
   <div class="row">
       <div class="col-xs-12">
-          <a id="create-new-backup-button" href="{{ url('backup/create') }}" class="btn btn-primary pull-right"
+          <a id="create-new-backup-button" href="{{ url('admin/backup/create') }}" class="btn btn-primary pull-right"
              style="margin-bottom:2em;"><i
                   class="fa fa-plus"></i> Create New Backup
           </a>
@@ -32,13 +32,13 @@
                           </td>
                           <td class="text-right">
                             <a class="btn btn-xs btn-warning"
-                               href="{{ url('backup/restore/'.$backup['file_name']) }}"><i
+                               href="{{ url('admin/backup/restore/'.$backup['file_name']) }}"><i
                                     class="fa fa-database"></i> Restore</a>
                               <a class="btn btn-xs btn-primary"
-                                 href="{{ url('backup/download/'.$backup['file_name']) }}"><i
+                                 href="{{ url('admin/backup/download/'.$backup['file_name']) }}"><i
                                       class="fa fa-cloud-download"></i> Download</a>
                               <a class="btn btn-xs btn-danger" data-button-type="delete"
-                                 href="{{ url('backup/delete/'.$backup['file_name']) }}"><i class="fa fa-trash-o"></i>
+                                 href="{{ url('admin/backup/delete/'.$backup['file_name']) }}"><i class="fa fa-trash-o"></i>
                                   Delete</a>
                           </td>
                       </tr>

@@ -11,21 +11,61 @@
         <h1>Revenus/Depenses</h1>
         </div>
         <div class="form-group">
-        {!! $revenu_depense_charts->render() !!}
+        <canvas id="revenueDepenseChart"></canvas>
         </div>
         <div class="form-group">
         <h1>Revenus par Catégorie</h1>
         </div>
         <div class="form-group">
-        {!! $revenu_categories_charts->render() !!}
+        <canvas id="revenueCategoriesChart"></canvas>
         </div>
         <div class="form-group">
         <h1>Dépenses par Catégorie</h1>
         </div>
-        {!! $depenses_categories_charts->render() !!}
+        <canvas id="depensesCategoriesChart"></canvas>
         </div>
       </div>
     </div>
   </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const revenueDepenseData = @json($revenu_depense_charts);
+
+new Chart(document.getElementById('revenueDepenseChart'), {
+    type: 'bar',
+    data: {
+        labels: revenueDepenseData.labels,
+        datasets: revenueDepenseData.datasets
+    },
+});
+
+const revenueCat = @json($revenu_categories_charts);
+
+new Chart(document.getElementById('revenueCategoriesChart'), {
+    type: 'pie',
+    data: {
+        labels: revenueCat.labels,
+        datasets: [{
+            data: revenueCat.data,
+            backgroundColor: revenueCat.colors,
+        }]
+    },
+});
+
+const depensesCat = @json($depenses_categories_charts);
+
+new Chart(document.getElementById('depensesCategoriesChart'), {
+    type: 'pie',
+    data: {
+        labels: depensesCat.labels,
+        datasets: [{
+            data: depensesCat.data,
+            backgroundColor: depensesCat.colors,
+        }]
+    },
+});
+</script>
+
 </section>
 @endsection

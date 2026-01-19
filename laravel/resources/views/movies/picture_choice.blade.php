@@ -8,7 +8,7 @@
     <a href="{{ url('movies/check/valid/poster') }}" class="btn btn-primary info_selection" >Valid All Poster</a>
     <ul class="pagination justify-content-end">
       <li class="page-item {{ $previous_movie !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $previous_movie !== null ? url('movies/check/picture/'.$previous_movie) : "#"  }}" aria-label="Previous">
+        <a class="page-link" href="{{ $previous_movie !== null ? url('admin/movies/check/picture/'.$previous_movie) : "#"  }}" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
           <span class="sr-only">Previous</span>
         </a>
@@ -18,7 +18,7 @@
         </button>
       </li>
       <li class="page-item {{ $next_movie !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $next_movie !== null ? url('movies/check/picture/'.$next_movie) : "#" }}" aria-label="Next">
+        <a class="page-link" href="{{ $next_movie !== null ? url('admin/movies/check/picture/'.$next_movie) : "#" }}" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
           <span class="sr-only">Next</span>
         </a>
@@ -51,7 +51,7 @@
                   </div>
    
                   <div class="card-body">
-                      <form method="POST" action="{{ route('movies.checkPicture') }}" id="movieUpdateForm">
+                      <form method="POST" action="{{ route('admin.movies.checkPicture') }}" id="movieUpdateForm">
                           @csrf
                           <input type="hidden" name="type" value="{{$type}}" />
                           <input type="hidden" name="new_img" value="" />
@@ -71,7 +71,7 @@
                       </form>
                   </div>
                   <div class="card-footer text-muted">
-                    <form method="POST" action="{{ route('movies.checkPicture') }}" id="searchAnotherMovie">
+                    <form method="POST" action="{{ route('admin.movies.checkPicture') }}" id="searchAnotherMovie">
                       @csrf
                     <div class="form-row">
                         <div class="col-8">

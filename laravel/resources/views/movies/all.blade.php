@@ -12,7 +12,7 @@
               </button>
               <div class="dropdown-menu">
                 @foreach ($all_support as $support)
-                    <a class="dropdown-item" href=" {{url('movies/all?support='.$support->id) }}">{{ $support->type }}</a>
+                    <a class="dropdown-item" href=" {{url('admin/movies/all?support='.$support->id) }}">{{ $support->type }}</a>
                 @endforeach
               </div>
           </div>
@@ -23,7 +23,7 @@
             </button>
             <div class="dropdown-menu">
               @foreach ($all_genre as $genre)
-                  <a class="dropdown-item" href=" {{url('movies/all?genre='.$genre['genre']) }}">{{ $genre['genre'] }}</a>
+                  <a class="dropdown-item" href=" {{url('admin/movies/all?genre='.$genre['genre']) }}">{{ $genre['genre'] }}</a>
               @endforeach
             </div>
           </div>

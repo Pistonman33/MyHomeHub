@@ -7,8 +7,8 @@
         <span class="nav-icon"></span>
     </label>
     <ul class="menu">
-        <li><a href="{{ url('/movies') }}">Films</a></li>
-        <li><a href="{{ route('tvshows') }}">Séries</a></li>
+        <li><a href="{{ route('movies.index') }}">Films</a></li>
+        <li><a href="{{ route('tvshows.index') }}">Séries</a></li>
         <li><a href="#">Dessin Animés</a></li>
     </ul>
     <div class="search">

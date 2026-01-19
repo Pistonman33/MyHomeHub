@@ -10,7 +10,6 @@ use App\Record;
 use App\Categorie;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Debug\Exception\FatalErrorException;
-use App\Chart;
 use App\Display;
 
 class FinanceController extends Controller
@@ -79,52 +78,52 @@ class FinanceController extends Controller
 
     }
 
-    private function home_manage_chart_revenue(){
-      $revenus =  Record::getSumPriceDepotRetrait($this->date_transaction,0);
-      $depenses =  Record::getSumPriceDepotRetrait($this->date_transaction,1);
+    private function home_manage_chart_revenue()
+    {
+        $revenus  = Record::getSumPriceDepotRetrait($this->date_transaction, 0);
+        $depenses = Record::getSumPriceDepotRetrait($this->date_transaction, 1);
 
-      $chart = new Chart('RevenueDepenseBar',340,300);
-      $amounts = array();
-      $amounts[Display::monthText($this->display_month['filter_month'])][0] = Display::amountForChart($revenus->total);
-      $amounts[Display::monthText($this->display_month['filter_month'])][1] = Display::amountForChart($depenses->total);
-      $legends = array("Revenus","Depenses");
-      $bkgcolors = array('rgba(54, 162, 235, 0.3)','rgba(255, 99, 132, 0.2)');
-      $chart->setlabelsDatasets($amounts);
-      $chart->bar($legends,$bkgcolors);
-      $this->revenu_depense_charts = $chart->display;
+        $this->revenu_depense_charts = [
+            'labels' => [Display::monthText($this->display_month['filter_month'])],
+            'datasets' => [
+                [
+                    'label' => 'Revenus',
+                    'data' => [Display::amountForChart($revenus->total)],
+                    'backgroundColor' => 'rgba(54,162,235,0.3)',
+                ],
+                [
+                    'label' => 'Dépenses',
+                    'data' => [Display::amountForChart($depenses->total)],
+                    'backgroundColor' => 'rgba(255,99,132,0.2)',
+                ],
+            ],
+        ];
     }
 
-    private function home_manage_chart_revenue_by_categories(){
-      $revenusSumCategories = Record::getSumPriceDepotRetraitByCategorie($this->date_transaction,0);
-      $categories_names = $revenusSumCategories->map(function($categorie){
-        return $categorie->nom;
-      });
-      $categories_amounts = $revenusSumCategories->map(function($categorie){
-        return Display::amountForChart($categorie->total);
-      });
-      $categories_colors = $revenusSumCategories->map(function($categorie){
-        return Categorie::getColorById($categorie->fk_id_categorie);
-      });
+    private function home_manage_chart_revenue_by_categories()
+    {
+        $data = Record::getSumPriceDepotRetraitByCategorie($this->date_transaction, 0);
 
-      $chart = new Chart('pieRevenueCategorie',310,300);
-      $chart->pie($categories_names->toArray(),$categories_colors,$categories_colors,$categories_amounts->toArray());
-      $this->revenu_categories_charts = $chart->display;
+        $this->revenu_categories_charts = [
+            'labels' => $data->pluck('nom')->toArray(),
+            'data' => $data->map(fn ($c) => Display::amountForChart($c->total))->toArray(),
+            'colors' => $data->map(
+                fn ($c) => Categorie::getColorById($c->fk_id_categorie)
+            )->toArray(),
+        ];
     }
 
-    private function home_manage_chart_depenses_by_categories(){
-      $depensesSumCategories = Record::getSumPriceDepotRetraitByCategorie($this->date_transaction,1);
-      $categories_names = $depensesSumCategories->map(function($categorie){
-        return $categorie->nom;
-      });
-      $categories_amounts = $depensesSumCategories->map(function($categorie){
-        return Display::amountForChart($categorie->total);
-      });
-      $categories_colors = $depensesSumCategories->map(function($categorie){
-        return Categorie::getColorById($categorie->fk_id_categorie);
-      });
-      $chart = new Chart('pieDepensesCategorie',310,300);
-      $chart->pie($categories_names->toArray(),$categories_colors,$categories_colors,$categories_amounts->toArray());
-      $this->depenses_categories_charts = $chart->display;
+    private function home_manage_chart_depenses_by_categories()
+    {
+        $data = Record::getSumPriceDepotRetraitByCategorie($this->date_transaction, 1);
+
+        $this->depenses_categories_charts = [
+            'labels' => $data->pluck('nom')->toArray(),
+            'data' => $data->map(fn ($c) => Display::amountForChart($c->total))->toArray(),
+            'colors' => $data->map(
+                fn ($c) => Categorie::getColorById($c->fk_id_categorie)
+            )->toArray(),
+        ];
     }
 
     public function import(Request $request){

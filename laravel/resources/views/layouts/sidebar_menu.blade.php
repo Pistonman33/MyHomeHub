@@ -1,23 +1,23 @@
 <div class="sidebar-sticky">
   <ul class="nav flex-column">
     <li class="nav-item">
-      <a class="nav-link active" href="{{ route('home') }}">
+      <a class="nav-link active" href="{{ route('admin.dashboard') }}">
         <span data-feather="home"></span>
         Dashboard <span class="sr-only">(current)</span>
       </a>
     </li>
 	</ul>
 	<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-		<span>Working Process</span>
+		<span>Blog</span>
 		<a class="d-flex align-items-center text-muted" href="#">
 			<span data-feather="plus-circle"></span>
 		</a>
 	</h6>
 	<ul class="nav flex-column mb-2">
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('stats') }}">
-				<i class="fas fa-signal"></i>
-				Stats info
+			<a class="nav-link" href="{{ route('admin.blog.articles') }}">
+				<i class="fas fa-barcode"></i>
+				Articles
 			</a>
 		</li>
 	</ul>
@@ -29,68 +29,33 @@
 	</h6>
 	<ul class="nav flex-column mb-2">
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('finance') }}">
+			<a class="nav-link" href="{{ route('admin.stats.index') }}">
+				<i class="fas fa-signal"></i>
+				Stats info
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="{{ route('admin.finance.index') }}">
 				<i class="fas fa-money-check"></i>
 				Display transactions
 			</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('finance.all') }}">
+			<a class="nav-link" href="{{ route('admin.finance.all') }}">
 				<i class="fas fa-exchange-alt"></i>
 				All transactions
 			</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('finance.show') }}">
+			<a class="nav-link" href="{{ route('admin.finance.show') }}">
 				<i class="fas fa-marker"></i>
 				Update transactions
 			</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('finance.import') }}">
+			<a class="nav-link" href="{{ route('admin.finance.import') }}">
 				<i class="fas fa-file-import"></i>
 				Import transactions
-			</a>
-		</li>
-  </ul>
-	<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-		<span>Movies</span>
-		<a class="d-flex align-items-center text-muted" href="#">
-			<span data-feather="plus-circle"></span>
-		</a>
-	</h6>
-	<ul class="nav flex-column mb-2">
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('movies') }}">
-				<i class="fas fa-film"></i>
-				Movies
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('movies.all') }}">
-				<i class="fas fa-film"></i>
-				All Movies
-        <span class="badge badge-info">{{App\Movie::getCountAllMovie()}}</span>
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('movies.pending') }}">
-				<i class="fas fa-film"></i>
-				Pending Movie(s)
-        <span class="badge badge-danger">{{App\Movie::getCountMovieNotInfo()}}</span>
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('tvshows') }}">
-				<i class="fas fa-tv"></i>
-				TVShows
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link" href="{{ route('tvshows.pending') }}">
-				<i class="fas fa-film"></i>
-				Pending Series(s)
-        <span class="badge badge-danger">{{App\Serie::getCountSerieNotInfo()}}</span>
 			</a>
 		</li>
   </ul>
@@ -102,12 +67,27 @@
 	</h6>
 	<ul class="nav flex-column mb-2">
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('library.scan') }}">
-				<i class="fas fa-barcode"></i>
-				Scan barcodes
+			<a class="nav-link" href="{{ route('admin.movies.all') }}">
+				<i class="fas fa-film"></i>
+				All Movies
+        <span class="badge badge-info">{{App\Movie::getCountAllMovie()}}</span>
 			</a>
 		</li>
-  </ul>
+		<li class="nav-item">
+			<a class="nav-link" href="{{ route('admin.movies.pending') }}">
+				<i class="fas fa-film"></i>
+				Pending Movie(s)
+        <span class="badge badge-danger">{{App\Movie::getCountMovieNotInfo()}}</span>
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="{{ route('admin.tvshows.pending') }}">
+				<i class="fas fa-film"></i>
+				Pending Series(s)
+        <span class="badge badge-danger">{{App\Serie::getCountSerieNotInfo()}}</span>
+			</a>
+		</li>
+	</ul>
 	<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
 		<span>Management</span>
 		<a class="d-flex align-items-center text-muted" href="#">
@@ -116,7 +96,7 @@
 	</h6>
 	<ul class="nav flex-column mb-2">
 		<li class="nav-item">
-			<a class="nav-link" href="{{ route('backup') }}">
+			<a class="nav-link" href="{{ route('admin.backup.index') }}">
 				<i class="far fa-file-archive"></i>
 				Backup manager
 			</a>

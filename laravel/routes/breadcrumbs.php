@@ -1,169 +1,166 @@
 <?php
-use Diglactic\Breadcrumbs\Breadcrumbs;
 
+use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
-// Home
-Breadcrumbs::for('home', function (BreadcrumbTrail $trail) {
-    $trail->push('Home', route('home'));
-});
-
-// Register
+/*
+|--------------------------------------------------------------------------
+| Auth
+|--------------------------------------------------------------------------
+*/
 Breadcrumbs::for('register', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
     $trail->push('Register', route('register'));
 });
 
+/*
+|--------------------------------------------------------------------------
+| =====================
+| ADMIN
+| =====================
+|--------------------------------------------------------------------------
+*/
 
-// Home > Finance
-Breadcrumbs::for('finance', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Finance', route('finance'));
+Breadcrumbs::for('admin.dashboard', function (BreadcrumbTrail $trail) {
+    $trail->push('Admin');
 });
 
-// Home > Finance > Add transactions
-Breadcrumbs::for('finance.import', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("Add transactions", route('finance.import'));
+/*
+|--------------------------------------------------------------------------
+| Finance
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.finance.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Finance', route('admin.finance.index'));
 });
 
-// Home > Finance > Transactions uploaded
-Breadcrumbs::for('finance.import_post', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("Transactions uploaded", route('finance.import_post'));
+Breadcrumbs::for('admin.finance.import', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Add transactions', route('admin.finance.import'));
 });
 
-// Home > Finance > Update transactions
-Breadcrumbs::for('finance.show', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("Update transactions", route('finance.show'));
+Breadcrumbs::for('admin.finance.import.post', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Transactions uploaded');
 });
 
-// Home > Finance > Update transactions
-Breadcrumbs::for('finance.show_post', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("Update transactions", route('finance.show'));
+Breadcrumbs::for('admin.finance.show', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Update transactions', route('admin.finance.show'));
 });
 
-// Home > Finance > Update transactions
-Breadcrumbs::for('finance.show_with_offset', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("Update transactions", route('finance.show'));
+Breadcrumbs::for('admin.finance.show.offset', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Update transactions', route('admin.finance.show'));
 });
 
-
-
-
-
-// Home > Finance > All transactions
-Breadcrumbs::for('finance.all', function (BreadcrumbTrail $trail) {
-    $trail->parent('finance');
-    $trail->push("All transactions", route('finance.all'));
+Breadcrumbs::for('admin.finance.show.post', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Update transactions');
 });
 
-// Home > Charge
-Breadcrumbs::for('charge', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Charge', route('charge'));
-});
-// Home > Charge > Save Charge
-Breadcrumbs::for('charge.save', function (BreadcrumbTrail $trail) {
-    $trail->parent('charge');
-    $trail->push('Save charge', route('charge.save'));
-});
-// Home > Charge > Save Charge
-Breadcrumbs::for('charge.save_post', function (BreadcrumbTrail $trail) {
-    $trail->parent('charge');
-    $trail->push('Save charge', route('charge.save'));
+Breadcrumbs::for('admin.finance.all', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('All transactions', route('admin.finance.all'));
 });
 
-// Home > Stats
-Breadcrumbs::for('stats', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Stats', route('stats'));
+/*
+|--------------------------------------------------------------------------
+| Stats
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.stats.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Stats', route('admin.stats.index'));
 });
 
-// Home > Stats > Show
-Breadcrumbs::for('stats.show', function (BreadcrumbTrail $trail) {
-    $trail->parent('stats');
-    $trail->push('Show Stats', route('stats'));
+Breadcrumbs::for('admin.stats.show', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.stats.index');
+    $trail->push('Category stats');
 });
 
-// Home > Documents
-Breadcrumbs::for('documents', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Documents', route('documents'));
+/*
+|--------------------------------------------------------------------------
+| Library
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.library.scan', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Library scan', route('admin.library.scan'));
 });
 
-// Home > Movies
-Breadcrumbs::for('movies', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Movies', route('movies'));
+/*
+|--------------------------------------------------------------------------
+| Blog
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.blog.articles', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Blog articles', route('admin.blog.articles'));
 });
 
-// Home > Movies > All movies
-Breadcrumbs::for('movies.all', function (BreadcrumbTrail $trail) {
-    $trail->parent('movies');
-    $trail->push("All movies", route('movies.all'));
+/*
+|--------------------------------------------------------------------------
+| Movies
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('movies.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Movies', route('movies.index'));
 });
 
-// Home > Movies > Pending Movie(s)
-Breadcrumbs::for('movies.pending', function (BreadcrumbTrail $trail) {
-    $trail->parent('movies');
-    $trail->push("Pending Movie(s)", route('movies.pending'));
+Breadcrumbs::for('admin.movies.all', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Movies', route('admin.movies.all'));
 });
 
-// Home > Movies > Pending Movie(s)
-Breadcrumbs::for('movies.pending_with_offset', function (BreadcrumbTrail $trail) {
-    $trail->parent('movies');
-    $trail->push("Pending Movie(s)", route('movies.pending'));
+Breadcrumbs::for('admin.movies.pending', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.movies.all');
+    $trail->push('Pending movies', route('admin.movies.pending'));
 });
 
-
-// Home > Movies > Pending Movie(s)
-Breadcrumbs::for('movies.pending_post', function (BreadcrumbTrail $trail) {
-    $trail->parent('movies');
-    $trail->push("Pending Movie(s)", route('movies.pending'));
+Breadcrumbs::for('admin.movies.pending.offset', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.movies.all');
+    $trail->push('Pending movies', route('admin.movies.pending'));
 });
 
-// Home > Movies > Pending Movie(s)
-Breadcrumbs::for('movies.checkPicture', function (BreadcrumbTrail $trail) {
-    $trail->parent('movies');
-    $trail->push("Check Picture(s)", route('movies.checkPicture'));
+Breadcrumbs::for('admin.movies.pending.post', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.movies.all');
+    $trail->push('Pending movies');
 });
 
-// Home > TV Shows
-Breadcrumbs::for('tvshows', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('TV Shows', route('tvshows'));
+/*
+|--------------------------------------------------------------------------
+| TV Shows
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.tvshows.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('TV Shows', route('admin.tvshows.index'));
 });
 
-// Home > TV Shows > Pending Movie(s)
-Breadcrumbs::for('tvshows.pending', function (BreadcrumbTrail $trail) {
-    $trail->parent('tvshows');
-    $trail->push("Pending Serie(s)", route('tvshows.pending'));
+Breadcrumbs::for('admin.tvshows.pending', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Pending series', route('admin.tvshows.pending'));
 });
 
-// Home > TV Shows > Pending Movie(s)
-Breadcrumbs::for('tvshows.pending_with_offset', function (BreadcrumbTrail $trail) {
-    $trail->parent('tvshows');
-    $trail->push("Pending Serie(s)", route('tvshows.pending'));
+Breadcrumbs::for('admin.tvshows.pending.offset', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Pending series', route('admin.tvshows.pending'));
 });
 
-
-// Home > TV Shows > Pending Movie(s)
-Breadcrumbs::for('tvshows.pending_post', function (BreadcrumbTrail $trail) {
-    $trail->parent('tvshows');
-    $trail->push("Pending Serie(s)", route('tvshows.pending'));
+Breadcrumbs::for('admin.tvshows.pending.post', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Pending series');
 });
 
-// Home > TV Shows > Pending Movie(s)
-Breadcrumbs::for('tvshows.checkPicture', function (BreadcrumbTrail $trail) {
-    $trail->parent('tvshows');
-    $trail->push("Check Picture(s)", route('tvshows.checkPicture'));
-});
-
-// Home > Backup
-Breadcrumbs::for('backup', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Backup', route('backup'));
+/*
+|--------------------------------------------------------------------------
+| Backup
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.backup.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Backup', route('admin.backup.index'));
 });

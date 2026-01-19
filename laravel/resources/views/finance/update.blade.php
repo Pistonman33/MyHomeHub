@@ -7,7 +7,7 @@
   <nav aria-label="Page navigation transactions">
     <ul class="pagination justify-content-end">
       <li class="page-item {{ $previous_transaction !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $previous_transaction !== null ? url('finance/show/'.$previous_transaction) : "#"  }}" aria-label="Previous">
+        <a class="page-link" href="{{ $previous_transaction !== null ? url('admin/finance/show/'.$previous_transaction) : "#"  }}" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
           <span class="sr-only">Previous</span>
         </a>
@@ -17,7 +17,7 @@
         </button>
       </li>
       <li class="page-item {{ $next_transaction !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $next_transaction !== null ? url('finance/show/'.$next_transaction) : "#" }}" aria-label="Next">
+        <a class="page-link" href="{{ $next_transaction !== null ? url('admin/finance/show/'.$next_transaction) : "#" }}" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
           <span class="sr-only">Next</span>
         </a>
@@ -41,7 +41,7 @@
                   </div>
 
                   <div class="card-body">
-                      <form method="POST" action="{{ route('finance.show') }}" id="TransactionUpdateForm">
+                      <form method="POST" action="{{ route('admin.finance.show') }}" id="TransactionUpdateForm">
                           @csrf
 
                           <div class="form-group row">
@@ -81,7 +81,7 @@
                           <div class="form-group row mb-0">
                               <div class="col-md-6 offset-md-4">
                                 <a class="btn btn-xs btn-danger" data-button-type="delete"
-                                   href="{{ url('finance/delete/'.$current_transaction->id) }}"><i class="fa fa-trash-o"></i>
+                                   href="{{ url('admin/finance/delete/'.$current_transaction->id) }}"><i class="fa fa-trash-o"></i>
                                     Delete</a>
                               </div>
                           </div>
@@ -94,7 +94,7 @@
   </div>
   @else
     <div class="alert alert-warning" role="alert">
-      No transaction to update, please upload file transaction <a href="{{ url('finance/import')}}" class="alert-link">here</a>
+      No transaction to update, please upload file transaction <a href="{{ url('admin/finance/import')}}" class="alert-link">here</a>
     </div>
   @endif
 </section>

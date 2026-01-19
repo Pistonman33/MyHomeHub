@@ -1,6 +1,6 @@
 <div class="form-group">
   <div class="btn-group">
-    <a class="btn btn-secondary" href="{{ route('finance.all') }}" role="button">More...</a>
+    <a class="btn btn-secondary" href="{{ route('admin.finance.all') }}" role="button">More...</a>
   </div>
   @if($year)
   <div class="btn-group">
@@ -9,7 +9,7 @@
     </button>
     <div class="dropdown-menu">
       @foreach ($year['list_years'] as $year_to_display)
-          <a class="dropdown-item" href=" {{url('finance?year='.$year_to_display->year) }}">{{ $year_to_display->year }}</a>
+          <a class="dropdown-item" href=" {{url('/admin/finance?year='.$year_to_display->year) }}">{{ $year_to_display->year }}</a>
       @endforeach
     </div>
   </div>
@@ -21,7 +21,7 @@
     </button>
     <div class="dropdown-menu">
       @foreach ($month['list_months'] as $month_to_display)
-          <a class="dropdown-item" href=" {{url('finance?year='.$year['filter_year'].'&month='.$month_to_display->month) }}">{{ App\Display::monthTextPrefixe($month_to_display->month)}}</a>
+          <a class="dropdown-item" href=" {{url('/admin/finance?year='.$year['filter_year'].'&month='.$month_to_display->month) }}">{{ App\Display::monthTextPrefixe($month_to_display->month)}}</a>
       @endforeach
     </div>
   </div>

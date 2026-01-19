@@ -9,7 +9,7 @@
         </button>
         <div class="dropdown-menu">
           @foreach ($all_category as $category)
-              <a class="dropdown-item" href=" {{url('finance/all?category='.$category->id) }}">{{ $category->nom }}</a>
+              <a class="dropdown-item" href=" {{url('admin/finance/all?category='.$category->id) }}">{{ $category->nom }}</a>
           @endforeach
         </div>
         <div class="btn-group">
