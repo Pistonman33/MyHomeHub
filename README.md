@@ -178,102 +178,29 @@ Laravel uses Eloquent, migrations, seeders, and policies. Its main database stor
 
 For this feature i have installed the livewire service from laravel to create component that manages js frontend for the posts backen management.
 
+##### Tables impacted
+- `myhome_post_term`
+- `myhome_posts`
+- `myhome_terms`
+
 
 ##### Import posts from Wordpress
 
-Here is the query to export all posts from Wordpress to new Laravel blog system.
-
+I have created one command in laravel that import all posts from Wordpress to laravel.
+Be carrefull all datas will be truncated before.
 ```
-SELECT 
-    p.ID AS wordpress_id,
-    p.post_title,
-    p.post_name AS slug,
-    p.post_content,
-    p.post_status,
-    p.post_date,
-    
-    -- Catégories séparées par virgule
-    GROUP_CONCAT(DISTINCT c.name ORDER BY c.name ASC SEPARATOR ', ') AS categories,
-    
-    -- Tags séparés par virgule
-    GROUP_CONCAT(DISTINCT t.name ORDER BY t.name ASC SEPARATOR ', ') AS tags
-
-FROM rayufat_posts p
-
--- Catégories
-LEFT JOIN rayufat_term_relationships tr_c 
-    ON p.ID = tr_c.object_id
-LEFT JOIN rayufat_term_taxonomy tt_c 
-    ON tr_c.term_taxonomy_id = tt_c.term_taxonomy_id 
-    AND tt_c.taxonomy = 'category'
-LEFT JOIN rayufat_terms c 
-    ON tt_c.term_id = c.term_id
-
--- Tags
-LEFT JOIN rayufat_term_relationships tr_t 
-    ON p.ID = tr_t.object_id
-LEFT JOIN rayufat_term_taxonomy tt_t 
-    ON tr_t.term_taxonomy_id = tt_t.term_taxonomy_id 
-    AND tt_t.taxonomy = 'post_tag'
-LEFT JOIN rayufat_terms t 
-    ON tt_t.term_id = t.term_id
-
-WHERE p.post_type = 'post'
-  AND p.post_status IN ('publish', 'draft')
-
-GROUP BY p.ID, p.post_title, p.post_name, p.post_content, p.post_status, p.post_date
-ORDER BY p.post_date DESC;
+php artisan import:wordpress
 ```
 
+#### Finance
 
-### Tables Laravel
-- `myhome_users`
-- `myhome_movies`
-- `myhome_series`
-- `myhome_info_movie`
-- `myhome_info_series`
-- `myhome_supports`
-- `myhome_categories`
-- `myhome_comptes`
-- `myhome_records`
-- `myhome_taux`
-- `myhome_blog_posts` (à créer)
-- `myhome_blog_categories` (à créer)
-- `myhome_blog_tags` (à créer)
-- `myhome_password_resets`
-- `myhome_personal_access_tokens`
-- `myhome_rappels` (si utilisé pour orchestrer API Python)
-- `myhome_groups`
+#### Movies / Series
 
-#### Détail tables Blog Laravel à créer
-**`myhome_blog_posts`**:
-- id (PK)
-- title (string)
-- slug (string, unique)
-- content (text)
-- author_id (FK users)
-- category_id (FK categories)
-- published_at (datetime)
-- timestamps
+#### Friends
 
-**`myhome_blog_categories`**:
-- id (PK)
-- name (string)
-- slug (string, unique)
-- description (text, nullable)
-- timestamps
+#### Backup
 
-**`myhome_blog_tags`**:
-- id (PK)
-- name (string)
-- slug (string, unique)
-- timestamps
 
-**Pivot table `myhome_blog_post_tag`**:
-- post_id (FK posts)
-- tag_id (FK tags)
-
----
 
 ### 🟨 Python — Ingestion & services transverses
 
