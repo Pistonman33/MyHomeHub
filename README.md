@@ -198,6 +198,21 @@ php artisan import:wordpress
 
 #### Friends
 
+It's a feature that manages all my friends and family people that i store the birthdate to never forget to wish an happy birthday !
+
+##### Tables impacted
+- `myhome_friend_groups`
+- `myhome_friends`
+
+I have created one command in laravel that import all posts from old Laravel tables to yhe new laravel.
+Be carrefull all datas will be truncated before.
+
+```
+php artisan import:friends
+```
+
+
+
 #### Backup
 
 
