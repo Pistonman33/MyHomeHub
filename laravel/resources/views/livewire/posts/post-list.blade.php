@@ -1,4 +1,4 @@
-<div class="container mt-4 p-4 bg-white rounded shadow">
+<div class="p-4 bg-white rounded shadow">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4">Posts List</h2>
@@ -6,15 +6,50 @@
             <i class="fas fa-plus"></i> Create a New Post
         </a>
     </div>
+    <input type="text" class="form-control mb-3" placeholder="Search posts by title, tags or categories" wire:model.live.debounce.300ms="search">
 
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
-                <th>Title</th>
-                <th>Status</th>
+                <th wire:click="sortBy('title')" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Title</span>
+                        @if ($sortField == 'title')
+                            @if ($sortDirection == 'asc')
+                                <i class="fas fa-sort-up"></i>
+                            @else
+                                <i class="fas fa-sort-down"></i>
+                            @endif
+                        @endif
+                    </div>
+                </th>
+                <th wire:click="sortBy('status')" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Status</span>
+                        @if ($sortField == 'status')
+                            @if ($sortDirection == 'asc')
+                                <i class="fas fa-sort-up"></i>
+                            @else
+                                <i class="fas fa-sort-down"></i>
+                            @endif
+                        @endif
+                    </div>
+                </th>
                 <th>Categories</th>
                 <th>Tags</th>
-                <th>Created At</th>
+                <th wire:click="sortBy('created_at')" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Created At</span>
+                        @if ($sortField == 'created_at')
+                            @if ($sortDirection == 'asc')
+                                <i class="fas fa-sort-up"></i>
+                            @else
+                                <i class="fas fa-sort-down"></i>
+                            @endif
+                        @endif
+                    </div>
+                </th>
+
                 <th>Actions</th>
             </tr>
         </thead>
