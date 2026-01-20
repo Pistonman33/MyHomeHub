@@ -11,6 +11,10 @@ class Friend extends Model
 
     protected $fillable = ['lastname', 'firstname', 'birthdate', 'fk_id_friend_group'];
 
+     protected $casts = [
+        'birthdate' => 'date',
+    ];
+
     public function group()
     {
         return $this->belongsTo(FriendGroup::class, 'fk_id_friend_group');

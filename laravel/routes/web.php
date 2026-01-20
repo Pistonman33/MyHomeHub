@@ -111,6 +111,15 @@ Route::prefix('admin')
             Route::get('posts/{article}/edit', 'BlogController@edit')->name('posts.edit');        
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Friends
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('friends')->name('friends.')->group(function () {
+            Route::get('birthdates',  'FriendsController@index')->name('index');
+        });
+
 
         /*
         |--------------------------------------------------------------------------

@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4">Posts List</h2>
         <a href="{{ route('admin.blog.posts.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create a New Post
+            <i class="fa-solid fa-plus"></i> Create a New Post
         </a>
     </div>
     <input type="text" class="form-control mb-3" placeholder="Search posts by title, tags or categories" wire:model.live.debounce.300ms="search">
@@ -16,9 +16,9 @@
                         <span>Title</span>
                         @if ($sortField == 'title')
                             @if ($sortDirection == 'asc')
-                                <i class="fas fa-sort-up"></i>
+                                <i class="fa-solid fa-sort-up"></i>
                             @else
-                                <i class="fas fa-sort-down"></i>
+                                <i class="fa-solid fa-sort-down"></i>
                             @endif
                         @endif
                     </div>
@@ -28,9 +28,9 @@
                         <span>Status</span>
                         @if ($sortField == 'status')
                             @if ($sortDirection == 'asc')
-                                <i class="fas fa-sort-up"></i>
+                                <i class="fa-solid fa-sort-up"></i>
                             @else
-                                <i class="fas fa-sort-down"></i>
+                                <i class="fa-solid fa-sort-down"></i>
                             @endif
                         @endif
                     </div>
@@ -42,9 +42,9 @@
                         <span>Created At</span>
                         @if ($sortField == 'created_at')
                             @if ($sortDirection == 'asc')
-                                <i class="fas fa-sort-up"></i>
+                                <i class="fa-solid fa-sort-up"></i>
                             @else
-                                <i class="fas fa-sort-down"></i>
+                                <i class="fa-solid fa-sort-down"></i>
                             @endif
                         @endif
                     </div>
@@ -71,10 +71,10 @@
                     <td>{{ $post->created_at->format('d/m/Y') }}</td>
                     <td>
                         <a href="{{ route('admin.blog.posts.edit', $post->id) }}" class="btn btn-sm btn-outline-primary me-1">
-                            <i class="fas fa-edit"></i> Edit
+                            <i class="fa-solid fa-edit"></i> Edit
                         </a>
                         <button wire:click="delete({{ $post->id }})" class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i> Delete
+                            <i class="fa-solid fa-trash"></i> Delete
                         </button>
                     </td>
                 </tr>

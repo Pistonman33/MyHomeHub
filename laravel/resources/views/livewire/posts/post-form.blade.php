@@ -65,7 +65,7 @@
         <input type="text" class="form-control" placeholder="Nouvelle catégorie" wire:model.defer="newCategoryName">
         <div class="input-group-append">
             <button type="button" class="btn btn-outline-primary" wire:click="addCategory">
-                <i class="fas fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </div>
     </div>
@@ -94,7 +94,7 @@
         <input type="text" class="form-control" placeholder="Nouveau tag" wire:model.defer="newTagName">
         <div class="input-group-append">
             <button type="button" class="btn btn-outline-primary" wire:click="addTag">
-                <i class="fas fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </div>
     </div>
@@ -107,7 +107,7 @@
     {{-- Boutons --}}
     <div class="mt-4 d-flex">
         <button wire:click="save" class="btn btn-primary mr-2">
-            <i class="fas fa-save"></i> Save
+            <i class="fa-solid fa-save"></i> Save
         </button>
         <a href="{{ route('admin.blog.posts') }}" class="btn btn-secondary">
             Cancel

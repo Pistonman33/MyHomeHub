@@ -92,6 +92,18 @@ Breadcrumbs::for('admin.library.scan', function (BreadcrumbTrail $trail) {
 
 /*
 |--------------------------------------------------------------------------
+| Friends
+|--------------------------------------------------------------------------
+*/
+
+Breadcrumbs::for('admin.friends.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Friends', route('admin.friends.index'));
+});
+
+
+/*
+|--------------------------------------------------------------------------
 | Blog
 |--------------------------------------------------------------------------
 */
