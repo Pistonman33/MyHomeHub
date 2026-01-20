@@ -22,12 +22,19 @@ class FriendsList extends Component
     #[Locked]
     public string $sortDirection = 'asc';
 
+    // Create a listener to refresh the list when a new friend is added
+    protected $listeners = ['friendAdded' => '$refresh'];
+
     private array $sortableFields = [
-        'firstname',
-        'lastname',
+        'name',
         'birthdate',
         'group'
     ];
+
+    public function edit($friendId)
+    {
+        $this->dispatch('edit-friend', ['friendId' => $friendId]);
+    }
 
     public function sortBy($field)
     {
@@ -39,9 +46,8 @@ class FriendsList extends Component
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortDirection = 'asc';
+            $this->sortField = $field;
         }
-
-        $this->sortField = $field;
     }
 
     public function render()
@@ -63,8 +69,10 @@ class FriendsList extends Component
                 $query->orderBy('friend_groups.name', $this->sortDirection);
                 break;
 
-            case 'firstname':
-            case 'lastname':
+            case 'name':
+                $query->orderBy('firstname', $this->sortDirection)
+                       ->orderBy('lastname', $this->sortDirection);
+                break;
             case 'birthdate':
                 $query->orderBy("friends.{$this->sortField}", $this->sortDirection);
                 break;
@@ -73,7 +81,14 @@ class FriendsList extends Component
                 $query->orderBy('friends.id', 'asc');
         }
         return view('livewire.friends.friends-list',[
-            'friends' => $query->paginate(10)
+            'friends' => $query->paginate(10)->withPath(route('admin.friends.index'))
         ]);
+    }
+    public function avatarColor(string $firstname, string $lastname): string
+    {
+        $hash = crc32(strtolower($firstname));
+        $hue = $hash % 360;
+        $color = "hsl($hue, 70%, 50%)";
+        return $color;
     }
 }

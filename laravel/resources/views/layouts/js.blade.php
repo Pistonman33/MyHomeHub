@@ -36,3 +36,20 @@
   </script>
 <script src="{{ asset('js/stats.js') }}"></script>
 @endif
+
+@if(Request::is('admin/friends/*'))
+<script>
+    document.addEventListener('livewire:init', () => {
+        const modalEl = document.getElementById('friendModal');
+        const modal = new bootstrap.Modal(modalEl);
+
+        Livewire.on('open-friend-modal', () => {
+            modal.show();
+        });
+
+        Livewire.on('close-friend-modal', () => {
+            modal.hide();
+        });
+    });
+</script>
+@endif

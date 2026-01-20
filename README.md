@@ -211,10 +211,15 @@ Be carrefull all datas will be truncated before.
 php artisan import:friends
 ```
 
+I have also used a livewire component to list all friends and filter by a search input. 
+It's also possible to sort by column name.
+I have used also livewire to create / update friends.
 
 
 #### Backup
 
+It's a feature that used the artisan bakcup run to create backup, restore it and download zip file.
+there is also an automatic backup done before import transactions from bank text file for example.
 
 
 ### 🟨 Python — Ingestion & services transverses

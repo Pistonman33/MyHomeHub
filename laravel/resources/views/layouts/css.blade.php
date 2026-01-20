@@ -18,3 +18,6 @@
 @if(Request::is('admin/movies*'))
 <link href="{{ asset('css/movies.css') }}" rel="stylesheet">
 @endif
+@if(Request::is('admin/friends*'))
+<link href="{{ asset('css/friends.css') }}" rel="stylesheet">
+@endif

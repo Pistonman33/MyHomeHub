@@ -59,7 +59,7 @@ class PostList extends Component
     }
 
     return view('livewire.posts.post-list', [
-        'posts' => $query->paginate(10)
+        'posts' => $query->paginate(10)->withPath(route('admin.blog.posts'))
     ]);
     }
 }
