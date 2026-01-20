@@ -2,7 +2,7 @@
 namespace App\Livewire\Posts;
 
 use Livewire\Component;
-use Livewire\Attributes\Locked;
+use Livewire\Attributes\Session;
 use Livewire\WithPagination;
 use App\Post;
 
@@ -12,12 +12,13 @@ class PostList extends Component
 
     protected $paginationTheme = 'bootstrap';
     
+    #[Session]
     public string $search = '';
 
-    #[Locked]
+    #[Session]
     public string $sortField = 'created_at';
 
-    #[Locked]
+    #[Session]
     public string $sortDirection = 'desc';
 
     private array $sortableFields = [

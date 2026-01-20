@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Friend;
-use Livewire\Attributes\Locked;
 use Livewire\WithPagination;
 use Livewire\Attributes\Session;
 
