@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Friend;
 use Livewire\Attributes\Locked;
 use Livewire\WithPagination;
-
+use Livewire\Attributes\Session;
 
 class FriendsList extends Component
 {
@@ -14,12 +14,13 @@ class FriendsList extends Component
 
     protected $paginationTheme = 'bootstrap';
     
+    #[Session]
     public string $search = '';
 
-    #[Locked]
+    #[Session]
     public string $sortField = 'lastname';
 
-    #[Locked]
+    #[Session]
     public string $sortDirection = 'asc';
 
     // Create a listener to refresh the list when a new friend is added
