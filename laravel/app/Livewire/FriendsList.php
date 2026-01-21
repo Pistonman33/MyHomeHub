@@ -50,6 +50,16 @@ class FriendsList extends Component
         }
     }
 
+    public function delete(int $friendId): void
+    {
+        $friend = Friend::findOrFail($friendId);
+        $friend->group()->dissociate();
+        $friend->delete();
+
+        session()->flash('message', 'Friend deleted successfully.');
+
+    }
+
     public function render()
     {
         $query = Friend::query()
