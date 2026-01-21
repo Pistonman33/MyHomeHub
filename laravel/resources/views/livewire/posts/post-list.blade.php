@@ -70,12 +70,17 @@
                     </td>
                     <td>{{ $post->created_at->format('d/m/Y') }}</td>
                     <td>
-                        <a href="{{ route('admin.blog.posts.edit', $post->id) }}" class="btn btn-sm btn-outline-primary me-1">
-                            <i class="fa-solid fa-edit"></i> Edit
+                         {{-- Edit --}}
+                        <a href="{{ route('admin.blog.posts.edit', $post->id) }}">
+                        <i class="fa-solid fa-pen-to-square fa-lg mt-3 text-primary"
+                               style="cursor:pointer;" title="Edit post"></i>
                         </a>
-                        <button wire:click="delete({{ $post->id }})" class="btn btn-sm btn-outline-danger">
-                            <i class="fa-solid fa-trash"></i> Delete
-                        </button>
+                        {{-- Delete --}}
+                        <i class="fa-solid fa-trash fa-lg mt-3 text-danger"
+                                style="cursor:pointer;"
+                                onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"
+                                wire:click.stop="delete({{ $post->id }})">
+                        </i>
                     </td>
                 </tr>
             @endforeach
