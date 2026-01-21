@@ -84,6 +84,10 @@ db-restore:
 		echo "❌ Restore aborted"; \
 		exit 1; \
 	fi
+# Drop the database if exists
+	$(COMPOSE) exec -T $(CONTAINER_DB) \
+		mysql -u$(DB_USERNAME) -p$(DB_PASSWORD) -e "DROP DATABASE IF EXISTS \`$(DB_DATABASE)\`; CREATE DATABASE \`$(DB_DATABASE)\`;"
+# Restore the database from dump
 	$(COMPOSE) exec -T $(CONTAINER_DB) \
 		mysql -u$(DB_USERNAME) -p$(DB_PASSWORD) $(DB_DATABASE) \
 		< $(DUMP_FILE)
