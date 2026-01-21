@@ -8,11 +8,47 @@ use App\Post;
 use App\Term;
 use DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ImportWordPressPosts extends Command
 {
     protected $signature = 'import:wordpress';
     protected $description = 'Import WordPress posts, categories, and tags';
+
+    function importPictures(string $content): string
+    {
+        preg_match_all('/<img[^>]+src="([^">]+)"/i', $content, $matches);
+        $imageUrls = $matches[1] ?? [];
+
+        foreach ($imageUrls as $imageUrl) {
+            try {
+                $imageBadUrl = str_replace('http://www.thiebault.be/blog', 'https://blog.thiebault.be', $imageUrl);
+
+                $imageContent = Http::timeout(10)->withBasicAuth(
+                    config('services.wordpress.username'),
+                    config('services.wordpress.password')
+                )->get($imageBadUrl)->body();
+
+                $filename = basename(parse_url($imageBadUrl, PHP_URL_PATH));
+                // Store in storage/app/public/images/posts/
+                $path = 'images/posts/' . uniqid() . '-' . $filename;
+
+                Storage::disk('public')->put($path, $imageContent);
+
+                $localUrl = Storage::url($path);
+
+                // replace URL in content
+                $content = str_replace($imageUrl, $localUrl, $content);
+
+            } catch (\Exception $e) {
+                // Log the error 
+                $this->info('Image import failed: ' . $imageUrl);
+            }
+        }        
+
+        return $content;
+    }
 
     public function handle()
     {
@@ -23,6 +59,9 @@ class ImportWordPressPosts extends Command
         DB::table('posts')->truncate();
         DB::table('terms')->truncate();     
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        Storage::disk('public')->deleteDirectory('images/posts');
+        Storage::disk('public')->makeDirectory('images/posts');
 
         $this->info("Importation des articles WordPress...");
 
@@ -40,12 +79,14 @@ class ImportWordPressPosts extends Command
                 default   => 'draft',
             };
 
+            $content = $this->importPictures($wpPost->post_content);
+
             // Create or update laravel posts based on slug
             $post = Post::updateOrCreate(
                 ['slug' => $wpPost->post_name],
                 [
                     'title' => $wpPost->post_title,
-                    'content' => $wpPost->post_content,
+                    'content' => $content,
                     'status' => $status,
                 ]
             );

@@ -34,5 +34,9 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
+        'wordpress' => [
+        'username' => env('WORDPRESS_HTTP_USER'),
+        'password' => env('WORDPRESS_HTTP_PASSWORD'),
+    ],
 
 ];

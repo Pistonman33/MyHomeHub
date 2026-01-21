@@ -176,7 +176,10 @@ Laravel uses Eloquent, migrations, seeders, and policies. Its main database stor
 
 #### Blog Posts
 
-For this feature i have installed the livewire service from laravel to create component that manages js frontend for the posts backen management.
+For this feature, i have installed the livewire service from laravel to create component that manages js frontend for the posts backend management.
+I have created a livewire component to list all posts and filter by a search input and sort by column name.
+I have used also livewire to create / update post with livewire form.
+
 
 ##### Tables impacted
 - `myhome_post_term`
@@ -188,6 +191,8 @@ For this feature i have installed the livewire service from laravel to create co
 
 I have created one command in laravel that import all posts from Wordpress to laravel.
 Be carrefull all datas will be truncated before.
+This tool also download all pictures from blog wordpress to the `public/storage/images/posts`
+
 ```
 php artisan import:wordpress
 ```
