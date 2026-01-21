@@ -15,8 +15,8 @@ class BlogController extends Controller
         return view('blog.posts.create');
     }
 
-    public function edit(Post $post)
+    public function edit($postid)
     {
-        return view('blog.posts.edit', compact('post'));
+        return view('blog.posts.edit', ['postId' => $postid]);
     }
 }

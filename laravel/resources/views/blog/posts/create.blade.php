@@ -1,4 +1,4 @@
 @extends('layouts.html')
 @section('content')
-    <livewire:posts.post-form />
+    <livewire:posts.post-edit />
 @endsection

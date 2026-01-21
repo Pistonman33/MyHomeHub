@@ -45,3 +45,13 @@ footer h2 i{
     font-style:normal;
     color:#888;
 }
+
+/* textarea editor wizywig */
+textarea#editor {
+    min-height: 650px;
+    max-height: 70vh;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 15px;
+}

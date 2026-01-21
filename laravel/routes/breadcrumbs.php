@@ -120,7 +120,7 @@ Breadcrumbs::for('admin.blog.posts.create', function (BreadcrumbTrail $trail) {
 
 Breadcrumbs::for('admin.blog.posts.edit', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.blog.posts');
-    $trail->push('Edit post', route('admin.blog.posts.edit'));
+     $trail->push('Edit post');
 });
 
 
