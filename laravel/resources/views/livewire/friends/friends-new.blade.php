@@ -30,6 +30,7 @@
                         <div class="mb-2">
                             <label for="group">Group</label>
                             <select class="form-control" wire:model.defer="form.fk_id_friend_group" id="group">
+                                <option value="">-- Sélectionnez un groupe --</option>
                                 @foreach($groups as $group)
                                     <option value="{{ $group->id }}">{{ $group->name }}</option>
                                 @endforeach
