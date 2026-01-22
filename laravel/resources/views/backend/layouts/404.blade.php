@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Error 403</title>
+<title>Error 404 for Myhome Thiébault Website</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 @include('backend.layouts.favicon')
 <link href='//fonts.googleapis.com/css?family=Courgette' rel='stylesheet' type='text/css'>
@@ -64,15 +64,15 @@ body{
 <body>
 	<div class="wrap">
 	   <div class="logo">
-	   <h1>403</h1>
-	    <p>Error occurred! - Request not authorized</p>
+	   <h1>404</h1>
+	    <p>Error occurred! - File not Found</p>
   	      <div class="sub">
 	        <p><a href="{{ url('/') }}">Back</a></p>
 	      </div>
         </div>
 	</div>
 	<div class="footer">
-	 &copy <?php echo date("Y")?> MT <a href="https://thiebault.be">Thiébault</a>
+	 &copy <?php echo date("Y")?> ArKaos s.a. <a href="https://arkaos.net">Arkaos</a>
 	</div>
 
 </body>

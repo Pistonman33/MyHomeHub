@@ -3,7 +3,7 @@
 <head>
 <title>Error 404</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-@include('layouts.favicon')
+@include('backend.layouts.favicon')
 <link href='//fonts.googleapis.com/css?family=Courgette' rel='stylesheet' type='text/css'>
 <style type="text/css">
 body{
@@ -57,7 +57,7 @@ body{
 	color:rgb(228, 146, 162);
 }
 </style>
-@include('layouts.analytics')
+@include('backend.layouts.analytics')
 </head>
 
 

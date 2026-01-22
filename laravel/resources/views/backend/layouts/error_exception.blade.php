@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Error 403</title>
+<title>Error for Myhome Thiébault Website</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 @include('backend.layouts.favicon')
 <link href='//fonts.googleapis.com/css?family=Courgette' rel='stylesheet' type='text/css'>
@@ -57,22 +57,21 @@ body{
 	color:rgb(228, 146, 162);
 }
 </style>
-@include('backend.layouts.analytics')
 </head>
 
 
 <body>
 	<div class="wrap">
 	   <div class="logo">
-	   <h1>403</h1>
-	    <p>Error occurred! - Request not authorized</p>
+	   <h1>Whoops</h1>
+	    <p>Error occurred! - looks like something went wrong.</p>
   	      <div class="sub">
 	        <p><a href="{{ url('/') }}">Back</a></p>
 	      </div>
         </div>
 	</div>
 	<div class="footer">
-	 &copy <?php echo date("Y")?> MT <a href="https://thiebault.be">Thiébault</a>
+	 &copy <?php echo date("Y")?> ArKaos<a href="http://arkaos.net">Arkaos</a>
 	</div>
 
 </body>

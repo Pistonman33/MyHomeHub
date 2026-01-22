@@ -13,7 +13,7 @@
     @include('layouts.analytics')
 </head>
 <body class="text-center">
-  <form method="POST" action="{{ route('login') }}" class="form-signin">
+  <form method="POST" action="{{ route('admin.login') }}" class="form-signin">
       @csrf
       <img class="mb-4" src="/apple-touch-icon-114x114-precomposed.png" alt="" style="border-radius: 20%;">
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>

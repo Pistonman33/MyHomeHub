@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Error 403</title>
+<title>Error 403 for Myhome Thiébault Website</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 @include('backend.layouts.favicon')
 <link href='//fonts.googleapis.com/css?family=Courgette' rel='stylesheet' type='text/css'>
@@ -72,7 +72,7 @@ body{
         </div>
 	</div>
 	<div class="footer">
-	 &copy <?php echo date("Y")?> MT <a href="https://thiebault.be">Thiébault</a>
+	 &copy <?php echo date("Y")?> ArKaos s.a <a href="https://arkaos.net">Arkaos</a>
 	</div>
 
 </body>

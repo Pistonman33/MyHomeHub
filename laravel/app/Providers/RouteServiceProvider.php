@@ -37,23 +37,38 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->mapApiRoutes();
 
+        $this->mapFrontendRoutes();
+        $this->mapBackendRoutes();
         $this->mapWebRoutes();
-
-        //
     }
-
     /**
-     * Define the "web" routes for the application.
+     * Define the "backend" routes for the application.
      *
      * These routes all receive session state, CSRF protection, etc.
      *
      * @return void
      */
-    protected function mapWebRoutes()
+    protected function mapBackendRoutes()
+    {
+        Route::middleware(['web', 'auth'])
+             ->namespace("App\Http\Controllers\Backend")
+             ->prefix('admin')
+             ->name('admin.')
+             ->group(base_path('routes/backend.php'));
+    }
+
+    /**
+     * Define the "Frontend" routes for the application.
+     *
+     * These routes all receive session state, CSRF protection, etc.
+     *
+     * @return void
+     */
+    protected function mapFrontendRoutes()
     {
         Route::middleware('web')
-             ->namespace($this->namespace)
-             ->group(base_path('routes/web.php'));
+             ->namespace("App\Http\Controllers\Frontend")
+             ->group(base_path('routes/frontend.php'));
     }
 
     /**
@@ -69,5 +84,19 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "common/web" routes for the application.
+     *
+     * These routes are for public pages, error pages, etc.
+     *
+     * @return void
+     */
+    protected function mapWebRoutes()
+    {
+        Route::middleware('web') // sessions, CSRF, etc.
+            ->namespace($this->namespace) // App\Http\Controllers
+            ->group(base_path('routes/web.php')); // le fichier web.php
     }
 }
