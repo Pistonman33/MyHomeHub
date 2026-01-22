@@ -51,8 +51,8 @@
                         <input class="form-check-input"
                                type="checkbox"
                                wire:model="selectedCategories"
-                               value="{{ $category->id }}">
-                        <label class="form-check-label">
+                               value="{{ $category->id }}" id="checkbox_{{ $category->id }}">
+                        <label class="form-check-label" for="checkbox_{{ $category->id }}">
                             {{ $category->name }}
                         </label>
                     </div>
@@ -68,6 +68,12 @@
                             wire:click="addCategory">
                         +
                     </button>
+                    @error('categorySearch')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
                 </div>
             </div>
 
@@ -87,8 +93,8 @@
                         @foreach ($tagSuggestions as $tag)
                             <button type="button"
                                     class="list-group-item list-group-item-action"
-                                    wire:click="addExistingTag({{ $tag->id }})">
-                                {{ $tag->name }}
+                                    wire:click="addExistingTag({{ $tag['id'] }})">
+                                {{ $tag['name'] }}
                             </button>
                         @endforeach
                     </div>
@@ -98,6 +104,11 @@
                         wire:click="addTagFromInput">
                     Add
                 </button>
+                @error('tagSearch')
+                    <div class="text-danger small mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
 
                 {{-- Tags sélectionnés --}}
                 <div class="d-flex flex-wrap gap-1">
@@ -106,7 +117,7 @@
                             $tag = $tags->firstWhere('id', $tagId);
                         @endphp
                         @if($tag)
-                            <span class="badge bg-secondary">
+                            <span class="badge bg-secondary" style="margin-right:3px;">
                                 {{ $tag->name }}
                                 <span wire:click="removeTag({{ $tagId }})"
                                       style="cursor:pointer;">×</span>

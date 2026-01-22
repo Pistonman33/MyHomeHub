@@ -23,6 +23,7 @@ class PostList extends Component
 
     private array $sortableFields = [
         'title',
+        'status',
         'created_at',
         'updated_at',
     ];

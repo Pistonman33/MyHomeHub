@@ -80,9 +80,24 @@ class PostEdit extends Component
             'newCategoryName' => 'required|string|max:255',
         ]);
 
+        $slug = Str::slug($this->newCategoryName);
+
+        $termExists = Term::where('slug', $slug)
+            ->whereIn('type', ['tag', 'category'])
+            ->exists();
+
+        if ($termExists) {
+            $this->addError(
+                'categorySearch',
+                'A tag or category already exists with this name.'
+            );
+            return;
+        }
+
+
         $category = Term::create([
             'name' => $this->newCategoryName,
-            'slug' => Str::slug($this->newCategoryName),
+            'slug' => $slug,
             'type' => 'category',
         ]);
 
@@ -121,14 +136,31 @@ class PostEdit extends Component
 
     public function addTagFromInput()
     {
+        $this->tagSearch = trim($this->tagSearch);    
         if (!$this->tagSearch) {
+            return;
+        }
+
+        $slug = Str::slug($this->tagSearch);
+
+        $termExists = Term::where('slug', $slug)
+            ->whereIn('type', ['tag', 'category'])
+            ->exists();
+
+        if ($termExists) {
+            $this->addError(
+                'tagSearch',
+                'A tag or category already exists with this name.'
+            );
             return;
         }
 
         $tag = Term::firstOrCreate(
             ['name' => $this->tagSearch, 'type' => 'tag'],
-            ['slug' => Str::slug($this->tagSearch)]
+            ['slug' => $slug]
         );
+
+        $this->tags       = Term::where('type', 'tag')->orderBy('name')->get();
 
         $this->addExistingTag($tag->id);
     }
