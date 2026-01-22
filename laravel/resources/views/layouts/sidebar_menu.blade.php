@@ -70,21 +70,21 @@
 			<a class="nav-link" href="{{ route('admin.movies.all') }}">
 				<i class="fa-solid fa-film"></i>
 				All Movies
-        <span class="badge badge-info">{{App\Movie::getCountAllMovie()}}</span>
+        <span class="badge badge-info">{{App\Models\Movie::getCountAllMovie()}}</span>
 			</a>
 		</li>
 		<li class="nav-item">
 			<a class="nav-link" href="{{ route('admin.movies.pending') }}">
 				<i class="fa-solid fa-film"></i>
 				Pending Movie(s)
-        <span class="badge badge-danger">{{App\Movie::getCountMovieNotInfo()}}</span>
+        <span class="badge badge-danger">{{App\Models\Movie::getCountMovieNotInfo()}}</span>
 			</a>
 		</li>
 		<li class="nav-item">
 			<a class="nav-link" href="{{ route('admin.tvshows.pending') }}">
 				<i class="fa-solid fa-film"></i>
 				Pending Series(s)
-        <span class="badge badge-danger">{{App\Serie::getCountSerieNotInfo()}}</span>
+        <span class="badge badge-danger">{{App\Models\Serie::getCountSerieNotInfo()}}</span>
 			</a>
 		</li>
 	</ul>

@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Friend;
+use App\Models\Friend;
 use Livewire\WithPagination;
 use Livewire\Attributes\Session;
 

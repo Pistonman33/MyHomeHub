@@ -1,9 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Ami;
+use App\Models\Ami;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BirthdayMail;

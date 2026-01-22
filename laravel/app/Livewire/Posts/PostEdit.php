@@ -3,8 +3,8 @@
 namespace App\Livewire\Posts;
 
 use Livewire\Component;
-use App\Post;
-use App\Term;
+use App\Models\Post;
+use App\Models\Term;
 use App\Livewire\Forms\PostForm;
 use Illuminate\Support\Str;
 

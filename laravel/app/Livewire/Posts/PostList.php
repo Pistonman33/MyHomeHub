@@ -4,7 +4,7 @@ namespace App\Livewire\Posts;
 use Livewire\Component;
 use Livewire\Attributes\Session;
 use Livewire\WithPagination;
-use App\Post;
+use App\Models\Post;
 
 class PostList extends Component
 {

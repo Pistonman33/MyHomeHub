@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-use App\Record;
-use App\Display;
+use AppModels\\Record;
+use App\Models\Display;
 
 class BackupController extends Controller
 {

@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Movie;
-use App\InfoMovie;
-use App\TMDB;
-use App\Support;
+use App\Models\Movie;
+use App\Models\InfoMovie;
+use App\Models\TMDB;
+use App\Models\Support;
 use Illuminate\Http\Response;
 use finfo;
 use Aws\CloudSearch\CloudSearchClient;

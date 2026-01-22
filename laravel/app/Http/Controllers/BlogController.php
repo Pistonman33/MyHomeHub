@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Post;
+use App\Models\Post;
 
 class BlogController extends Controller
 {
+    /*************************/
+    /* BACKEND with livewire */
+    /*************************/
     public function index()
     {
         return view('blog.posts.index');
@@ -18,5 +21,14 @@ class BlogController extends Controller
     public function edit($postid)
     {
         return view('blog.posts.edit', ['postId' => $postid]);
+    }
+
+    /************/
+    /* Frontend */
+    /************/
+    
+    public function front()
+    {
+        return view('blog.posts.front');
     }
 }

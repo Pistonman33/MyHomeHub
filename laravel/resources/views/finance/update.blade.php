@@ -30,13 +30,13 @@
               <div class="card">
                   <div class="card-header {{ $current_transaction->retrait ? "alert-danger" : "alert-success" }}" align="center">
                       <span class="pull-left">
-                      {{ App\Display::dateDMY($current_transaction->date) }}
+                      {{ App\Models\Display::dateDMY($current_transaction->date) }}
                       </span>
                       <span>
                       {{ $current_transaction->nom }}
                       </span>
                       <span class="pull-right">
-                      <?php echo App\Display::transactionAmount($current_transaction); ?>
+                      <?php echo App\Models\Display::transactionAmount($current_transaction); ?>
                       </span>
                   </div>
 

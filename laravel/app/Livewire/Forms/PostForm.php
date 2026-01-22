@@ -4,7 +4,7 @@ namespace App\Livewire\Forms;
 
 use Livewire\Form;
 use Livewire\Attributes\Validate;
-use App\Post;
+use App\Models\Post;
 
 class PostForm extends Form
 {

@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Livewire\Forms\FriendsForm;
-use App\FriendGroup;
-use App\Friend;
+use App\Models\FriendGroup;
+use App\Models\Friend;
 use Livewire\Attributes\On; 
 
 class FriendsNew extends Component

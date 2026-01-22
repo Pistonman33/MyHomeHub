@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Record;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +43,11 @@ Route::prefix('library')
       Route::post('api/barcode', 'ScanController@lookup')->name('scan.lookup');
     });
 
+Route::prefix('blog')
+    ->name('blog.')
+    ->group(function () {
+      Route::get('', 'BlogController@front')->name('posts');
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +86,6 @@ Route::prefix('admin')
 
             // Debug / maintenance
             Route::get('update-records', function () {
-                dd(Record::assignCategoryRecords());
             })->name('update-records');
         });
 

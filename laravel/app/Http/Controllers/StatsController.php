@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Record;
-use App\Display;
-use App\Chart;
-use App\Categorie;
+use App\Models\Record;
+use App\Models\Display;
+use App\Models\Chart;
+use App\Models\Categorie;
 use Illuminate\Support\Facades\DB;
 
 class StatsController extends Controller

@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Friend;
-use App\FriendGroup;
+use App\Models\Friend;
+use App\Models\FriendGroup;
 use DB;
 
 class ImportFriends extends Command

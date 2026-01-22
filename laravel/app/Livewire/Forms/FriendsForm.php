@@ -4,8 +4,8 @@ namespace App\Livewire\Forms;
 
 use Livewire\Attributes\Validate;
 use Livewire\Form;
-use App\Friend;
-use App\FriendGroup;
+use App\Models\Friend;
+use App\Models\FriendGroup;
 
 class FriendsForm extends Form
 {

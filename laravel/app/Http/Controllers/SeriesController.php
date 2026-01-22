@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Serie;
-use App\InfoSerie;
-use App\Support;
-use App\TMDB;
+use App\Models\Serie;
+use App\Models\InfoSerie;
+use App\Models\Support;
+use App\Models\TMDB;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;

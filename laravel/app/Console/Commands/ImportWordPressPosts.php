@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use App\Post;
-use App\Term;
+use App\Models\Post;
+use App\Models\Term;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
