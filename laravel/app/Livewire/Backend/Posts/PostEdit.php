@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire\Posts;
+namespace App\Livewire\Backend\Posts;
 
 use Livewire\Component;
 use App\Models\Post;
 use App\Models\Term;
-use App\Livewire\Forms\PostForm;
+use App\Livewire\Backend\Forms\PostForm;
 use Illuminate\Support\Str;
 
 class PostEdit extends Component

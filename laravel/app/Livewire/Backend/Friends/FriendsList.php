@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Backend\Friends;
 
 use Livewire\Component;
 use App\Models\Friend;

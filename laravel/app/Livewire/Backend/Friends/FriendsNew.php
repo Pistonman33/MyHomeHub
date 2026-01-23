@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Backend\Friends;
 
 use Livewire\Component;
-use App\Livewire\Forms\FriendsForm;
+use App\Livewire\Backend\Forms\FriendsForm;
 use App\Models\FriendGroup;
 use App\Models\Friend;
 use Livewire\Attributes\On; 

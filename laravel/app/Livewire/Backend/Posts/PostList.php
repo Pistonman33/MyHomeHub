@@ -1,5 +1,5 @@
 <?php
-namespace App\Livewire\Posts;
+namespace App\Livewire\Backend\Posts;
 
 use Livewire\Component;
 use Livewire\Attributes\Session;

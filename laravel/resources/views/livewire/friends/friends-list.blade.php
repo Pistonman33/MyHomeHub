@@ -2,13 +2,11 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4">Friends List</h2>
-        <livewire:friends-new />
+        <livewire:backend.friends.friends-new />
     </div>
 
-    <input type="text"
-           class="form-control mb-3"
-           placeholder="Search friends by firstname, lastname"
-           wire:model.live.debounce.300ms="search">
+    <input type="text" class="form-control mb-3" placeholder="Search friends by firstname, lastname"
+        wire:model.live.debounce.300ms="search">
 
     <table class="table table-bordered table-hover">
         <thead class="table-light">
@@ -46,15 +44,15 @@
         </thead>
 
         <tbody>
-            @foreach($friends as $friend)
+            @foreach ($friends as $friend)
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             {{-- Avatar --}}
                             <div class="avatar"
-                                 style="background-color: {{ $this->avatarColor($friend->firstname, $friend->lastname) }}">
-                                {{ strtoupper(substr($friend->firstname,0,1)) }}
-                                {{ strtoupper(substr($friend->lastname,0,1)) }}
+                                style="background-color: {{ $this->avatarColor($friend->firstname, $friend->lastname) }}">
+                                {{ strtoupper(substr($friend->firstname, 0, 1)) }}
+                                {{ strtoupper(substr($friend->lastname, 0, 1)) }}
                             </div>
 
                             {{-- Name --}}
@@ -71,14 +69,11 @@
                     <td class="text-center">
                         <div class="d-flex justify-content-center gap-3">
                             {{-- Edit --}}
-                            <i class="fa-solid fa-pen-to-square fa-lg mt-3 text-primary"
-                               style="cursor:pointer;"
-                               wire:click.stop="edit({{ $friend->id }})"
-                               title="Edit friend"></i>
+                            <i class="fa-solid fa-pen-to-square fa-lg mt-3 text-primary" style="cursor:pointer;"
+                                wire:click.stop="edit({{ $friend->id }})" title="Edit friend"></i>
 
                             {{-- Delete --}}
-                            <i class="fa-solid fa-trash fa-lg mt-3 text-danger"
-                                style="cursor:pointer;"
+                            <i class="fa-solid fa-trash fa-lg mt-3 text-danger" style="cursor:pointer;"
                                 onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"
                                 wire:click.stop="delete({{ $friend->id }})">
                             </i>

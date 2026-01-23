@@ -9,6 +9,6 @@ class BlogController extends Controller
 {
     public function front()
     {
-        return view('blog.posts.front');
+        return view('frontend.blog.index');
     }
 }
