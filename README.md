@@ -75,6 +75,7 @@ docker-compose.yml
 ├── python
 ├── mysql
 └── mailhog
+└── node
 ```
 
 ### Traefik
@@ -142,6 +143,38 @@ Why we use it in this project:
 Access (local dev):
 - MailHog [Mail](https://mailhog.myhome.hub.test) 
 
+### Node
+
+The Node service is used exclusively for frontend asset management during development and build time.
+It runs Vite and Tailwind CSS to compile and bundle CSS and JavaScript assets for the Laravel application. 
+This service is running only locally and not required in production, as only the compiled assets are deployed.
+Using a dedicated Node container keeps the PHP application lightweight and ensures a clean separation between backend logic and frontend tooling.
+
+use the following command to enter into the node container and after that execute npm command needed locally.
+
+```
+make npm-shell 
+```
+
+Locally on dev environment we don't need to run `make npm-dev` because the node container running.
+
+Vite [dashboard](ttp://localhost:5173)
+
+Behavior:
+- CSS and JS are served from memory by Vite (http://localhost:5173).
+- Laravel includes these files via @vite(...).
+- Nothing is written to public/build.
+- node_modules is required locally but should not be versioned.
+
+For production, we run `make npm-build` to compile files in laravel
+Behavior:
+
+- Compiled CSS and JS are written to public/build.
+- Laravel serves the files from public/build.
+- node_modules remains outside public/ and should not be versioned.
+- Only public/build is deployed to production.
+
+
 ---
 
 
@@ -185,6 +218,11 @@ I have used also livewire to create / update post with livewire form.
 - `myhome_post_term`
 - `myhome_posts`
 - `myhome_terms`
+
+##### Frontend
+
+I have created a new template with tailwindcss and vite for the blog posts frontend website.
+So need to have a container node with npm to install tailwind and generate css.
 
 
 ##### Import posts from Wordpress

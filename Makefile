@@ -93,6 +93,16 @@ db-restore:
 		< $(DUMP_FILE)
 	@echo "✅ Database restored from $(DUMP_FILE)"
 
-## Helpers
-bash:
-	$(COMPOSE) exec $(CONTAINER_LARAVEL) sh
+#node
+npm-shell:
+	$(COMPOSE) run --rm $(CONTAINER_NODE) sh
+
+npm-dev:
+	$(COMPOSE) exec $(CONTAINER_NODE) npm run dev
+
+npm-build:
+	$(COMPOSE) exec $(CONTAINER_NODE) npm run build
+
+npm-install:
+	$(COMPOSE) exec $(CONTAINER_NODE) npm install
+

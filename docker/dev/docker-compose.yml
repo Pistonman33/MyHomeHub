@@ -86,6 +86,19 @@ services:
       - "traefik.http.routers.mailhog.tls=true"
     networks:
       - myhomehub_network
+  # “For production, I usually build assets beforehand using Vite and Tailwind, and only deploy the compiled files. Node is not required in the production container.”
+  node:
+    build:
+      context: ../
+      dockerfile: node/Dockerfile
+    container_name: myhomehub_node
+    volumes:
+      - ../../laravel:/var/www
+    ports:
+      - "5173:5173"
+    command: ["npm", "run", "dev"]
+    networks:
+      - myhomehub_network
 
 networks:
   myhomehub_network:
