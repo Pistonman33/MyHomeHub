@@ -1,4 +1,4 @@
 @extends('backend.layouts.html')
 @section('content')
-    <livewire:friends-list />
+    <livewire:backend.friends.friends-list />
 @endsection

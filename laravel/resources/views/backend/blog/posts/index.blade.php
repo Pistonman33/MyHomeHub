@@ -1,4 +1,4 @@
 @extends('backend.layouts.html')
 @section('content')
-    <livewire:posts.post-list />
+    <livewire:backend.posts.post-list />
 @endsection
