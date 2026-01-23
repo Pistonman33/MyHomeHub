@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\Auth\LoginController;
+use App\Http\Controllers\Backend\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -8,8 +10,25 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Auth::routes();
+// ROUTES WITHOUT AUTH MIDDLEWARE FOR AUTHENTICATION
+// Login routes
+Route::get('login', [LoginController::class, 'showLoginForm'])
+    ->name('login')
+    ->withoutMiddleware('auth');
 
+Route::post('login', [LoginController::class, 'login'])
+    ->withoutMiddleware('auth');
+
+// Register routes
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])
+    ->name('register')
+    ->withoutMiddleware('auth');
+
+Route::post('register', [RegisterController::class, 'register'])
+    ->withoutMiddleware('auth');
+
+// Logout route
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', 'HomeController@index')->name('dashboard');
 
 /*

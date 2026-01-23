@@ -1,4 +1,4 @@
-@extends('layouts.html')
+@extends('backend.layouts.html')
 
 @section('content')
 <div class="container">

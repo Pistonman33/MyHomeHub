@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    @include('layouts.seo')
+    @include('backend.layouts.seo')
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link href="{{ asset('css/login.css') }}" rel="stylesheet">
-    @include('layouts.token')
-    @include('layouts.analytics')
+    @include('backend.layouts.token')
+    @include('backend.layouts.analytics')
 </head>
 <body class="text-center">
   <form method="POST" action="{{ route('admin.login') }}" class="form-signin">

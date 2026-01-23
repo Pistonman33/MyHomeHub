@@ -8,9 +8,9 @@ use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 | Auth
 |--------------------------------------------------------------------------
 */
-Breadcrumbs::for('register', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
-    $trail->push('Register', route('register'));
+Breadcrumbs::for('admin.register', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Register', route('admin.register'));
 });
 
 /*
