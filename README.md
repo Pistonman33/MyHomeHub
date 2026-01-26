@@ -9,6 +9,7 @@ This document presents the structure, technical choices, component responsibilit
 ## 🎯 Project Goal
 
 This project is designed to:
+
 - **Showcase my web development skills (Laravel / PHP)**
 - **Demonstrate my proficiency in Python for automated services**
 - **Present a scalable, maintainable, and professional architecture**
@@ -43,7 +44,7 @@ This project is designed to:
 
 ## 🧭 Environment Variables
 
-All environment variables are stored on the `.env` root file for 
+All environment variables are stored on the `.env` root file for
 
 ```
 laravel
@@ -51,6 +52,7 @@ MakeFile
 ```
 
 ---
+
 ## 🚀 Déploiement — Docker
 
 Execute the project following the environment.
@@ -91,12 +93,12 @@ Need to add following records on /etc/hosts for web domain
 
 Traefik [dashboard](https://traefik.myhome.hub.test/dashboard/#/)
 
-
 ### Nginx
 
 In this project, Nginx acts as the web server in front of the Laravel application.
 
 Laravel itself does not serve HTTP requests directly. It requires a web server to:
+
 - Serve static files (CSS, JS, images)
 - Forward PHP requests to PHP-FPM
 - Define the correct web root (/public)
@@ -113,7 +115,6 @@ LOG_LEVEL=debug
 All environment variable is on the root of the project and not of laravel.
 
 MyHomeHub [dashboard](https://myhome.hub.test/)
-
 
 ### Mysql
 
@@ -141,26 +142,28 @@ Why we use it in this project:
 - Useful for local development and testing, but not needed in production.
 
 Access (local dev):
-- MailHog [Mail](https://mailhog.myhome.hub.test) 
+
+- MailHog [Mail](https://mailhog.myhome.hub.test)
 
 ### Node
 
 The Node service is used exclusively for frontend asset management during development and build time.
-It runs Vite and Tailwind CSS to compile and bundle CSS and JavaScript assets for the Laravel application. 
+It runs Vite and Tailwind CSS to compile and bundle CSS and JavaScript assets for the Laravel application.
 This service is running only locally and not required in production, as only the compiled assets are deployed.
 Using a dedicated Node container keeps the PHP application lightweight and ensures a clean separation between backend logic and frontend tooling.
 
 use the following command to enter into the node container and after that execute npm command needed locally.
 
 ```
-make npm-shell 
+make npm-shell
 ```
 
 Locally on dev environment we don't need to run `make npm-dev` because the node container running.
 
-Vite [dashboard](ttp://localhost:5173)
+Vite [dashboard](http://localhost:5173)
 
 Behavior:
+
 - CSS and JS are served from memory by Vite (http://localhost:5173).
 - Laravel includes these files via @vite(...).
 - Nothing is written to public/build.
@@ -174,36 +177,27 @@ Behavior:
 - node_modules remains outside public/ and should not be versioned.
 - Only public/build is deployed to production.
 
-
 ---
-
 
 ## 🟢 Who does what
 
 ### 🟩 Laravel — Main Backend
 
 Laravel is the **master system** that:
+
 - manages the **business domain**
-- exposes the **main APIs**
-       - Movies / TV showd save file from NAS
+- exposes the **main APIs** - Movies / TV showd save file from NAS
 - serves the backend UI
 
-
 Responsibilities:
+
 - Authentication & users
-- Financial information about my family
-       - stats by categories and see all transactions
-       - import transactions from txt file (ING transactions export)
-       - update transactions by categories
-              - Little logic that save transactions in the good category during import.
-- Movies / TV shows (API + admin panel)
-       - Show Movies and TV shows library 
-       - Assign movie/tv show info from TMDB for the good movie title
+- Financial information about my family - stats by categories and see all transactions - import transactions from txt file (ING transactions export) - update transactions by categories - Little logic that save transactions in the good category during import.
+- Movies / TV shows (API + admin panel) - Show Movies and TV shows library - Assign movie/tv show info from TMDB for the good movie title
 
 - Blog (posts / categories / tags)
 - External API calls (TMDB, legal age, etc.)
 - Business logic validation
-
 
 Laravel uses Eloquent, migrations, seeders, and policies. Its main database stores all the business tables.
 
@@ -213,8 +207,8 @@ For this feature, i have installed the livewire service from laravel to create c
 I have created a livewire component to list all posts and filter by a search input and sort by column name.
 I have used also livewire to create / update post with livewire form.
 
-
 ##### Tables impacted
+
 - `myhome_post_term`
 - `myhome_posts`
 - `myhome_terms`
@@ -223,7 +217,8 @@ I have used also livewire to create / update post with livewire form.
 
 I have created a new template with tailwindcss and vite for the blog posts frontend website.
 So need to have a container node with npm to install tailwind and generate css.
-
+There is also a vite server installed on the node container that refresh page every changes that we do on the laravel template for blog.
+This server is available only on dev environment and need to follow the production process to deploy it.
 
 ##### Import posts from Wordpress
 
@@ -244,6 +239,7 @@ php artisan import:wordpress
 It's a feature that manages all my friends and family people that i store the birthdate to never forget to wish an happy birthday !
 
 ##### Tables impacted
+
 - `myhome_friend_groups`
 - `myhome_friends`
 
@@ -254,35 +250,37 @@ Be carrefull all datas will be truncated before.
 php artisan import:friends
 ```
 
-I have also used a livewire component to list all friends and filter by a search input. 
+I have also used a livewire component to list all friends and filter by a search input.
 It's also possible to sort by column name.
 I have used also livewire to create / update friends.
-
 
 #### Backup
 
 It's a feature that used the artisan bakcup run to create backup, restore it and download zip file.
 there is also an automatic backup done before import transactions from bank text file for example.
 
-
 ### 🟨 Python — Ingestion & services transverses
 
 Python est utilisé pour :
+
 - scanner le **NAS**
 - faire des traitements asynchrones ou batch
 - enrichir des données
 - exposer des services spécialisés (ex. anniversaire)
 
 Python :
+
 - n’est **pas** source de vérité
 - **ne touche jamais directement la base de données Laravel**
 - interagit avec Laravel uniquement via API
 
 Python gère une DB légère (ex. SQLite) pour :
+
 - l’état des scans
 - des données techniques temporaires
 
 ### Tables Python
+
 - `myhome_amis`
 - `myhome_groupe_amis`
 - `myhome_rappels`
@@ -294,10 +292,12 @@ Python gère une DB légère (ex. SQLite) pour :
 ### 🟢 Laravel
 
 Laravel **gère ses propres migrations et seeders** pour :
+
 - toutes les tables métier
 - les données de test CRUD et logiques
 
 Exemple :
+
 ```php
 Movie::factory()->count(20)->create();
 ```
@@ -309,15 +309,16 @@ Python a ses propres scripts de mise en place et de peuplement (par exemple `mig
 Laravel n’exécute **aucune migration Python directement**.
 
 Seeder Laravel qui appelle l’API Python :
+
 ```php
 foreach ($fakeAmis as $ami) {
     Http::post('http://python-api/api/amis', $ami);
 }
 ```
+
 - Cela permet de rester fidèle à la séparation des responsabilités.
 
 ---
-
 
 ## 🛠️ Mise en production — VPS OVH
 
@@ -325,13 +326,13 @@ Pour la production, un **serveur VPS Cloud OVH** est recommandé.
 
 ### 💡 OVH VPS-1
 
-- 4 vCores  
-- 8 Go RAM  
-- 75 Go SSD  
-- Backup journalier  
-- Trafic illimité  
+- 4 vCores
+- 8 Go RAM
+- 75 Go SSD
+- Backup journalier
+- Trafic illimité
 - Bande passante ~400 Mbps  
-👉 Convient pour ton projet avec Docker et plusieurs services. ([ovhcloud.com](https://www.ovhcloud.com/fr/vps/))
+  👉 Convient pour ton projet avec Docker et plusieurs services. ([ovhcloud.com](https://www.ovhcloud.com/fr/vps/))
 
 ### 🔎 Alternatives
 
@@ -355,11 +356,13 @@ Pour la production, un **serveur VPS Cloud OVH** est recommandé.
 ## 📌 Conseils pratiques de production
 
 ### Sécurité
+
 - Configurer un firewall
 - Activer HTTPS avec Certbot
 - Surveiller les backups
 
 ### Performances
+
 - Allouer plus de RAM si tu prévois une charge importante
 - Surveiller logs & métriques
 
@@ -392,6 +395,7 @@ portfolio-project/
 ## 📎 Résumé
 
 **MyHomeHub** est une **architecture professionnelle et claire**, capable de :
+
 - être montrée en entretien
 - évoluer vers mobile
 - être maintenue et déployée facilement

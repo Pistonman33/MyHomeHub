@@ -53,6 +53,6 @@ class FriendsNew extends Component
 
     public function render()
     {
-        return view('livewire.friends.friends-new');
+        return view('livewire.backend.friends.friends-new');
     }
 }

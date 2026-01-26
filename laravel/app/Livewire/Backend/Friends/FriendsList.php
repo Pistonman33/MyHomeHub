@@ -90,7 +90,7 @@ class FriendsList extends Component
             default:
                 $query->orderBy('friends.id', 'asc');
         }
-        return view('livewire.friends.friends-list',[
+        return view('livewire.backend.friends.friends-list',[
             'friends' => $query->paginate(10)->withPath(route('admin.friends.index'))
         ]);
     }

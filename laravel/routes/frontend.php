@@ -20,12 +20,13 @@ Route::prefix('tvshows')
 Route::prefix('library')
     ->name('library.')
     ->group(function () {
-      Route::get('scan', 'ScanController@home')->name('scan');
-      Route::post('api/barcode', 'ScanController@lookup')->name('scan.lookup');
+        Route::get('scan', 'ScanController@home')->name('scan');
+        Route::post('api/barcode', 'ScanController@lookup')->name('scan.lookup');
     });
 
 Route::prefix('blog')
     ->name('blog.')
     ->group(function () {
-      Route::get('', 'BlogController@front')->name('posts');
+        Route::get('', 'BlogController@front')->name('posts');
+        Route::get('{slug}', 'BlogController@post')->name('post');
     });

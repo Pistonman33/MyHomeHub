@@ -26,25 +26,28 @@
                         <p class="text-sm font-medium text-zinc-600 dark:text-neutral-400">
                             {{ $post->created_at->format('F j, Y') }} </p>
                         @foreach ($post->categories as $cat)
-                            <a href="{{ route('blog.posts', $cat->slug) }}"
+                            <a wire:click.prevent="selectTerm({{ $cat->id }})" href="#"
                                 class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700 transition hover:bg-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:hover:bg-orange-500/25">
                                 {{ $cat->name }} </a>
                         @endforeach
                     </div> <!-- Title -->
                     <h4 class="font-[Space Grotesk] mb-3 text-lg font-bold sm:text-xl"> <a
-                            href="{{ route('blog.posts', $post->slug) }}"
+                            href="{{ route('blog.post', $post->slug) }}"
                             class="leading-7 text-zinc-800 hover:text-zinc-600 dark:text-zinc-200 dark:hover:text-zinc-400">
                             {{ $post->title }} </a> </h4> <!-- Tags -->
                     <div class="mb-3 flex flex-wrap gap-2">
                         @foreach ($post->tags as $tag)
-                            <a href="{{ route('blog.posts', $tag->slug) }}"
-                                class="rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700">
-                                {{ $tag->name }} </a>
+                            <a wire:click.prevent="selectTerm({{ $tag->id }})" href="#"
+                                class="rounded-md
+                                border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700
+                                transition hover:bg-zinc-100 dark:border-neutral-700 dark:bg-neutral-800
+                                dark:text-neutral-300 dark:hover:bg-neutral-700">
+                                #{{ $tag->name }} </a>
                         @endforeach
                     </div> <!-- Excerpt -->
                     <p class="mb-3 text-sm leading-relaxed text-zinc-600 dark:text-neutral-400">
                         {{ \Illuminate\Support\Str::words(strip_tags($post->content), 80) }} </p> <!-- Read more --> <a
-                        href="{{ route('blog.posts', $post->slug) }}"
+                        href="{{ route('blog.post', $post->slug) }}"
                         class="text-sm font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300">
                         Read more → </a>
                 </div>

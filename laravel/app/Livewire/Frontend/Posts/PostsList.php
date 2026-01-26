@@ -11,6 +11,15 @@ class PostsList extends Component
     use WithPagination;
 
     public $search = '';
+    public $termId = null;
+
+    protected $queryString = ['search', 'termId'];
+
+    public function selectTerm($id)
+    {
+        $this->termId = $id;
+        $this->resetPage(); 
+    }
 
     public function render()
     {
@@ -30,6 +39,11 @@ class PostsList extends Component
             });
         }
 
+        if ($this->termId) {
+            $query->whereHas('terms', function($q) {
+                $q->where('terms.id', $this->termId);
+            });
+        }
         return view('livewire.frontend.posts.posts-list', [
             'posts' => $query->paginate(10)->withQueryString(),
         ]);

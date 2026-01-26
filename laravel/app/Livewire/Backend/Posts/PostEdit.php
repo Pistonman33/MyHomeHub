@@ -174,6 +174,6 @@ class PostEdit extends Component
 
     public function render()
     {
-        return view('livewire.posts.post-edit');
+        return view('livewire.backend.posts.post-edit');
     }
 }

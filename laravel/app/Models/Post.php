@@ -15,6 +15,10 @@ class Post extends Model
         'published_at',
     ];
 
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];    
+
     protected static function booted()
     {
         static::saving(function ($post) {
