@@ -5,7 +5,7 @@ name: myhomehub-dev.
 services:
 
   traefik:
-    image: traefik:v3.0
+    image: traefik:3.6.2
     container_name: myhomehub_traefik
     command:
       - "--configFile=/traefik/traefik.yml"
@@ -75,7 +75,7 @@ services:
       - myhomehub_network
 
   mailhog:
-    image: mailhog/mailhog
+    image: axllent/mailpit
     container_name: myhomehub_mailhog
     ports:
       - "8025:8025"
