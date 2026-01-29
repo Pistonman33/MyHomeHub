@@ -14,9 +14,11 @@ up:
 build:
 	$(COMPOSE) up -d --build
 
-
 down:
 	$(COMPOSE) down
+
+prune:
+	docker builder prune -af
 
 restart:
 	$(COMPOSE) down
