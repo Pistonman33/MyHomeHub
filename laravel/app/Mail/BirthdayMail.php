@@ -30,6 +30,6 @@ class BirthdayMail extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.birthday');
+        return $this->view('backend.emails.birthday');
     }
 }

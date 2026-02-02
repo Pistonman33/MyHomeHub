@@ -30,3 +30,15 @@ Route::prefix('blog')
         Route::get('', 'BlogController@front')->name('posts');
         Route::get('{slug}', 'BlogController@post')->name('post');
     });
+
+Route::prefix('friends')
+    ->name('friends.')
+    ->group(function () {
+        Route::get('', 'FriendsController@index')->name('all');
+    });
+
+Route::prefix('test')
+    ->name('test.')
+    ->group(function () {
+        Route::get('', 'FriendsController@tailwindcss')->name('tailwindcss');
+    });    
