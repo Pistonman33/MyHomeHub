@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Michael Thiébault – Senior Full‑Stack Developer (PHP, Laravel, GitLab,
+      Docker)
+    </title>
+
+    <meta
+      name="description"
+      content="Michael Thiébault – Senior full‑stack PHP developer (20+ years experience) specialized in Laravel, Drupal, WordPress, GitLab, Docker. Based in Belgium."
+    />
+    <meta name="author" content="Michael Thiébault" />
+    <meta
+      name="keywords"
+      content="Michael Thiébault, PHP developer, Laravel, Drupal, WordPress, GitLab, Docker, full‑stack, REST API, MySQL, Linux, Mac, Synology, Git, DevOps"
+    />
+
+    <!-- Open Graph (Facebook / LinkedIn) -->
+    <meta
+      property="og:title"
+      content="Michael Thiébault – Senior Full‑Stack Developer"
+    />
+    <meta
+      property="og:description"
+      content="Based in Belgium, with over 20 years experience in PHP (Laravel, Drupal, WordPress), APIs, Docker, GitLab and full‑stack web development."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.thiebault.be/" />
+    <!-- Replace with an actual image URL: profile photo or branding -->
+    <meta
+      property="og:image"
+      content="https://www.thiebault.be/images/profile.png"
+    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Michael Thiébault – PHP / Laravel / Docker Expert"
+    />
+    <meta
+      name="twitter:description"
+      content="Senior developer with over two decades of experience in Laravel, WordPress, Drupal, REST APIs, GitLab CI/CD and Docker."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.thiebault.be/images/profile.png"
+    />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- GoogleFonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <style>
+      body {
+        background-color: #f5f5f5;
+        padding: 2rem;
+        font-family: "Lato", sans-serif;
+        color: #545454;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Montserrat", sans-serif;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 20px;
+        color: #ed6348;
+      }
+
+      h3 {
+        color: #ed6348;
+      }
+
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+
+      .fas,
+      .fab {
+        padding-right: 10px;
+      }
+
+      .underline-title {
+        position: relative;
+        display: inline-block;
+        padding-bottom: 15px;
+      }
+
+      .underline-title::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 60px;
+        height: 5px;
+        background-color: #545454;
+      }
+
+      .cv-container {
+        max-width: 960px;
+        margin: auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-wrap: wrap;
+        min-height: 100vh;
+        background: #fff;
+      }
+
+      .left-column {
+        background: linear-gradient(90deg, #ed6348 0%, #f08f59 100%);
+        color: white;
+        padding: 2rem 1.5rem;
+        width: 100%;
+        max-width: 300px;
+        flex-shrink: 0;
+        text-align: left;
+      }
+
+      .left-column img {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        margin-bottom: 1rem;
+      }
+
+      .left-column .profile {
+        text-align: center;
+      }
+
+      .left-column .tags {
+        text-transform: uppercase;
+      }
+
+      .left-column h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .left-column h2 {
+        font-size: 1rem;
+        font-weight: normal;
+        margin-bottom: 1rem;
+      }
+
+      .left-column .section-title {
+        font-weight: bold;
+        margin-top: 4rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        padding-bottom: 0.25rem;
+        text-transform: uppercase;
+      }
+
+      .left-column ul.no-bullet {
+        list-style: none;
+        padding-left: 0;
+        font-size: 0.95rem;
+      }
+
+      .title {
+        margin-left: 50px;
+        margin-top: 50px;
+        margin-bottom: 50px;
+      }
+
+      .right-column {
+        padding: 2rem;
+        flex: 1;
+      }
+
+      .right-column h3 {
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.25rem;
+      }
+
+      .right-column h5 {
+        margin-top: 1rem;
+        font-size: 1rem;
+      }
+
+      .right-column ul {
+        font-size: 0.95rem;
+        padding-left: 1.2rem;
+      }
+
+      .btn-pdf {
+        display: inline-flex;
+        align-items: center;
+        background-color: #545454;
+        color: white;
+        font-weight: 600;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .job-entry .function {
+        display: block;
+        font-size: 0.95rem;
+        color: #ed6348;
+      }
+
+      .job-entry .location {
+        text-transform: none;
+      }
+
+      .job-entry .training_title {
+        display: block;
+        font-size: 0.95rem;
+      }
+
+      .job-entry .date {
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      .job-entry ul {
+        padding-left: 1.2rem;
+        margin-bottom: 0;
+      }
+
+      .btn-pdf i {
+        margin-right: 10px;
+        font-size: 18px;
+      }
+
+      .btn-pdf:hover {
+        background-color: #3d3d3d;
+      }
+
+      @media (max-width: 768px) {
+        .cv-container {
+          flex-direction: column;
+        }
+
+        .left-column {
+          max-width: 100%;
+        }
+
+        .right-column {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cv-container">
+      <!-- Colonne gauche -->
+      <div class="left-column">
+        <div class="profile">
+          <img src="images/profile.png" alt="Michaël Thiébault photo" />
+          <a
+            href="files/2025_MT_CV_CANVA.pdf"
+            class="btn-pdf"
+            target="_blank"
+            download
+          >
+            <i class="fas fa-file-pdf"></i>Download CV
+          </a>
+        </div>
+        <div class="section-title">Contact</div>
+        <ul class="no-bullet">
+          <li>
+            <i class="fas fa-map-marker-alt"></i>Rue Pergère 94 <br />1420
+            Braine-l’Alleud
+          </li>
+          <li><i class="fas fa-phone-alt"></i>+32 476 88 10 81</li>
+          <li>
+            <i class="fas fa-envelope"></i
+            ><a href="mailto:michael@thiebault.be">michael@thiebault.be</a>
+          </li>
+          <li>
+            <i class="fab fa-linkedin"></i
+            ><a
+              href="https://www.linkedin.com/in/michaelthiebault/"
+              target="_blank"
+              >michaelthiebault</a
+            >
+          </li>
+          <li><i class="fas fa-flag"></i>Belgian</li>
+          <li><i class="fas fa-car"></i>Driver License B</li>
+        </ul>
+
+        <div class="section-title">Skills</div>
+        <p class="tags">
+          PHP - Laravel - Drupal – WordPress - API - GitLab - Docker - JIRA -
+          Confluence – CodeIgniter – E-commerce – MailChimp – HUBSPOT - Google
+          Workspace – MySQL - Linux – Mac – Apache – URL Rewrite - BOOTSTRAP -
+          HTML5 & CSS - MANTIS - ASANA - ASSEMBLA
+        </p>
+
+        <div class="section-title">Other experiences</div>
+        <ul>
+          <li>AXA Royale Belge: Administrative processing (data entry)</li>
+          <li>
+            Cerp: Delivery driver and warehouse worker for pharmaceutical
+            products
+          </li>
+          <li>MTA: Worker (precision drilling and milling)</li>
+          <li>Volleyball Coach: Club coach since 2019</li>
+        </ul>
+
+        <div class="section-title">Languages</div>
+        <ul>
+          <li>French (Fluent)</li>
+          <li>English (Work)</li>
+          <li>Dutch (School level)</li>
+        </ul>
+
+        <div class="section-title">Interests</div>
+        <ul class="no-bullet">
+          <li>
+            <i class="fas fa-table-tennis-paddle-ball"></i>Table tennis (3y)
+          </li>
+          <li><i class="fas fa-volleyball-ball"></i>Volleyball (15y)</li>
+          <li><i class="fas fa-book"></i>Comics</li>
+          <li><i class="fas fa-bicycle"></i>Biking</li>
+          <li><i class="fas fa-gamepad"></i>Gaming</li>
+        </ul>
+      </div>
+
+      <div class="right-column">
+        <div class="title">
+          <h1><strong>Michaël</strong> Thiébault</h1>
+          <h2 class="underline-title">Senior Full-Stack Developer</h2>
+        </div>
+        <h3>Profile</h3>
+        <p>
+          Senior full-stack web developer with 20+ years of experience,
+          specialized in Laravel, RESTful APIs, and Drupal/WordPress. Autonomous
+          and detail-oriented, I enjoy collaborating with developers and
+          building robust, meaningful solutions across systems. From end-to-end
+          web apps to full ecosystems supporting software products, I’m always
+          driven by new challenges and a passion for improving tools and
+          workflows.
+        </p>
+
+        <h3>Work Experience</h3>
+
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>InMusic Brands – ArKaos </strong
+                ><span class="location text-muted">(Mechelen / Remote)</span>
+              </h5>
+              <span class="function">Senior Web Developer</span>
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">03/2017 - NOW</span>
+          </div>
+
+          <ul class="mt-3">
+            <li>
+              Developed and maintained RESTful APIs and web services in Laravel
+              for software license management, including test automation and
+              integration testing.
+            </li>
+            <li>
+              Built and maintained web portals (frontend and backend) for
+              customer license management and internal support, using Laravel,
+              Drupal, and WordPress.
+            </li>
+            <li>
+              Integrated third-party services (HubSpot, payment/shipping APIs,
+              Mailchimp) and created custom e-commerce modules to improve sales
+              performance.
+            </li>
+            <li>
+              Maintained and deployed tools and microservices supporting
+              software teams, including Docker-based CI pipelines, crash log
+              analysis tools, and dashboards.
+            </li>
+            <li>
+              Provided technical support, created documentation (Confluence),
+              managed hosting (AWS/OVH), and contributed to decision-making on
+              frameworks and CMS platforms.
+            </li>
+          </ul>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>Easi </strong
+                ><span class="location text-muted">(Nivelles)</span>
+              </h5>
+              <span class="function">Software Engineer</span>
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">07/2016 – 03/2017</span>
+          </div>
+
+          <ul class="mt-3">
+            <li>
+              Collaborated on the development of a mobile banking app (My
+              Degroof Petercam), with a strong focus on security best practices.
+            </li>
+            <li>
+              Maintained and improved iOS applications (SmartSales, Notélé),
+              including unit testing in Xcode, CoreData, and AutoLayout.
+            </li>
+          </ul>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong
+                  >Uchrony, A Division of Business & Decision Benelux </strong
+                ><span class="location text-muted">(Woluwe Saint Lambert)</span>
+              </h5>
+              <span class="function">Senior Web Developer / iOS Developer</span>
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">03/2015 – 07/2016</span>
+          </div>
+
+          <ul class="mt-3">
+            <li>
+              Maintained and updated iOS applications for the Carrefour group.
+            </li>
+            <li>
+              Developed a mobile app (Esplanade) interacting with Bluetooth
+              iBeacons for location-based services.
+            </li>
+            <li>
+              Built proofs of concept using various beacon technologies
+              (Estimote, Nearables, Kontakt.io, etc.).
+            </li>
+            <li>
+              Developed backend features for web applications using PHP and
+              MySQL.
+            </li>
+          </ul>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>Uchrony S.A </strong
+                ><span class="location text-muted">(Auderghem)</span>
+              </h5>
+              <span class="function">iOS Developer</span>
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">12/2011 - 03/2015</span>
+          </div>
+
+          <ul class="mt-3">
+            <li>
+              Developed and deployed iOS apps (iPhone/iPad) for Carrefour,
+              including design integration and App Store/OTA distribution.
+            </li>
+            <li>
+              Created a custom notification server in PHP for APNS integration
+              (Carrefour CheckIn, Borne).
+            </li>
+            <li>
+              Managed test deployments using internal and external TestFlight,
+              and handled Apple provisioning and certificates.
+            </li>
+            <li>
+              Integrated various iOS SDKs and CocoaPods, including the creation
+              of a custom pod and framework.
+            </li>
+          </ul>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>Uchrony S.A </strong
+                ><span class="location text-muted">(Auderghem)</span>
+              </h5>
+              <span class="function">Web Developer</span>
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">08/2003 - 03/2015</span>
+          </div>
+
+          <ul class="mt-3">
+            <li>
+              Built custom and CMS-based websites / e-commerce platforms using
+              Joomla, WordPress, Drupal, Prestashop.
+            </li>
+            <li>
+              Developed custom modules, components, and plugins for Joomla,
+              Drupal, Wordpress and Prestashop.
+            </li>
+            <li>
+              Contributed to the design of a home made CMS built with
+              ColdFusion, PHP.
+            </li>
+            <li>Developed an Intranet in Zend Framework for Patro.</li>
+            <li>
+              Managed databases and data migration pipelines (DTS) between
+              staging and production environments.
+            </li>
+            <li>
+              Integrated HTML5/CSS3 templates in collaboration with designers,
+              ensuring full responsiveness and compliance with client specs.
+            </li>
+          </ul>
+        </div>
+
+        <h3>Training</h3>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>TECHNOFUTUR TIC ASBL </strong
+                ><span class="location text-muted">(Gosselies)</span>
+              </h5>
+              <span class="training_title"
+                >iOS SDK Programming (5-days training)</span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">30/11/2012</span>
+          </div>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>LR TECH S.A </strong
+                ><span class="location text-muted">(Brussels)</span>
+              </h5>
+              <span class="training_title"
+                >Advanced ColdFusion MX Development</span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">17/11/2003</span>
+          </div>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>GLTT </strong
+                ><span class="location text-muted">(Rhode-Saint-Genèse)</span>
+              </h5>
+              <span class="training_title"
+                >Evening English Course, Level 3</span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">2006 - 2007</span>
+          </div>
+        </div>
+
+        <h3>Education</h3>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>HEB ESI </strong
+                ><span class="location text-muted">(Brussels)</span>
+              </h5>
+              <span class="training_title">
+                Bachelor’s Degree in Industrial IT<br /><em
+                  >“Specialization: Networks and Telecommunications”</em
+                ></span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">2000 - 2003</span>
+          </div>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>ECAM </strong
+                ><span class="location text-muted">(Brussels)</span>
+              </h5>
+              <span class="training_title"
+                >Industrial Engineering, 1st year completed</span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">1999 - 2000</span>
+          </div>
+        </div>
+        <div class="job-entry mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start"
+          >
+            <div>
+              <h5 class="mb-1">
+                <strong>Institut des Sœurs de Notre-Dame </strong
+                ><span class="location text-muted">(Brussels)</span>
+              </h5>
+              <span class="training_title"
+                >General Secondary Education<br /><em
+                  >Options: Latin and Mathematics</em
+                ></span
+              >
+            </div>
+            <span class="date text-muted mt-2 mt-md-0">1993 - 1999</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

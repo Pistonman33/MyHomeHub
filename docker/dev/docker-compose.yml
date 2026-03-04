@@ -3,7 +3,6 @@ version: "3.9"
 name: myhomehub-dev.
 
 services:
-
   traefik:
     image: traefik:3.6.2
     container_name: myhomehub_traefik
@@ -15,12 +14,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ../traefik:/traefik
 
-    
     labels:
       - "traefik.enable=true"
 
       # Dashboard router
-      - "traefik.http.routers.traefik.rule=Host(`traefik.myhome.hub.test`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.thiebault.test`)"
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.service=api@internal"
@@ -32,16 +30,26 @@ services:
     depends_on:
       - laravel
     volumes:
-      - ../../laravel:/var/www:ro
+      - ../../laravel:/var/www:ro. # For Laravel application code
+      - ../../html:/var/www/static:ro # For static website html
       - ../nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../nginx/logs:/var/log/nginx # For nginx logs
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.laravel.rule=Host(`myhome.hub.test`)"
+
+      # Laravel
+      - "traefik.http.routers.laravel.rule=Host(`myhome.thiebault.test`)"
       - "traefik.http.routers.laravel.entrypoints=websecure"
       - "traefik.http.routers.laravel.tls=true"
+
+      # Static site
+      - "traefik.http.routers.static.rule=Host(`thiebault.test`)"
+      - "traefik.http.routers.static.entrypoints=websecure"
+      - "traefik.http.routers.static.tls=true"
+
     networks:
       - myhomehub_network
-  
+
   laravel:
     build:
       context: ../
@@ -53,7 +61,7 @@ services:
     depends_on:
       - mysql
     expose:
-      - "9000"      
+      - "9000"
     networks:
       - myhomehub_network
 
@@ -81,7 +89,7 @@ services:
       - "8025:8025"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mailhog.rule=Host(`mailhog.myhome.hub.test`)"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.thiebault.test`)"
       - "traefik.http.routers.mailhog.entrypoints=websecure"
       - "traefik.http.routers.mailhog.tls=true"
     networks:
@@ -105,4 +113,3 @@ networks:
 
 volumes:
   mysql_data:
-

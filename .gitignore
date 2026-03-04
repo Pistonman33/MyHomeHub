@@ -2,5 +2,6 @@ docker/mysql/data/*
 docker/mysql/dumps/*
 docker/mysql/init/*
 docker/traefik/certs/*
+docker/nginx/logs/*
 !docker/traefik/certs/.gitkeep
 .env

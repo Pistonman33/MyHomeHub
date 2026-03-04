@@ -86,22 +86,25 @@ Reverse proxy service that manages routes and certificates.
 Need to add following records on /etc/hosts for web domain
 
 ```
-127.0.0.1       traefik.myhome.hub.test
-127.0.0.1       myhome.hub.test
-127.0.0.1       mailhog.myhome.hub.test
+127.0.0.1       traefik.thiebault.test
+127.0.0.1       myhome.thiebault.test
+127.0.0.1       mailhog.thiebault.test
+127.0.0.1       thiebault.test
 ```
 
-Traefik [dashboard](https://traefik.myhome.hub.test/dashboard/#/)
+Traefik [dashboard](https://traefik.thiebault.test/dashboard/#/)
 
 ### Nginx
 
-In this project, Nginx acts as the web server in front of the Laravel application.
+In this project, Nginx acts as the web server in front of the Laravel application and also manage the static website html.
 
 Laravel itself does not serve HTTP requests directly. It requires a web server to:
 
 - Serve static files (CSS, JS, images)
 - Forward PHP requests to PHP-FPM
 - Define the correct web root (/public)
+
+Nginx webserver manages the static html website.
 
 ### Laravel
 
@@ -114,7 +117,7 @@ LOG_LEVEL=debug
 
 All environment variable is on the root of the project and not of laravel.
 
-MyHomeHub [dashboard](https://myhome.hub.test/)
+MyHomeHub [dashboard](https://myhome.thiebault.test/)
 
 ### Mysql
 
@@ -143,7 +146,7 @@ Why we use it in this project:
 
 Access (local dev):
 
-- MailHog [Mail](https://mailhog.myhome.hub.test)
+- MailHog [Mail](https://mailhog.thiebault.test)
 
 ### Node
 
