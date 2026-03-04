@@ -2,7 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('movies')
+// SUBDOMAINS
+Route::domain(env('BLOG_SUBDOMAIN'))->prefix('/')->name('blog.')
+    ->group(function () {
+        Route::get('', 'BlogController@front')->name('posts');
+        Route::get('{slug}', 'BlogController@post')->name('post');
+});
+
+Route::domain(env('MEDIA_SUBDOMAIN'))->prefix('movies')
     ->name('movies.')
     ->group(function () {
 
@@ -10,7 +17,7 @@ Route::prefix('movies')
         Route::post('filter', 'MoviesController@filter')->name('filter');
     });
 
-Route::prefix('tvshows')
+Route::domain(env('MEDIA_SUBDOMAIN'))->prefix('tvshows')
     ->name('tvshows.')
     ->group(function () {
         Route::get('/', 'SeriesController@home')->name('index');
@@ -22,13 +29,6 @@ Route::prefix('library')
     ->group(function () {
         Route::get('scan', 'ScanController@home')->name('scan');
         Route::post('api/barcode', 'ScanController@lookup')->name('scan.lookup');
-    });
-
-Route::prefix('blog')
-    ->name('blog.')
-    ->group(function () {
-        Route::get('', 'BlogController@front')->name('posts');
-        Route::get('{slug}', 'BlogController@post')->name('post');
     });
 
 Route::prefix('friends')

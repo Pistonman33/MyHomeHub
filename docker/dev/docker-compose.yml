@@ -37,8 +37,8 @@ services:
     labels:
       - "traefik.enable=true"
 
-      # Laravel
-      - "traefik.http.routers.laravel.rule=Host(`myhome.thiebault.test`)"
+      # Laravel and subdomains
+      - "traefik.http.routers.laravel.rule=Host(`myhome.thiebault.test`) || Host(`blog.thiebault.test`) || Host(`media.thiebault.test`)"
       - "traefik.http.routers.laravel.entrypoints=websecure"
       - "traefik.http.routers.laravel.tls=true"
 

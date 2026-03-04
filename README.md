@@ -90,6 +90,8 @@ Need to add following records on /etc/hosts for web domain
 127.0.0.1       myhome.thiebault.test
 127.0.0.1       mailhog.thiebault.test
 127.0.0.1       thiebault.test
+127.0.0.1       blog.thiebault.test
+127.0.0.1       media.thiebault.test
 ```
 
 Traefik [dashboard](https://traefik.thiebault.test/dashboard/#/)
@@ -117,7 +119,9 @@ LOG_LEVEL=debug
 
 All environment variable is on the root of the project and not of laravel.
 
-MyHomeHub [dashboard](https://myhome.thiebault.test/)
+MyHomeHub [backend](https://myhome.thiebault.test/admin)
+MyHomeHub [media](https://media.thiebault.test)
+MyHomeHub [blog](https://blog.thiebault.test)
 
 ### Mysql
 
