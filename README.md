@@ -110,14 +110,34 @@ Nginx webserver manages the static html website.
 
 ### Laravel
 
-In dev environment the log are sent to the docker logs
+In dev environment the log are sent to the docker logs with this configuration
 
 ```
 LOG_CHANNEL=stderr
 LOG_LEVEL=debug
 ```
 
+or this config to store error message on the laravel log file of the day in the storage folder.
+
+```
+LOG_CHANNEL=daily
+LOG_LEVEL=debug
+```
+
 All environment variable is on the root of the project and not of laravel.
+
+#### Laravel Scheduler in Docker (`schedule:work`)
+
+In this project, the Laravel task scheduler is handled directly **inside the Docker container** using `schedule:work`.  
+This means there is **no need to set up a separate Linux cron job**.
+
+##### How it works
+
+- The scheduler is defined in `App\Console\Kernel.php` using `Schedule` and your existing commands/callbacks.
+- The Docker container launches the scheduler in the background using:
+
+```bash
+php artisan schedule:work & php-fpm
 
 MyHomeHub [backend](https://myhome.thiebault.test/admin)
 MyHomeHub [media](https://media.thiebault.test)
@@ -129,9 +149,11 @@ Laravel project needs mysql database.
 There are also command line to manage db:
 
 ```
+
 make db
 make db-dump FILE=prod-2026-01-15.sql
 make db-restore FILE=prod-2026-01-15.sql
+
 ```
 
 There is also an `docker/mysql/init` folder that can contains a init backup file launching when we rebuild the mysql container.
@@ -162,7 +184,9 @@ Using a dedicated Node container keeps the PHP application lightweight and ensur
 use the following command to enter into the node container and after that execute npm command needed locally.
 
 ```
+
 make npm-shell
+
 ```
 
 Locally on dev environment we don't need to run `make npm-dev` because the node container running.
@@ -234,7 +258,9 @@ Be carrefull all datas will be truncated before.
 This tool also download all pictures from blog wordpress to the `public/storage/images/posts`
 
 ```
+
 php artisan import:wordpress
+
 ```
 
 #### Finance
@@ -254,8 +280,10 @@ I have created one command in laravel that import all posts from old Laravel tab
 Be carrefull all datas will be truncated before.
 
 ```
+
 php artisan import:friends
-```
+
+````
 
 I have also used a livewire component to list all friends and filter by a search input.
 It's also possible to sort by column name.
@@ -307,7 +335,7 @@ Exemple :
 
 ```php
 Movie::factory()->count(20)->create();
-```
+````
 
 ### 🟡 Python
 
