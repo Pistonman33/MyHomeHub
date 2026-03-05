@@ -16,6 +16,13 @@ class BlogController extends Controller
     public function post($slug)
     {
         $article = Post::where('slug', $slug)->first();
+        if ($article) {
+           $article->content = str_replace(
+                ['[code]', '[/code]'],
+                ['<pre><code>', '</code></pre>'],
+                $article->content
+            );
+        }
         return view('frontend.blog.post', ['post' => $article]);
     }
 }
