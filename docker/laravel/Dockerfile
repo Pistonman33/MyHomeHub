@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     mysql-client \
     mariadb-connector-c \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
