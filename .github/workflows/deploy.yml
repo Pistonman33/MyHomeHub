@@ -54,7 +54,7 @@ jobs:
             -e DB_DATABASE=myhomehub_test \
             -e DB_USERNAME=root \
             -e DB_PASSWORD=root \
-            -e COMPOSER_ALLOW_SUPERUSER=1
+            -e COMPOSER_ALLOW_SUPERUSER=1 \
             myhomehub-ci \
             sh -c "composer install && php artisan test --parallel"
 
