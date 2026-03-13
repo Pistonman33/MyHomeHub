@@ -26,8 +26,12 @@ WORKDIR /var/www
 # Copy Laravel app
 COPY laravel .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+#Fix permissions pour Composer et storage
+RUN chown -R www-data:www-data /var/www
+
+# Install PHP dependencies via Composer (no dev, optimized)
+# --no-interaction pour CI
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Permissions
 RUN chown -R www-data:www-data /var/www
