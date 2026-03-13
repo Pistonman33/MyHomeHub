@@ -30,6 +30,8 @@ COPY laravel .
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 COPY laravel/.env.example .env
+
+USER root
 # Install PHP dependencies via Composer (no dev, optimized)
 # --no-interaction pour CI
 RUN composer install --no-dev --optimize-autoloader --no-interaction
