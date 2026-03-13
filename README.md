@@ -343,6 +343,12 @@ Workflow file: `deploy.yml`
 ```bash
 docker build -t ghcr.io/<OWNER>/myhomehub:latest -f laravel/Dockerfile.prod .
 
+
+Also we can test it locally the build image from prod with the following command:
+
+```bash
+docker build -t myhomehub-prod -f docker/laravel/Dockerfile.prod .
+
 Push to GHCR
 
 Authenticates to GitHub Container Registry using ${{ secrets.GITHUB_TOKEN }}
