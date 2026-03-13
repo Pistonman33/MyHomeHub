@@ -72,7 +72,7 @@ jobs:
             -e DB_USERNAME=root \
             -e DB_PASSWORD=root \
             myhomehub-ci \
-            sh -c "php artisan test --parallel"
+            sh -c "php artisan test"
 
   deploy:
     needs: tests
