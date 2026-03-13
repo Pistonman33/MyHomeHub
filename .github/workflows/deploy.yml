@@ -57,6 +57,9 @@ jobs:
           docker build \
             -t myhomehub-ci \
             -f docker/laravel/Dockerfile.ci .
+      - name: Debug folder content
+        run: |
+          docker run --rm -w /var/www myhomehub-ci sh -c "ls -al /var/www; ls -al /var/www/tests"
 
       - name: Run tests
         run: |
