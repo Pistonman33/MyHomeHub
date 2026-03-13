@@ -23,6 +23,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
+RUN mkdir -p /var/www/vendor && chown -R www-data:www-data /var/www/vendor
+
 # Copy Laravel app
 COPY laravel .
 

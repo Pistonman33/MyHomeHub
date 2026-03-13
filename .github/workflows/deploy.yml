@@ -29,46 +29,50 @@ jobs:
         run: |
           docker push ghcr.io/pistonman33/myhomehub:latest
 
-  tests:
-    needs: build
-    runs-on: ubuntu-latest
+tests:
+  needs: build
+  runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: myhomehub_test
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+  services:
+    mysql:
+      image: mysql:8
+      env:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: myhomehub_test
+      options: >-
+        --health-cmd="mysqladmin ping --silent"
+        --health-interval=10s
+        --health-timeout=5s
+        --health-retries=5
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Build CI image for tests
-        run: |
-          docker build \
-            -t myhomehub-ci \
-            -f docker/laravel/Dockerfile.prod .
+    - name: Login GHCR
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run tests
-        run: |
-          docker run --rm \
-            -w /var/www \
-            -u www-data \
-            -e APP_ENV=testing \
-            -e DB_CONNECTION=mysql \
-            -e DB_HOST=mysql \
-            -e DB_PORT=3306 \
-            -e DB_DATABASE=myhomehub_test \
-            -e DB_USERNAME=root \
-            -e DB_PASSWORD=root \
-            myhomehub-ci \
-            sh -c "mkdir -p /var/www/vendor /var/www/storage /var/www/bootstrap/cache && chmod -R 777 /var/www/vendor /var/www/storage /var/www/bootstrap/cache && composer install --no-interaction && php artisan test --parallel"
+    - name: Build CI image for tests
+      run: |
+        docker build \
+          -t myhomehub-ci \
+          -f docker/laravel/Dockerfile.ci .
+
+    - name: Run tests
+      run: |
+        docker run --rm \
+          --network host \
+          -w /var/www \
+          -u www-data \
+          -e APP_ENV=testing \
+          -e DB_CONNECTION=mysql \
+          -e DB_HOST=mysql \
+          -e DB_PORT=3306 \
+          -e DB_DATABASE=myhomehub_test \
+          -e DB_USERNAME=root \
+          -e DB_PASSWORD=root \
+          myhomehub-ci \
+          sh -c "php artisan test --parallel"
 
   deploy:
     needs: tests

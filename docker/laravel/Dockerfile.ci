@@ -1,0 +1,14 @@
+FROM ghcr.io/pistonman33/myhomehub:latest
+
+# Switch en root pour installer require-dev
+USER root
+
+# Installer les dépendances dev
+RUN composer install --prefer-dist --no-interaction --ignore-platform-reqs
+
+# Fix permissions pour www-data
+RUN chown -R www-data:www-data /var/www/vendor /var/www/storage /var/www/bootstrap/cache
+
+# Switch back
+USER www-data
+WORKDIR /var/www
