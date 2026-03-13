@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build, Test & Deploy
 
 on:
   push:
@@ -33,11 +33,25 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: myhomehub_test
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build CI image
+      - name: Build CI image for tests
         run: |
           docker build \
             -t myhomehub-ci \
@@ -45,17 +59,11 @@ jobs:
 
       - name: Run tests
         run: |
-          # Crée un volume temporaire pour vendor afin d'éviter les problèmes de permissions
-          docker volume create myhomehub_vendor
-
-          # Lancer le container pour les tests
           docker run --rm \
-            --network host \
-            -u www-data \
-            -v myhomehub_vendor:/var/www/vendor \
+            -w /var/www \
             -e APP_ENV=testing \
             -e DB_CONNECTION=mysql \
-            -e DB_HOST=host.docker.internal \
+            -e DB_HOST=mysql \
             -e DB_PORT=3306 \
             -e DB_DATABASE=myhomehub_test \
             -e DB_USERNAME=root \
@@ -63,11 +71,8 @@ jobs:
             myhomehub-ci \
             sh -c "composer install --no-interaction && php artisan test --parallel"
 
-          # Supprime le volume temporaire après les tests
-          docker volume rm myhomehub_vendor
-
   deploy:
-    needs: tests
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
