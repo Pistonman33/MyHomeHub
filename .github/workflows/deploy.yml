@@ -57,9 +57,13 @@ jobs:
           docker build \
             -t myhomehub-ci \
             -f docker/laravel/Dockerfile.ci .
-      - name: Debug folder content
+      - name: Wait for MySQL
         run: |
-          docker run --rm -w /var/www myhomehub-ci sh -c "ls -al /var/www; ls -al /var/www/tests"
+          for i in {1..30}; do
+            mysqladmin ping -h127.0.0.1 -uroot -proot && break
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
       - name: Run tests
         run: |
