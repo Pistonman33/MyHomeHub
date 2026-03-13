@@ -37,11 +37,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pull prod image
-        run: docker pull ghcr.io/pistonman33/myhomehub:latest
+      - name: Build CI image
+        run: |
+          docker build \
+            -t myhomehub-ci \
+            -f docker/laravel/Dockerfile.prod .
 
       - name: Run tests
         run: |
@@ -49,13 +49,14 @@ jobs:
             --network host \
             -e APP_ENV=testing \
             -e DB_CONNECTION=mysql \
-            -e DB_HOST=127.0.0.1 \
+            -e DB_HOST=host.docker.internal \
             -e DB_PORT=3306 \
             -e DB_DATABASE=myhomehub_test \
             -e DB_USERNAME=root \
             -e DB_PASSWORD=root \
-            ghcr.io/pistonman33/myhomehub:latest \
-            sh -c "composer install --no-dev --optimize-autoloader && php artisan test --parallel"
+            -e COMPOSER_ALLOW_SUPERUSER=1
+            myhomehub-ci \
+            sh -c "composer install && php artisan test --parallel"
 
   deploy:
     needs: tests
