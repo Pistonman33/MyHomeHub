@@ -5,26 +5,6 @@ on:
     branches: [main]
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Start CI stack
-        run: docker compose -f docker/ci/docker-compose.yml up -d --build
-
-      - name: Run migrations
-        run: docker compose -f docker/ci/docker-compose.yml exec -T laravel php artisan migrate
-
-      - name: Run tests
-        run: docker compose -f docker/ci/docker-compose.yml exec -T laravel php artisan test
-
-      - name: Stop containers
-        if: always()
-        run: docker compose -f docker/ci/docker-compose.yml down
-
   build:
     runs-on: ubuntu-latest
 
@@ -48,6 +28,31 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/pistonman33/myhomehub:latest
+
+  tests:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull prod image
+        run: docker pull ghcr.io/pistonman33/myhomehub:latest
+
+      - name: Run tests
+        run: |
+          docker run --rm \
+            --network host \
+            -e APP_ENV=testing \
+            -e DB_CONNECTION=mysql \
+            -e DB_HOST=127.0.0.1 \
+            -e DB_PORT=3306 \
+            -e DB_DATABASE=myhomehub_test \
+            -e DB_USERNAME=root \
+            -e DB_PASSWORD=root \
+            ghcr.io/pistonman33/myhomehub:latest \
+            sh -c "composer install --no-dev --optimize-autoloader && php artisan test --parallel"
 
   deploy:
     needs: build
