@@ -1,0 +1,43 @@
+FROM php:8.3-fpm-alpine
+
+RUN apk add --no-cache \
+    bash \
+    git \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    unzip \
+    oniguruma-dev \
+    icu-dev \
+    curl \
+    shadow \
+    libxml2-dev \
+    mysql-client \
+    mariadb-connector-c \
+    libzip-dev \
+    && docker-php-ext-install \
+    pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www
+
+# Copy Laravel app
+COPY laravel .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Permissions
+RUN chown -R www-data:www-data /var/www
+
+# Entrypoint
+COPY laravel/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER www-data
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["php-fpm"]

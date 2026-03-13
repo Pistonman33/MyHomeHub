@@ -294,6 +294,137 @@ I have used also livewire to create / update friends.
 It's a feature that used the artisan bakcup run to create backup, restore it and download zip file.
 there is also an automatic backup done before import transactions from bank text file for example.
 
+
+# Laravel + Docker / GitHub Actions CI/CD Deployment
+
+This document summarizes the production deployment process for a Laravel project using Docker, Traefik, and GitHub Actions with GitHub Container Registry (GHCR).
+
+---
+
+## 1. Production Docker Compose
+
+File: `docker-compose.prod.yml`
+
+- **Traefik**: reverse proxy + automatic SSL (Let's Encrypt)
+- **Nginx**: web server for Laravel and static site
+- **Laravel**: PHP-FPM container for the app
+- **Scheduler**: container for Laravel scheduled tasks (`php artisan schedule:work`)
+- **MySQL**: database container
+
+### Key Points
+- The production `.env` **must NOT be versioned**.
+  → It should exist **directly on the VPS**.
+- Exposed ports: `80` for ACME challenge (HTTP → HTTPS), `443` for HTTPS.
+- Persistent volumes for Laravel and MySQL ensure data is not lost.
+- Laravel command in prod: `php-fpm` for main app, `php artisan schedule:work` for scheduler.
+
+---
+
+## 2. Laravel Dockerfile (Production)
+
+- Based on `php:8.3-fpm-alpine`
+- Installs PHP extensions required for Laravel
+- Copies Laravel app into `/var/www`
+- Installs dependencies with `composer install --no-dev --optimize-autoloader`
+- Sets proper permissions for `www-data`
+- Entrypoint `/entrypoint.sh` handles `storage:link` creation
+
+---
+
+## 3. GitHub Actions CI/CD Workflow
+
+Workflow file: `deploy.yml`
+
+### Steps
+
+1. **Build Docker Image**
+   - GitHub Actions builds the Laravel image using the production Dockerfile:
+
+```bash
+docker build -t ghcr.io/<OWNER>/myhomehub:latest -f laravel/Dockerfile.prod .
+
+Push to GHCR
+
+Authenticates to GitHub Container Registry using ${{ secrets.GITHUB_TOKEN }}
+
+Pushes the built image:
+
+docker push ghcr.io/<OWNER>/myhomehub:latest
+
+Deploy on VPS
+
+SSH into VPS and pull the latest image from GHCR:
+
+cd /var/www/myhomehub
+docker compose pull
+docker compose up -d
+docker system prune -f
+
+Laravel containers run with the production .env already on the VPS
+
+Scheduler container runs php artisan schedule:work
+
+Nginx reads the Laravel container via fastcgi_pass
+
+GitHub Secrets Used
+
+SERVER_IP → VPS IP
+
+SERVER_USER → SSH user
+
+SSH_PRIVATE_KEY → SSH private key
+
+GITHUB_TOKEN → automatically provided by GitHub for GHCR login
+
+⚠️ Never commit DB_PASSWORD, APP_KEY, SSH keys, or full .env in a public repo.
+
+4. Environment Variables
+
+Production .env is on the VPS only
+
+CI/CD only uses GitHub secrets for SSH, GHCR login, or dynamic variables
+
+In development, use a local .env with Docker Compose
+
+5. Traefik + SSL
+
+Ports 80 and 443 exposed
+
+Let’s Encrypt handles HTTPS automatically
+
+HTTP → HTTPS redirection recommended
+
+Configuration via labels in docker-compose.prod.yml
+
+6. Best Practices
+
+Public repo → safe for code, Dockerfiles, Nginx, Traefik configs, but never secrets
+
+Private repo → safer if you store internal scripts or CI logic
+
+Always test locally/dev before deploying to production
+
+Store sensitive secrets outside the repo, either in GitHub Secrets or directly on the VPS
+
+7. Vercel-style GHCR Workflow Advantages
+
+No .env in repo → secrets stay safe on VPS
+
+Reproducible builds → image built once in CI, deployed anywhere
+
+Clean separation between build (CI) and runtime (prod)
+
+8. Optional Diagram
++----------------+       +-----------------+        +----------------+
+|                |  80/443|                 |  9000  |                |
+|    Traefik     +------->+     Nginx        +------->+   Laravel      |
+|  (SSL, proxy)  |        |  (PHP FPM proxy) |        |  PHP-FPM       |
++----------------+        +-----------------+        +----------------+
+                                  |                             |
+                                  |                             |
+                                  v                             v
+                          Static files /www/html            MySQL container
+
 ### 🟨 Python — Ingestion & services transverses
 
 Python est utilisé pour :

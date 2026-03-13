@@ -1,1 +1,94 @@
-#TODO
+version: "3.9"
+
+name: myhomehub
+
+services:
+  traefik:
+    image: traefik:3.0
+    container_name: myhomehub_traefik
+    command:
+      - "--configFile=/traefik/traefik.yml"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--certificatesresolvers.le.acme.email=webmaster@thiebault.be"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../traefik:/traefik
+      - traefik_certs:/letsencrypt
+    networks:
+      - myhomehub_network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: myhomehub_nginx
+    depends_on:
+      - laravel
+    volumes:
+      - ../../html:/var/www/static:ro
+      - ../nginx/default_prod.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.laravel.rule=Host(`myhome.thiebault.be`) || Host(`blog.thiebault.be`) || Host(`media.thiebault.be`)"
+      - "traefik.http.routers.laravel.entrypoints=websecure"
+      - "traefik.http.routers.laravel.tls=true"
+      - "traefik.http.routers.laravel.tls.certresolver=le"
+      - "traefik.http.routers.static.rule=Host(`thiebault.be`)"
+      - "traefik.http.routers.static.entrypoints=websecure"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.laravel.tls.certresolver=le"
+    networks:
+      - myhomehub_network
+    restart: unless-stopped
+
+  laravel:
+    image: ghcr.io/pistonman33/myhomehub:latest
+    container_name: myhomehub_laravel
+    depends_on:
+      - mysql
+    volumes:
+      - ../storage:/var/www/storage
+    expose:
+      - "9000"
+    networks:
+      - myhomehub_network
+    command: php-fpm
+    restart: unless-stopped
+
+  scheduler:
+    image: ghcr.io/pistonman33/myhomehub:latest
+    container_name: myhomehub_scheduler
+    volumes:
+      - ../storage:/var/www/storage
+    command: php artisan schedule:work
+    networks:
+      - myhomehub_network
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: myhomehub_mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${CONTAINER_MYSQL_ROOT_PASSWORD}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ../mysql/data:/var/lib/mysql
+      - ../mysql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - myhomehub_network
+    restart: unless-stopped
+
+networks:
+  myhomehub_network:
+volumes:
+  traefik_certs:
