@@ -39,8 +39,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: myhomehub_test
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -72,7 +70,7 @@ jobs:
             sh -c "composer install --no-interaction && php artisan test --parallel"
 
   deploy:
-    needs: build
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
