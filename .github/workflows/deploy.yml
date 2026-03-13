@@ -65,16 +65,10 @@ jobs:
           docker run --rm \
             --network host \
             -w /var/www \
-            -u root \
-            -e APP_ENV=testing \
-            -e DB_CONNECTION=mysql \
             -e DB_HOST=127.0.0.1 \
-            -e DB_PORT=3306 \
-            -e DB_DATABASE=myhomehub_test \
-            -e DB_USERNAME=root \
-            -e DB_PASSWORD=root \
             myhomehub-ci \
-            sh -c "php artisan test"
+            sh -c "php artisan config:clear && php artisan migrate && php artisan test"
+
   deploy:
     needs: tests
     runs-on: ubuntu-latest
