@@ -23,7 +23,7 @@ jobs:
         run: |
           docker build \
           -t ghcr.io/pistonman33/myhomehub:latest \
-          -f laravel/Dockerfile.prod .
+          -f docker/laravel/Dockerfile.prod .
 
       - name: Push Docker image
         run: |
