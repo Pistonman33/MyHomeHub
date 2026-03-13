@@ -57,8 +57,11 @@ jobs:
 
       - name: Run tests
         run: |
+          docker volume create myhomehub_vendor
           docker run --rm \
             -w /var/www \
+            -u www-data \
+            -v myhomehub_vendor:/var/www/vendor \
             -e APP_ENV=testing \
             -e DB_CONNECTION=mysql \
             -e DB_HOST=mysql \
@@ -68,6 +71,7 @@ jobs:
             -e DB_PASSWORD=root \
             myhomehub-ci \
             sh -c "composer install --no-interaction && php artisan test --parallel"
+          docker volume rm myhomehub_vendor
 
   deploy:
     needs: tests
