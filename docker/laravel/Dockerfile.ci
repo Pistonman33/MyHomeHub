@@ -7,7 +7,7 @@ USER root
 RUN composer install --prefer-dist --no-interaction --ignore-platform-reqs
 
 # copier env de test
-COPY .env.testing .env
+COPY laravel/.env.testing .env
 
 # Fix permissions pour www-data
 RUN chown -R www-data:www-data /var/www/vendor /var/www/storage /var/www/bootstrap/cache
