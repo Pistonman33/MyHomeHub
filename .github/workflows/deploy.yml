@@ -45,8 +45,14 @@ jobs:
 
       - name: Run tests
         run: |
+          # Crée un volume temporaire pour vendor afin d'éviter les problèmes de permissions
+          docker volume create myhomehub_vendor
+
+          # Lancer le container pour les tests
           docker run --rm \
             --network host \
+            -u www-data \
+            -v myhomehub_vendor:/var/www/vendor \
             -e APP_ENV=testing \
             -e DB_CONNECTION=mysql \
             -e DB_HOST=host.docker.internal \
@@ -54,9 +60,11 @@ jobs:
             -e DB_DATABASE=myhomehub_test \
             -e DB_USERNAME=root \
             -e DB_PASSWORD=root \
-            -e COMPOSER_ALLOW_SUPERUSER=1 \
             myhomehub-ci \
-            sh -c "composer install && php artisan test --parallel"
+            sh -c "composer install --no-interaction && php artisan test --parallel"
+
+          # Supprime le volume temporaire après les tests
+          docker volume rm myhomehub_vendor
 
   deploy:
     needs: tests
