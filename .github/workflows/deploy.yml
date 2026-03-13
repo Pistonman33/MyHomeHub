@@ -37,6 +37,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Login GHCR
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Pull prod image
         run: docker pull ghcr.io/pistonman33/myhomehub:latest
 
@@ -55,7 +58,7 @@ jobs:
             sh -c "composer install --no-dev --optimize-autoloader && php artisan test --parallel"
 
   deploy:
-    needs: build
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
