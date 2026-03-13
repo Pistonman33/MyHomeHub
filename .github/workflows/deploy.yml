@@ -5,6 +5,26 @@ on:
     branches: [main]
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start CI stack
+        run: docker compose -f docker/ci/docker-compose.yml up -d --build
+
+      - name: Run migrations
+        run: docker compose -f docker/ci/docker-compose.yml exec -T laravel php artisan migrate
+
+      - name: Run tests
+        run: docker compose -f docker/ci/docker-compose.yml exec -T laravel php artisan test
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f docker/ci/docker-compose.yml down
+
   build:
     runs-on: ubuntu-latest
 

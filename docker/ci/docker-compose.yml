@@ -1,0 +1,33 @@
+version: "3.9"
+
+name: myhomehub-ci
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: myhomehub_test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: root
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+
+  laravel:
+    build:
+      context: ../
+      dockerfile: laravel/Dockerfile
+    depends_on:
+      - mysql
+    environment:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: myhomehub_test
+      DB_USERNAME: test
+      DB_PASSWORD: test
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
