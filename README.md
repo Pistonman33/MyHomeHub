@@ -138,6 +138,7 @@ This means there is **no need to set up a separate Linux cron job**.
 
 ```bash
 php artisan schedule:work & php-fpm
+```
 
 MyHomeHub [backend](https://myhome.thiebault.test/admin)
 MyHomeHub [media](https://media.thiebault.test)
@@ -149,11 +150,9 @@ Laravel project needs mysql database.
 There are also command line to manage db:
 
 ```
-
 make db
 make db-dump FILE=prod-2026-01-15.sql
 make db-restore FILE=prod-2026-01-15.sql
-
 ```
 
 There is also an `docker/mysql/init` folder that can contains a init backup file launching when we rebuild the mysql container.
@@ -184,9 +183,7 @@ Using a dedicated Node container keeps the PHP application lightweight and ensur
 use the following command to enter into the node container and after that execute npm command needed locally.
 
 ```
-
 make npm-shell
-
 ```
 
 Locally on dev environment we don't need to run `make npm-dev` because the node container running.
@@ -258,7 +255,6 @@ Be carrefull all datas will be truncated before.
 This tool also download all pictures from blog wordpress to the `public/storage/images/posts`
 
 ```
-
 php artisan import:wordpress
 
 ```
@@ -280,10 +276,8 @@ I have created one command in laravel that import all posts from old Laravel tab
 Be carrefull all datas will be truncated before.
 
 ```
-
 php artisan import:friends
-
-````
+```
 
 I have also used a livewire component to list all friends and filter by a search input.
 It's also possible to sort by column name.
@@ -294,12 +288,13 @@ I have used also livewire to create / update friends.
 It's a feature that used the artisan bakcup run to create backup, restore it and download zip file.
 there is also an automatic backup done before import transactions from bank text file for example.
 
-
 # Laravel + Docker / GitHub Actions CI/CD Deployment
 
 This document summarizes the production deployment process for a Laravel project using Docker, Traefik, and GitHub Actions with GitHub Container Registry (GHCR).
 
 ---
+
+# Production info
 
 ## 1. Production Docker Compose
 
@@ -312,6 +307,7 @@ File: `docker-compose.prod.yml`
 - **MySQL**: database container
 
 ### Key Points
+
 - The production `.env` **must NOT be versioned**.
   → It should exist **directly on the VPS**.
 - Exposed ports: `80` for ACME challenge (HTTP → HTTPS), `443` for HTTPS.
@@ -343,66 +339,82 @@ Workflow file: `deploy.yml`
 ```bash
 docker build -t ghcr.io/<OWNER>/myhomehub:latest -f laravel/Dockerfile.prod .
 
+```
 
 Also we can test it locally the build image from prod with the following command:
 
 ```bash
 docker build -t myhomehub-prod -f docker/laravel/Dockerfile.prod .
+```
 
-Push to GHCR
+    - Push to GHCR:
 
 Authenticates to GitHub Container Registry using ${{ secrets.GITHUB_TOKEN }}
 
 Pushes the built image:
 
+```bash
 docker push ghcr.io/<OWNER>/myhomehub:latest
+```
 
-Deploy on VPS
+2. **Tests**
 
-SSH into VPS and pull the latest image from GHCR:
+- We build a laravel container with the Dockerfile.ci
+- We used the laravel prod build with other permission and composer install with dev depencies for use artisan test command
+- Also use another mysql temporaly server for testing.
+- Execute all test on laravel defined:
 
+```bash
+php artisan config:clear
+php artisan migrate
+php artisan test
+```
+
+3. **Deploy on VPS**
+
+- This step need first satisfy build and test step before!
+
+- SSH into VPS and pull the latest image from GHCR:
+
+```bash
 cd /var/www/myhomehub
 docker compose pull
 docker compose up -d
 docker system prune -f
+```
 
-Laravel containers run with the production .env already on the VPS
+- Laravel containers run with the production .env already on the VPS
 
-Scheduler container runs php artisan schedule:work
+- Scheduler container runs php artisan schedule:work
 
-Nginx reads the Laravel container via fastcgi_pass
+- Nginx reads the Laravel container via fastcgi_pass
 
-GitHub Secrets Used
+- GitHub Secrets Used
 
+```
 SERVER_IP → VPS IP
-
 SERVER_USER → SSH user
-
 SSH_PRIVATE_KEY → SSH private key
-
 GITHUB_TOKEN → automatically provided by GitHub for GHCR login
+```
 
 ⚠️ Never commit DB_PASSWORD, APP_KEY, SSH keys, or full .env in a public repo.
 
-4. Environment Variables
-
-Production .env is on the VPS only
+- Environment Variables
+  Production .env is on the VPS only
 
 CI/CD only uses GitHub secrets for SSH, GHCR login, or dynamic variables
 
 In development, use a local .env with Docker Compose
 
-5. Traefik + SSL
+- Traefik + SSL
 
 Ports 80 and 443 exposed
-
 Let’s Encrypt handles HTTPS automatically
-
 HTTP → HTTPS redirection recommended
-
 Configuration via labels in docker-compose.prod.yml
 
-6. Best Practices
+- Best Practices
 
 Public repo → safe for code, Dockerfiles, Nginx, Traefik configs, but never secrets
 
@@ -412,7 +424,7 @@ Always test locally/dev before deploying to production
 
 Store sensitive secrets outside the repo, either in GitHub Secrets or directly on the VPS
 
-7. Vercel-style GHCR Workflow Advantages
+- Vercel-style GHCR Workflow Advantages
 
 No .env in repo → secrets stay safe on VPS
 
@@ -420,16 +432,16 @@ Reproducible builds → image built once in CI, deployed anywhere
 
 Clean separation between build (CI) and runtime (prod)
 
-8. Optional Diagram
-+----------------+       +-----------------+        +----------------+
-|                |  80/443|                 |  9000  |                |
-|    Traefik     +------->+     Nginx        +------->+   Laravel      |
-|  (SSL, proxy)  |        |  (PHP FPM proxy) |        |  PHP-FPM       |
-+----------------+        +-----------------+        +----------------+
-                                  |                             |
-                                  |                             |
-                                  v                             v
-                          Static files /www/html            MySQL container
+- Optional Diagram
+  +----------------+ +-----------------+ +----------------+
+  | | 80/443| | 9000 | |
+  | Traefik +------->+ Nginx +------->+ Laravel |
+  | (SSL, proxy) | | (PHP FPM proxy) | | PHP-FPM |
+  +----------------+ +-----------------+ +----------------+
+  | |
+  | |
+  v v
+  Static files /www/html MySQL container
 
 ### 🟨 Python — Ingestion & services transverses
 
@@ -472,7 +484,7 @@ Exemple :
 
 ```php
 Movie::factory()->count(20)->create();
-````
+```
 
 ### 🟡 Python
 
