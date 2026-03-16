@@ -14,7 +14,7 @@
 
             @foreach ($seasons as $s)
                 <option value="{{ $s }}">
-                    {{ $s }}
+                    {{ $s - 1 }} - {{ $s }}
                 </option>
             @endforeach
 
@@ -91,10 +91,11 @@
                 Win / Loss
             </h2>
 
-            <canvas id="winLossChart"></canvas>
+            <div class="relative h-72">
+                <canvas id="winLossChart" wire:ignore></canvas>
+            </div>
 
         </div>
-
 
         <div class="bg-white p-6 rounded-xl shadow">
 
@@ -102,13 +103,12 @@
                 Performance par classement
             </h2>
 
-            <canvas id="rankingChart"></canvas>
+            <div class="relative h-72">
+                <canvas id="rankingChart" wire:ignore></canvas>
+            </div>
 
         </div>
-
     </div>
-
-
     {{-- LAST MATCHES --}}
 
     <div class="bg-white rounded-xl shadow p-6">
@@ -119,45 +119,65 @@
 
         <div class="space-y-3">
 
-            @foreach ($lastMatches as $match)
-                <div class="flex justify-between items-center border-b pb-2">
+            <div class="grid md:grid-cols-3 gap-6 text-sm">
 
-                    <div>
+                @foreach ($matchesGrouped as $matches)
+                    <div class="bg-white rounded-xl shadow p-6">
 
-                        <div class="font-semibold">
-                            {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                        <div class="mb-4">
+
+                            <h2 class="font-semibold text-lg">
+                                {{ $matches->first()->opponent_club }}
+                            </h2>
+
+                            <div class="text-sm text-gray-500">
+                                {{ \Carbon\Carbon::parse($matches->first()->date)->format('d M Y') }}
+                            </div>
+
                         </div>
 
-                        <div class="text-sm text-gray-500">
-                            {{ $match->opponent_ranking }} • {{ $match->date }}
+                        <div class="space-y-2">
+
+                            @foreach ($matches as $match)
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm">
+                                            {{ $match->opponent_ranking }}
+                                        </div>
+                                        <div class="font-medium">
+                                            {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center">
+                                        <!-- Badge V/D avec largeur fixe -->
+                                        <span
+                                            class="w-6 text-center px-2 py-1 text-xs rounded text-white
+        {{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
+                                            {{ $match->result }}
+                                        </span>
+
+                                        <!-- Sets avec largeur fixe -->
+                                        <div class="font-semibold w-10 text-right">
+                                            {{ $match->set_for }} - {{ $match->set_against }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+
                         </div>
 
                     </div>
+                @endforeach
 
-                    <div class="text-right">
-
-                        <span
-                            class="px-3 py-1 rounded text-white
-{{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
-
-                            {{ $match->result == 'V' ? 'Victoire' : 'Défaite' }}
-
-                        </span>
-
-                        <div class="text-sm text-gray-500">
-
-                            {{ $match->set_for }} - {{ $match->set_against }}
-
-                        </div>
-
-                    </div>
-
-                </div>
-            @endforeach
+            </div>
 
         </div>
 
     </div>
+
+</div>
 
 </div>
 
@@ -186,10 +206,22 @@
                         data: [
                             {{ $stats['wins'] }},
                             {{ $stats['losses'] }}
-                        ]
+                        ],
+
+                        backgroundColor: [
+                            '#22c55e',
+                            '#ef4444'
+                        ],
+
+                        borderWidth: 0
+
 
                     }]
 
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
 
             })
@@ -216,6 +248,8 @@
 
                         {
                             label: 'Victoires',
+                            backgroundColor: '#22c55e',
+                            borderRadius: 2,
                             data: [
                                 @foreach ($rankingStats as $r)
                                     {{ $r->wins }},
@@ -225,6 +259,8 @@
 
                         {
                             label: 'Défaites',
+                            backgroundColor: '#ef4444',
+                            borderRadius: 2,
                             data: [
                                 @foreach ($rankingStats as $r)
                                     {{ $r->losses }},

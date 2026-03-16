@@ -69,21 +69,21 @@ jobs:
             myhomehub-ci \
             sh -c "php artisan config:clear && php artisan migrate && php artisan test"
 
-  deploy:
-    needs: tests
-    runs-on: ubuntu-latest
+  # deploy:
+  #   needs: tests
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Deploy on VPS
-        uses: appleboy/ssh-action@v1
+  #   steps:
+  #     - name: Deploy on VPS
+  #       uses: appleboy/ssh-action@v1
 
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #       with:
+  #         host: ${{ secrets.SERVER_IP }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-          script: |
-            cd /var/www/myhomehub
-            docker compose pull
-            docker compose up -d
-            docker system prune -f
+  #         script: |
+  #           cd /var/www/myhomehub
+  #           docker compose pull
+  #           docker compose up -d
+  #           docker system prune -f

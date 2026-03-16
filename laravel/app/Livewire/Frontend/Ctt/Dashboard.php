@@ -55,10 +55,12 @@ class Dashboard extends Component
     {
         return $this->baseQuery()
             ->orderByDesc('date')
-            ->limit(10)
-            ->get();
+            ->get()
+            ->groupBy(function ($match) {
+                return $match->date . '-' . $match->opponent_club;
+            });
     }
-
+    
     public function getSeasons()
     {
         return CttMatch::select('season_year')
@@ -69,11 +71,11 @@ class Dashboard extends Component
 
     public function render()
     {
-        return view('livewire.frontend.ctt.dashboard',[
-            'stats'=>$this->getStats(),
-            'rankingStats'=>$this->getRankingStats(),
-            'lastMatches'=>$this->getLastMatches(),
-            'seasons'=>$this->getSeasons()
-        ]);
+        return view('livewire.frontend.ctt.dashboard', [
+            'stats' => $this->getStats(),
+            'rankingStats' => $this->getRankingStats(),
+            'matchesGrouped' => $this->getLastMatches(),
+            'seasons' => $this->getSeasons()
+        ]);    
     }
 }
