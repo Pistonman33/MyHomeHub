@@ -37,6 +37,13 @@ Route::prefix('friends')
         Route::get('', 'FriendsController@index')->name('all');
     });
 
+Route::prefix('ctt')
+    ->name('ctt.')
+    ->group(function () {
+        Route::get('/', 'CttController@index')->name('ctt');
+    });
+
+
 Route::prefix('test')
     ->name('test.')
     ->group(function () {
