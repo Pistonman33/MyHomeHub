@@ -6,8 +6,7 @@
             <i class="fa-solid fa-plus"></i> Create a New Post
         </a>
     </div>
-    <input type="text" class="form-control mb-3" placeholder="Search posts by title, tags or categories"
-        wire:model.live.debounce.300ms="search">
+    <input type="text" class="form-control mb-3" placeholder="Rechercher..." wire:model.live.debounce.300ms="search">
 
     <table class="table table-bordered table-hover">
         <thead class="table-light">

@@ -15,7 +15,7 @@ class BlogController extends Controller
     }
     public function post($slug)
     {
-        $article = Post::where('slug', $slug)->first();
+        $article = Post::where('slug', $slug)->firstOrFail();
         if ($article) {
            $article->content = str_replace(
                 ['[code]', '[/code]'],

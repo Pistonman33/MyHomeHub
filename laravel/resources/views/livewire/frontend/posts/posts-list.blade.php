@@ -49,7 +49,7 @@
                         {{ \Illuminate\Support\Str::words(strip_tags($post->content), 80) }} </p> <!-- Read more --> <a
                         href="{{ route('blog.post', $post->slug) }}"
                         class="text-sm font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300">
-                        Read more → </a>
+                        En savoir plus → </a>
                 </div>
         </div> @empty <p class="text-center text-zinc-500 dark:text-neutral-400">No posts found.</p>
         @endforelse

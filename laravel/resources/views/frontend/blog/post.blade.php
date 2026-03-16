@@ -8,7 +8,7 @@
         <div>
             <a href="{{ route('blog.posts') }}"
                 class="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition">
-                ← All posts
+                ← Tous les articles
             </a>
         </div>
 
@@ -46,12 +46,12 @@
         <!-- Post -->
         <article
             class="mx-auto w-full max-w-4xl text-zinc-700 dark:text-zinc-300
-            [&>h2]:mt-14 [&>h2]:text-2xl [&>h2]:font-bold
-            [&>h3]:mt-12 [&>h3]:text-xl [&>h3]:font-bold
+            [&>h2]:mt-8 [&>h2]:text-2xl [&>h2]:font-bold
+            [&>h3]:mt-5 [&>h3]:text-xl [&>h3]:font-bold
             [&>p]:mt-5 [&>p]:leading-relaxed
             [&>pre]:mt-5 [&>pre]:rounded-xl [&>pre]:bg-zinc-800 [&>pre]:p-4
             [&>pre]:text-sm [&>pre]:font-medium [&>pre]:text-zinc-100
-            [&>ul]:mt-5 [&>ul]:list-disc [&>ul]:pl-6">
+            [&>ul]:mt-5 [&>ul]:list-disc [&>ul]:pl-6 [&>hr]:mt-5">
             {!! $post->content !!}
         </article>
         <!-- END Post -->
