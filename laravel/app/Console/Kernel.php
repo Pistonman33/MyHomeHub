@@ -26,17 +26,26 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        if (App::environment('prod')){
+        if (App::environment('prod')) {
+          // BACKUP SCHEDULE
           $schedule->command('backup:clean')->daily()->at('1:45');
           $schedule->command('backup:run')->daily()->at('2:00');
+          // BIRTHDAY EMAILS SCHEDULE
           $schedule->call(function () {
             Birthday::sentBirthdayMail();
           })->dailyAt('6:10');
           $schedule->call(function () {
             Birthday::sentMonthlyBirthdayMail();
           })->weeklyOn(1, '5:00');
+
+          // CTT SYNC SCHEDULE
+          $currentYear = date('Y');
+          $cmd = 'ctt:sync 167818 '.$currentYear;
+          $schedule->command($cmd)->dailyAt('8:00');
+
+          
           // ONLY FOR OVH
-          $this->scheduleRunsHourly($schedule);
+          //$this->scheduleRunsHourly($schedule);
         }
 
         // $schedule->command('inspire')

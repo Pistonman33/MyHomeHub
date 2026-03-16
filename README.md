@@ -128,21 +128,27 @@ All environment variable is on the root of the project and not of laravel.
 
 #### Laravel Scheduler in Docker (`schedule:work`)
 
-In this project, the Laravel task scheduler is handled directly **inside the Docker container** using `schedule:work`.  
+In this project, the Laravel task scheduler has own **Docker container** using `schedule:work`.  
 This means there is **no need to set up a separate Linux cron job**.
+This turn every minute.
+To check the list of schedule:
+
+```bash
+php artisan schedule:list
+```
+
+And logs file are store in /storage/logs/scheduler.log
 
 ##### How it works
 
 - The scheduler is defined in `App\Console\Kernel.php` using `Schedule` and your existing commands/callbacks.
-- The Docker container launches the scheduler in the background using:
+- There is a Docker container (scheduler) that launches the scheduler in the background using:
 
 ```bash
-php artisan schedule:work & php-fpm
+php artisan schedule:work
 ```
 
 MyHomeHub [backend](https://myhome.thiebault.test/admin)
-MyHomeHub [media](https://media.thiebault.test)
-MyHomeHub [blog](https://blog.thiebault.test)
 
 ### Mysql
 
@@ -248,6 +254,8 @@ So need to have a container node with npm to install tailwind and generate css.
 There is also a vite server installed on the node container that refresh page every changes that we do on the laravel template for blog.
 This server is available only on dev environment and need to follow the production process to deploy it.
 
+MyHomeHub [blog](https://blog.thiebault.test)
+
 ##### Import posts from Wordpress
 
 I have created one command in laravel that import all posts from Wordpress to laravel.
@@ -262,6 +270,8 @@ php artisan import:wordpress
 #### Finance
 
 #### Movies / Series
+
+MyHomeHub [media](https://media.thiebault.test)
 
 #### Friends
 
@@ -282,6 +292,27 @@ php artisan import:friends
 I have also used a livewire component to list all friends and filter by a search input.
 It's also possible to sort by column name.
 I have used also livewire to create / update friends.
+
+#### Ping pong
+
+It's a feature that import all ping pong results from me from ctt api and present result on a nice dashboard
+
+##### Tables impacted
+
+- `myhome_ctt_matches`
+- `myhome_ctt_players`
+- `myhome_ctt_seasons`
+
+I have created one command in laravel that import all results of season and license id in parameter.
+It's a sync tool thta adds only new values.
+
+```
+php artisan ctt:sync <license_id> <season_year>
+```
+
+I have also created a dashboard on the frontend laravel project in the folowing url:
+
+CTT [dashboard](https://myhome.thiebault.test/ctt)
 
 #### Backup
 

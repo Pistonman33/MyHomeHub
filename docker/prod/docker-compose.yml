@@ -67,7 +67,7 @@ services:
     container_name: myhomehub_scheduler
     volumes:
       - ../storage:/var/www/storage
-    command: php artisan schedule:work
+    command: php artisan schedule:work >> /var/www/storage/logs/scheduler.log 2>&1
     networks:
       - myhomehub_network
     restart: unless-stopped

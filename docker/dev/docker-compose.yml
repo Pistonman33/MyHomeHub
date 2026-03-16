@@ -64,8 +64,18 @@ services:
       - "9000"
     networks:
       - myhomehub_network
-    #Cron jobs are handled by Laravel's scheduler, which runs in the same container as the application. The command starts both the scheduler and the PHP-FPM server.
-    command: sh -c "php artisan schedule:work & php-fpm"
+    command: php-fpm
+  scheduler:
+    build:
+      context: ../
+      dockerfile: laravel/Dockerfile
+    container_name: myhomehub_scheduler
+    volumes:
+      - ../../laravel:/var/www
+      - ../../.env:/var/www/.env:ro
+    command: php artisan schedule:work >> /var/www/storage/logs/scheduler.log 2>&1
+    networks:
+      - myhomehub_network
 
   mysql:
     image: mysql:8.0
