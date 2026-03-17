@@ -40,9 +40,10 @@ class Dashboard extends Component
     }
     public function getCurrentRanking()
     {
-        if (!$this->season || $this->season === 'all')
-            $this->season = date('Y');
-        return CttSeason::where('year', $this->season)->value('ranking');
+        $s = $this->season;
+        if (!$s || $s === 'all')
+            $s = date('Y');
+        return CttSeason::where('year', $s)->value('ranking');
     }
 
     public function getRankingStats()

@@ -108,8 +108,7 @@
             </h2>
 
             <div class="relative h-72">
-                <canvas id="winLossChart" wire:ignore data-wins="{{ $stats['wins'] }}"
-                    data-losses="{{ $stats['losses'] }}"></canvas>
+                <canvas id="winLossChart"></canvas>
             </div>
 
         </div>
