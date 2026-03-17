@@ -4,6 +4,7 @@ namespace App\Livewire\Frontend\Ctt;
 
 use Livewire\Component;
 use App\Models\CttMatch;
+use App\Models\CttSeason;
 use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Component
@@ -37,6 +38,12 @@ class Dashboard extends Component
             'percentage' => $total ? round($wins/$total*100) : 0
         ];
     }
+    public function getCurrentRanking()
+    {
+        if (!$this->season || $this->season === 'all')
+            $this->season = date('Y');
+        return CttSeason::where('year', $this->season)->value('ranking');
+    }
 
     public function getRankingStats()
     {
@@ -69,13 +76,23 @@ class Dashboard extends Component
             ->pluck('season_year');
     }
 
+    public function updatedSeason()
+    {
+        $this->dispatch('refreshCharts', [
+            'wins' => $this->getStats()['wins'],
+            'losses' => $this->getStats()['losses'],
+            'ranking' => $this->getRankingStats()->toArray()
+        ]);
+    }
+
     public function render()
     {
         return view('livewire.frontend.ctt.dashboard', [
             'stats' => $this->getStats(),
             'rankingStats' => $this->getRankingStats(),
             'matchesGrouped' => $this->getLastMatches(),
-            'seasons' => $this->getSeasons()
+            'seasons' => $this->getSeasons(),
+            'currentRanking' => $this->getCurrentRanking(),
         ]);    
     }
 }

@@ -17,7 +17,6 @@ class CttPlayer extends Model
         'license',
         'firstname',
         'lastname',
-        'ranking',
         'status',
         'club',
     ];

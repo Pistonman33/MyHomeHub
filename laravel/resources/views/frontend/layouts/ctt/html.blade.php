@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}" x-data="darkModeData()" :class="{ 'dark': darkMode }">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="utf-8" />

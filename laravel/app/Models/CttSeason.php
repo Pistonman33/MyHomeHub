@@ -29,6 +29,7 @@ class CttSeason extends Model
         'year',
         'name',
         'is_current',
+        'ranking'
     ];
 
     /*
@@ -41,6 +42,8 @@ class CttSeason extends Model
         'year' => 'integer',
         'name' => 'string',
         'is_current' => 'boolean',
+        'ranking'=> 'string',
+
     ];
 
     /*

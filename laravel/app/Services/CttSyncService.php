@@ -42,6 +42,7 @@ class CttSyncService
             [
                 'name' => ($year-1)."-$year",
                 'is_current' => $year == date('Y')  ? true : false,
+                'ranking' => $member->Ranking ?? null,
             ]
         );
         // create or update player in db
@@ -49,8 +50,7 @@ class CttSyncService
             ['license' => $member->UniqueIndex],
             [
                 'firstname' => $member->FirstName,
-                'lastname' => $member->LastName,
-                'ranking' => $member->Ranking ?? null,
+                'lastname' => $member->LastName,                
                 'status' => $member->Status ?? null,
                 'club' => $member->Club ?? null,
             ]

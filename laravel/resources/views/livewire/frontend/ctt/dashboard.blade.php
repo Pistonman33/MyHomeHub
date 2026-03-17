@@ -25,7 +25,23 @@
 
     {{-- STATS CARDS --}}
 
-    <div class="grid md:grid-cols-4 gap-6">
+    <div class="grid md:grid-cols-5 gap-6">
+        <div
+            class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow p-6 flex flex-col justify-between">
+
+            <div class="text-sm opacity-70">
+                Classement actuel
+            </div>
+
+            <div class="flex items-center justify-between mt-4">
+
+                <div class="text-4xl font-bold tracking-wide">
+                    {{ $currentRanking ?? 'N/A' }}
+                </div>
+
+            </div>
+
+        </div>
 
         <div class="bg-white rounded-xl shadow p-6">
 
@@ -92,7 +108,8 @@
             </h2>
 
             <div class="relative h-72">
-                <canvas id="winLossChart" wire:ignore></canvas>
+                <canvas id="winLossChart" wire:ignore data-wins="{{ $stats['wins'] }}"
+                    data-losses="{{ $stats['losses'] }}"></canvas>
             </div>
 
         </div>
@@ -179,102 +196,95 @@
 
 </div>
 
-</div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    document.addEventListener("livewire:load", loadCharts)
-    document.addEventListener("livewire:navigated", loadCharts)
+    let winLossChart = null
+    let rankingChartInstance = null
 
-    function loadCharts() {
+    document.addEventListener("livewire:init", () => {
+
+        loadCharts(
+            @json($stats['wins']),
+            @json($stats['losses']),
+            @json($rankingStats->toArray())
+        )
+
+        Livewire.on('refreshCharts', (event) => {
+
+            const data = event[0] // ✅ IMPORTANT
+
+            if (!data || !data.ranking) return
+
+            loadCharts(
+                data.wins,
+                data.losses,
+                data.ranking
+            )
+        })
+    })
+
+    function loadCharts(wins = 0, losses = 0, ranking = []) {
+
+        if (winLossChart) {
+            winLossChart.destroy()
+        }
+
+        if (rankingChartInstance) {
+            rankingChartInstance.destroy()
+        }
 
         const winLoss = document.getElementById('winLossChart')
 
         if (winLoss) {
-
-            new Chart(winLoss, {
-
+            winLossChart = new Chart(winLoss, {
                 type: 'doughnut',
-
                 data: {
                     labels: ['Victoires', 'Défaites'],
-
                     datasets: [{
-
-                        data: [
-                            {{ $stats['wins'] }},
-                            {{ $stats['losses'] }}
-                        ],
-
-                        backgroundColor: [
-                            '#22c55e',
-                            '#ef4444'
-                        ],
-
+                        data: [wins, losses],
+                        backgroundColor: ['#22c55e', '#ef4444'],
                         borderWidth: 0
-
-
                     }]
-
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false
                 }
-
             })
-
         }
 
         const rankingChart = document.getElementById('rankingChart')
 
         if (rankingChart) {
 
-            new Chart(rankingChart, {
+            const labels = ranking.map(r => r.opponent_ranking ?? '')
+            const winsData = ranking.map(r => r.wins ?? 0)
+            const lossesData = ranking.map(r => r.losses ?? 0)
 
+            rankingChartInstance = new Chart(rankingChart, {
                 type: 'bar',
-
                 data: {
-
-                    labels: [
-                        @foreach ($rankingStats as $r)
-                            "{{ $r->opponent_ranking }}",
-                        @endforeach
-                    ],
-
-                    datasets: [
-
-                        {
+                    labels: labels,
+                    datasets: [{
                             label: 'Victoires',
                             backgroundColor: '#22c55e',
-                            borderRadius: 2,
-                            data: [
-                                @foreach ($rankingStats as $r)
-                                    {{ $r->wins }},
-                                @endforeach
-                            ]
+                            data: winsData
                         },
-
                         {
                             label: 'Défaites',
                             backgroundColor: '#ef4444',
-                            borderRadius: 2,
-                            data: [
-                                @foreach ($rankingStats as $r)
-                                    {{ $r->losses }},
-                                @endforeach
-                            ]
+                            data: lossesData
                         }
-
                     ]
-
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
-
             })
-
         }
-
     }
 </script>

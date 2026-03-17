@@ -15,8 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('license')->primary();
             $table->string('firstname');
             $table->string('lastname');
-
-            $table->string('ranking')->nullable(); // E4
+            
             $table->string('status')->nullable();  // A
             $table->string('club')->nullable(); // BBW179
 
