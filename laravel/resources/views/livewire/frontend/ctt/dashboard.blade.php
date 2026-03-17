@@ -1,159 +1,91 @@
 <div class="p-6 max-w-7xl mx-auto space-y-8">
 
     {{-- HEADER --}}
-
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 
         <h1 class="text-3xl font-bold">
-            🏓 CTT Performance Dashboard
+            🏓 CTT Dashboard
         </h1>
 
-        <select wire:model.live="season" class="border rounded-lg px-4 py-2">
-
+        <select wire:model.live="season" class="border rounded-lg px-4 py-2 self-end sm:self-auto">
             <option value="all">Toutes saisons</option>
-
             @foreach ($seasons as $s)
                 <option value="{{ $s }}">
                     {{ $s - 1 }} - {{ $s }}
                 </option>
             @endforeach
-
         </select>
 
     </div>
 
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
 
-    {{-- STATS CARDS --}}
-
-    <div class="grid md:grid-cols-5 gap-6">
+        {{-- 1er bloc --}}
         <div
-            class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow p-6 flex flex-col justify-between">
-
-            <div class="text-sm opacity-70">
-                Classement actuel
-            </div>
-
+            class="col-span-1 sm:col-span-1 md:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow p-6 flex flex-col justify-between">
+            <div class="text-sm opacity-70">Classement actuel</div>
             <div class="flex items-center justify-between mt-4">
-
-                <div class="text-4xl font-bold tracking-wide">
-                    {{ $currentRanking ?? 'N/A' }}
-                </div>
-
+                <div class="text-4xl font-bold tracking-wide">{{ $currentRanking ?? 'N/A' }}</div>
             </div>
-
         </div>
 
-        <div class="bg-white rounded-xl shadow p-6">
-
-            <div class="text-gray-500 text-sm">
-                Total Matches
-            </div>
-
-            <div class="text-3xl font-bold">
-                {{ $stats['total'] }}
-            </div>
-
+        {{-- 2e bloc --}}
+        <div class="col-span-1 sm:col-span-1 md:col-span-1 bg-white rounded-xl shadow p-6">
+            <div class="text-gray-500 text-sm">Total Matches</div>
+            <div class="text-3xl font-bold">{{ $stats['total'] }}</div>
         </div>
 
-
-        <div class="bg-green-50 rounded-xl shadow p-6">
-
-            <div class="text-gray-500 text-sm">
-                Victoires
-            </div>
-
-            <div class="text-3xl font-bold text-green-600">
-                {{ $stats['wins'] }}
-            </div>
-
+        {{-- 3e bloc --}}
+        <div class="col-span-1 sm:col-span-1 md:col-span-1 bg-green-50 rounded-xl shadow p-6">
+            <div class="text-gray-500 text-sm">Victoires</div>
+            <div class="text-3xl font-bold text-green-600">{{ $stats['wins'] }}</div>
         </div>
 
-
-        <div class="bg-red-50 rounded-xl shadow p-6">
-
-            <div class="text-gray-500 text-sm">
-                Défaites
-            </div>
-
-            <div class="text-3xl font-bold text-red-600">
-                {{ $stats['losses'] }}
-            </div>
-
+        {{-- 4e bloc --}}
+        <div class="col-span-1 sm:col-span-1 md:col-span-1 bg-red-50 rounded-xl shadow p-6">
+            <div class="text-gray-500 text-sm">Défaites</div>
+            <div class="text-3xl font-bold text-red-600">{{ $stats['losses'] }}</div>
         </div>
 
-
-        <div class="bg-blue-50 rounded-xl shadow p-6">
-
-            <div class="text-gray-500 text-sm">
-                Winrate
-            </div>
-
-            <div class="text-3xl font-bold text-blue-600">
-                {{ $stats['percentage'] }}%
-            </div>
-
+        {{-- 5e bloc --}}
+        <div class="col-span-1 sm:col-span-1 md:col-span-1 bg-blue-50 rounded-xl shadow p-6">
+            <div class="text-gray-500 text-sm">Winrate</div>
+            <div class="text-3xl font-bold text-blue-600">{{ $stats['percentage'] }}%</div>
         </div>
 
     </div>
 
-
     {{-- CHARTS --}}
-
-    <div class="grid md:grid-cols-2 gap-6">
-
-        <div class="bg-white p-6 rounded-xl shadow">
-
-            <h2 class="font-semibold mb-4">
-                Win / Loss
-            </h2>
-
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow mr-0 md:mr-4">
+            <h2 class="font-semibold mb-4">Win / Loss</h2>
             <div class="relative h-72">
                 <canvas id="winLossChart"></canvas>
             </div>
-
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow">
-
-            <h2 class="font-semibold mb-4">
-                Performance par classement
-            </h2>
-
+            <h2 class="font-semibold mb-4">Performance par classement</h2>
             <div class="relative h-72">
                 <canvas id="rankingChart" wire:ignore></canvas>
             </div>
-
         </div>
     </div>
+
     {{-- LAST MATCHES --}}
-
     <div class="bg-white rounded-xl shadow p-6">
-
-        <h2 class="font-semibold mb-4">
-            Derniers matches
-        </h2>
-
+        <h2 class="font-semibold mb-4">Derniers matches</h2>
         <div class="space-y-3">
-
-            <div class="grid md:grid-cols-3 gap-6 text-sm">
-
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-sm">
                 @foreach ($matchesGrouped as $matches)
                     <div class="bg-white rounded-xl shadow p-6">
-
                         <div class="mb-4">
-
-                            <h2 class="font-semibold text-lg">
-                                {{ $matches->first()->opponent_club }}
-                            </h2>
-
+                            <h2 class="font-semibold text-lg">{{ $matches->first()->opponent_club }}</h2>
                             <div class="text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($matches->first()->date)->format('d M Y') }}
-                            </div>
-
+                                {{ \Carbon\Carbon::parse($matches->first()->date)->format('d M Y') }}</div>
                         </div>
 
                         <div class="space-y-2">
-
                             @foreach ($matches as $match)
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center gap-3">
@@ -167,32 +99,24 @@
                                     </div>
 
                                     <div class="flex items-center">
-                                        <!-- Badge V/D avec largeur fixe -->
                                         <span
                                             class="w-6 text-center px-2 py-1 text-xs rounded text-white
-        {{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
+                                            {{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
                                             {{ $match->result }}
                                         </span>
-
-                                        <!-- Sets avec largeur fixe -->
                                         <div class="font-semibold w-10 text-right">
                                             {{ $match->set_for }} - {{ $match->set_against }}
                                         </div>
                                     </div>
                                 </div>
                             @endforeach
-
                         </div>
 
                     </div>
                 @endforeach
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 
