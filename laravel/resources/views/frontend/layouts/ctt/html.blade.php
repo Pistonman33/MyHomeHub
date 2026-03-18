@@ -10,7 +10,7 @@
     @include('frontend.layouts.ctt.tailwindcss')
 </head>
 
-<body class="font-[Inter] bg-gray-100">
+<body class="font-[Inter] bg-gray-900 text-gray-100">
     @yield('content')
 </body>
 

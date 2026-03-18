@@ -81,10 +81,32 @@ class Dashboard extends Component
     {
         $this->dispatch('refreshCharts', [
             'wins' => $this->getStats()['wins'],
-            'losses' => $this->getStats()['losses'],
-            'ranking' => $this->getRankingStats()->toArray()
+            'losses' => $this->getStats()['losses']
         ]);
     }
+
+    public function getTopOpponents()
+    {
+        $query = \App\Models\CttMatch::selectRaw('
+                opponent_license,
+                opponent_firstname,
+                opponent_lastname,
+                opponent_club,
+                COUNT(*) as total_matches,
+                SUM(CASE WHEN result IN ("W","V") THEN 1 ELSE 0 END) as wins,
+                SUM(CASE WHEN result IN ("L","D") THEN 1 ELSE 0 END) as losses,
+                MAX(opponent_ranking) as last_ranking
+            ')
+            ->groupBy('opponent_license', 'opponent_firstname', 'opponent_lastname', 'opponent_club')
+            ->orderByDesc('total_matches')
+            ->limit(10);
+
+        if ($this->season !== 'all') {
+            $query->where('season_year', $this->season);
+        }
+
+        return $query->get();
+    }    
 
     public function render()
     {
