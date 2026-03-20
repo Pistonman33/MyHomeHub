@@ -30,7 +30,7 @@ services:
     depends_on:
       - laravel
     volumes:
-      - ../../laravel:/var/www:ro. # For Laravel application code
+      - ../../laravel:/var/www:ro # For Laravel application code
       - ../../html:/var/www/static:ro # For static website html
       - ../nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ../nginx/logs:/var/log/nginx # For nginx logs
@@ -41,11 +41,17 @@ services:
       - "traefik.http.routers.laravel.rule=Host(`myhome.thiebault.test`) || Host(`blog.thiebault.test`) || Host(`media.thiebault.test`)"
       - "traefik.http.routers.laravel.entrypoints=websecure"
       - "traefik.http.routers.laravel.tls=true"
+      - "traefik.http.routers.laravel.service=nginx-service"
+      - "traefik.http.routers.laravel.priority=10"
 
       # Static site
       - "traefik.http.routers.static.rule=Host(`thiebault.test`)"
       - "traefik.http.routers.static.entrypoints=websecure"
       - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.service=nginx-service"
+      - "traefik.http.routers.static.priority=10"
+
+      - "traefik.http.services.nginx-service.loadbalancer.server.port=80"
 
     networks:
       - myhomehub_network
@@ -76,7 +82,27 @@ services:
     command: php artisan schedule:work >> /var/www/storage/logs/scheduler.log 2>&1
     networks:
       - myhomehub_network
-
+  native:
+    build:
+      context: ../
+      dockerfile: laravel/Dockerfile
+    container_name: myhomehub_native
+    volumes:
+      - ../../laravel:/var/www
+      - ../../.env:/var/www/.env:ro
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.native.rule=Host(`native.thiebault.test`)"
+      - "traefik.http.routers.native.entrypoints=websecure"
+      - "traefik.http.routers.native.tls=true"
+      - "traefik.http.routers.native.priority=100"
+      - "traefik.http.services.native.loadbalancer.server.port=3000"
+    command: sh -c "php artisan serve --host=0.0.0.0 --port=8000 & php artisan native:jump ios"
+    networks:
+      - myhomehub_network
   mysql:
     image: mysql:8.0
     container_name: myhomehub_mysql

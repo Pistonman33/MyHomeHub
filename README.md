@@ -617,3 +617,16 @@ portfolio-project/
 - utiliser Docker et VPS Cloud
 
 #TODO Makefile pour mysql php artisan ????
+
+## NativePHP
+
+Dasn cette branche j'ai fait un test avec native PHP et voici mes conclusions !
+
+1. NativePHP avec server jump qui est un serveur web qui pêrmet de télécharger le bundle sous iOs avec testflight installé et l'application Jump dans tesflight installé. Elle proposé de scanné un qr code pour téléharger et installer le bundle.
+2. Malheureumsent avec docker pas réussi a changer le host dans l'application jump pour pouvoir télécharegr le bundle=> il propose une url interne de docker!
+3. Donc cette solution est abandonée car je devrais oublié toute mes urls dans host \*.thiebault.test et devoir déployer jump sur mon host c'est à dire installer php / node etc... => perd l'interet de docker ici en developpementr local.
+4. La seul solution viable pour nativephp est donc d'installer d'abord tout en production et utiliser les urls de prod.
+5. Mais denouveau il faudra un compte apple pour publier cette app sur le store,sinon utiliser testflight mais l'applicatione xpirear après un certain temps 7 jours.
+6. Denouveau je pense aussi que nativephp en faite créer juste une application iOs vace principalement une webvieuw qui importe le frontend dedans et interagit avec le backend et permet d'utiliser des fonctionnalités de l'iphone.
+   Donc pour moi ca n'a di'nteret que si on utilise des fonctionnalités de iPhone pouur utiliser native php comme lma caméra ou notification push sinon on utilise safari tout simùplement.
+   TODO: notifications push quand on a des résultats du ping ?
