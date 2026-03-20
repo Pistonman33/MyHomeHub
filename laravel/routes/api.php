@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 */
 
 Route::group(['middleware' => 'auth:api'], function() {
-    Route::post('movies', 'MoviesController@saveMovie');
-    Route::post('series', 'SeriesController@saveSerie');
+     Route::post('movies', 'MoviesController@saveMovie');
+     Route::post('series', 'SeriesController@saveSerie');
 });
-

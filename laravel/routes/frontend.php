@@ -6,46 +6,42 @@ use Illuminate\Support\Facades\Route;
 Route::domain(env('BLOG_SUBDOMAIN'))->prefix('/')->name('blog.')
     ->group(function () {
         Route::get('', 'BlogController@front')->name('posts');
-        Route::get('{slug}', 'BlogController@post')->name('post');
+        Route::get('{slug}', 'BlogController@post')->name('post')->where('slug', '[A-Za-z0-9\-]+');
 });
 
-Route::domain(env('MEDIA_SUBDOMAIN'))->prefix('movies')
-    ->name('movies.')
-    ->group(function () {
+Route::domain(env('MEDIA_SUBDOMAIN'))->group(function () {
 
-        Route::get('/', 'MoviesController@home')->name('index');
-        Route::post('filter', 'MoviesController@filter')->name('filter');
+    Route::get('/', function () {
+        return redirect()->route('movies.index');
+    });
+    Route::prefix('movies')->group(function () {
+        Route::get('/', 'MoviesController@home')->name('movies.index');
+        Route::post('filter', 'MoviesController@filter')->name('movies.filter');
     });
 
-Route::domain(env('MEDIA_SUBDOMAIN'))->prefix('tvshows')
-    ->name('tvshows.')
-    ->group(function () {
-        Route::get('/', 'SeriesController@home')->name('index');
-        Route::post('filter', 'SeriesController@filter')->name('filter');
+    Route::prefix('tvshows')->group(function () {
+        Route::get('/', 'SeriesController@home')->name('tvshows.index');
+        Route::post('filter', 'SeriesController@filter')->name('tvshows.filter');
+    });
+});
+
+Route::domain(env('MYHOME_SUBDOMAIN'))->group(function () {
+
+    Route::prefix('library')->group(function () {
+        Route::get('scan', 'ScanController@home')->name('library.scan');
+        Route::post('api/barcode', 'ScanController@lookup')->name('library.scan.lookup');
     });
 
-Route::prefix('library')
-    ->name('library.')
-    ->group(function () {
-        Route::get('scan', 'ScanController@home')->name('scan');
-        Route::post('api/barcode', 'ScanController@lookup')->name('scan.lookup');
+    Route::prefix('friends')->group(function () {
+        Route::get('', 'FriendsController@index')->name('friends.all');
     });
 
-Route::prefix('friends')
-    ->name('friends.')
-    ->group(function () {
-        Route::get('', 'FriendsController@index')->name('all');
-    });
-
-Route::prefix('ctt')
-    ->name('ctt.')
-    ->group(function () {
+    Route::prefix('ctt')->group(function () {
         Route::get('/', 'CttController@index')->name('ctt');
     });
 
+    Route::prefix('test')->group(function () {
+        Route::get('', 'FriendsController@tailwindcss')->name('test.tailwindcss');
+    });
 
-Route::prefix('test')
-    ->name('test.')
-    ->group(function () {
-        Route::get('', 'FriendsController@tailwindcss')->name('tailwindcss');
-    });    
+});
