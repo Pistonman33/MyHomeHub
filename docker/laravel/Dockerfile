@@ -16,8 +16,6 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     default-mysql-client \
     libzip-dev \
-    nodejs \
-    npm \
     rsync \
     grep \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
