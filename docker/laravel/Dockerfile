@@ -1,23 +1,25 @@
-# PHP 8.3 with FPM (light for prod)
-FROM php:8.3-fpm-alpine
+# PHP 8.3
+FROM php:8.3-fpm
 
 # Install dependencies for Laravel
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     bash \
     git \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
     unzip \
-    oniguruma-dev \
-    icu-dev \
+    libonig-dev \
+    libicu-dev \
     curl \
-    shadow \
     libxml2-dev \
-    mysql-client \
-    mariadb-connector-c \
+    default-mysql-client \
     libzip-dev \
+    nodejs \
+    npm \
+    rsync \
+    grep \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
 
 # Install Composer
