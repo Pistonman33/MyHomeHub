@@ -65,19 +65,24 @@ make build
 make restart
 make logs
 make ps
+make laravel-shell
+make db
 ```
 
 Services:
 
 ```
 docker-compose.yml
-├── traefik
-├── nginx
-├── laravel
-├── python
-├── mysql
-└── mailhog
-└── node
+├── traefik       --> reverse proxy + automatic SSL (Let's Encrypt)
+├── nginx         --> web server for Laravel and static site
+├── laravel       --> PHP-FPM container for the app
+├── scheduler     --> container for Laravel scheduled tasks (`php artisan schedule:work`)
+├── mysql         --> database container
+└── grpc-ctt      --> grpc written on GO that returns player results by license
+└── grpc-client   --> grpc client witten on GO that call grpc ctt services
+└── grpcui        --> grpc Ui to test grpc
+└── mailhog       --> Mailpit is packed full of features for developers wanting to test SMTP and emails.
+└── node.         --> Node js use with laravel for vite server, npm libraries needed and tailwind css.
 ```
 
 ### Traefik
@@ -92,6 +97,8 @@ Need to add following records on /etc/hosts for web domain
 127.0.0.1       thiebault.test
 127.0.0.1       blog.thiebault.test
 127.0.0.1       media.thiebault.test
+127.0.0.1       go.thiebault.test
+127.0.0.1       doc.thiebault.test
 ```
 
 Traefik [dashboard](https://traefik.thiebault.test/dashboard/#/)
@@ -473,6 +480,16 @@ Clean separation between build (CI) and runtime (prod)
   | |
   v v
   Static files /www/html MySQL container
+
+### Go — Grpc client / server developped on go for icroservices.
+
+You can see the result of calling grpc microservices with a client developped on go directly inside the container `myhomehub_grpc-client`.
+
+If error not display in the containers `myhomehub_grpc-client` and `myhomehub_grpc-ctt` launch following command in terminal:
+
+```bash
+cd docker/dev && docker compose --progress=plain build grpc-ctt --no-cache 2>&1 | tail -30
+```
 
 ### 🟨 Python — Ingestion & services transverses
 

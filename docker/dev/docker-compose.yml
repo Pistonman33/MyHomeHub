@@ -76,6 +76,38 @@ services:
     command: php artisan schedule:work >> /var/www/storage/logs/scheduler.log 2>&1
     networks:
       - myhomehub_network
+  grpc-ctt:
+    build:
+      context: ../../
+      dockerfile: docker/go/Dockerfile
+    container_name: myhomehub_grpc-ctt
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      APP_PORT: 50051
+    depends_on:
+      - mysql
+    expose:
+      - "50051"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.go-api.rule=Host(`go.thiebault.test`)"
+      - "traefik.http.routers.go-api.entrypoints=websecure"
+      - "traefik.http.routers.go-api.tls=true"
+      - "traefik.http.services.go-api.loadbalancer.server.port=50051"
+    networks:
+      - myhomehub_network
+
+  grpc-client:
+    build:
+      context: ../../go/grpc
+      dockerfile: services/ctt/client/Dockerfile
+    container_name: myhomehub_grpc-client
+    networks:
+      - myhomehub_network
 
   mysql:
     image: mysql:8.0
@@ -91,6 +123,25 @@ services:
       - ../mysql/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "3306:3306"
+    networks:
+      - myhomehub_network
+
+  grpcui:
+    image: fullstorydev/grpcui
+    container_name: myhomehub_grpc_doc
+    depends_on:
+      - grpc-ctt
+    command:
+      - "-plaintext"
+      - "grpc-ctt:50051"
+    labels:
+      - "traefik.enable=true"
+
+      # Route HTTPS
+      - "traefik.http.routers.grpcui.rule=Host(`doc.thiebault.test`)"
+      - "traefik.http.routers.grpcui.entrypoints=websecure"
+      - "traefik.http.routers.grpcui.tls=true"
+      - "traefik.http.services.grpcui.loadbalancer.server.port=8080"
     networks:
       - myhomehub_network
 

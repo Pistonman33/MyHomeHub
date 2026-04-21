@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package ctt;
+
+option go_package = "myhomehub/go/grpc/gen/ctt";
+
+// ── Messages ────────────────────────────────────────────────────
+
+message Result {
+  int32  total    = 1;
+  int32  win      = 2;
+  int32  lost     = 3;
+  int32  winrate  = 4;
+}
+
+message GetPlayerResultRequest {
+  int32  license = 1; 
+}
+
+message GetPlayerResultResponse {
+  Result result = 1;
+}
+
+// ── Service ─────────────────────────────────────────────────────
+
+service CttService {
+  rpc GetPlayerResult (GetPlayerResultRequest) returns (GetPlayerResultResponse);
+}
