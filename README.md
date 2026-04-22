@@ -73,16 +73,17 @@ Services:
 
 ```
 docker-compose.yml
-├── traefik       --> reverse proxy + automatic SSL (Let's Encrypt)
-├── nginx         --> web server for Laravel and static site
-├── laravel       --> PHP-FPM container for the app
-├── scheduler     --> container for Laravel scheduled tasks (`php artisan schedule:work`)
-├── mysql         --> database container
-└── grpc-ctt      --> grpc written on GO that returns player results by license
-└── grpc-client   --> grpc client witten on GO that call grpc ctt services
-└── grpcui        --> grpc Ui to test grpc
-└── mailhog       --> Mailpit is packed full of features for developers wanting to test SMTP and emails.
-└── node.         --> Node js use with laravel for vite server, npm libraries needed and tailwind css.
+├── traefik               --> reverse proxy + automatic SSL (Let's Encrypt)
+├── nginx                 --> web server for Laravel and static site
+├── laravel               --> PHP-FPM container for the app
+├── scheduler             --> container for Laravel scheduled tasks (`php artisan schedule:work`)
+├── mysql                 --> database container
+└── grpc-ctt              --> grpc written on GO that returns player results by license
+└── grpc-client           --> grpc client written on GO that call grpc ctt services
+└── grpc-client-python    --> grpc client written on python that call grpc ctt services with protobuff files
+└── grpcui                --> grpc Ui to test grpc
+└── mailhog               --> Mailpit is packed full of features for developers wanting to test SMTP and emails.
+└── node.                 --> Node js use with laravel for vite server, npm libraries needed and tailwind css.
 ```
 
 ### Traefik
@@ -481,7 +482,9 @@ Clean separation between build (CI) and runtime (prod)
   v v
   Static files /www/html MySQL container
 
-### Go — Grpc client / server developped on go for icroservices.
+### 🟨 Go
+
+#### Grpc client / server developped on go for microservices.
 
 You can see the result of calling grpc microservices with a client developped on go directly inside the container `myhomehub_grpc-client`.
 
@@ -491,146 +494,14 @@ If error not display in the containers `myhomehub_grpc-client` and `myhomehub_gr
 cd docker/dev && docker compose --progress=plain build grpc-ctt --no-cache 2>&1 | tail -30
 ```
 
-### 🟨 Python — Ingestion & services transverses
+If a container crashed and need to be inside to chek file:
 
-Python est utilisé pour :
-
-- scanner le **NAS**
-- faire des traitements asynchrones ou batch
-- enrichir des données
-- exposer des services spécialisés (ex. anniversaire)
-
-Python :
-
-- n’est **pas** source de vérité
-- **ne touche jamais directement la base de données Laravel**
-- interagit avec Laravel uniquement via API
-
-Python gère une DB légère (ex. SQLite) pour :
-
-- l’état des scans
-- des données techniques temporaires
-
-### Tables Python
-
-- `myhome_amis`
-- `myhome_groupe_amis`
-- `myhome_rappels`
-
----
-
-## 📦 Migrations et seeders
-
-### 🟢 Laravel
-
-Laravel **gère ses propres migrations et seeders** pour :
-
-- toutes les tables métier
-- les données de test CRUD et logiques
-
-Exemple :
-
-```php
-Movie::factory()->count(20)->create();
+```bash
+cd docker/dev && docker compose run --rm --entrypoint sh grpc-client-python
 ```
 
-### 🟡 Python
+### 🟨 Python
 
-Python a ses propres scripts de mise en place et de peuplement (par exemple `migrate.py`, `seed_amis.py`).
+#### Grpc client developped on python for microservices interact and protobuff on go.
 
-Laravel n’exécute **aucune migration Python directement**.
-
-Seeder Laravel qui appelle l’API Python :
-
-```php
-foreach ($fakeAmis as $ami) {
-    Http::post('http://python-api/api/amis', $ami);
-}
-```
-
-- Cela permet de rester fidèle à la séparation des responsabilités.
-
----
-
-## 🛠️ Mise en production — VPS OVH
-
-Pour la production, un **serveur VPS Cloud OVH** est recommandé.
-
-### 💡 OVH VPS-1
-
-- 4 vCores
-- 8 Go RAM
-- 75 Go SSD
-- Backup journalier
-- Trafic illimité
-- Bande passante ~400 Mbps  
-  👉 Convient pour ton projet avec Docker et plusieurs services. ([ovhcloud.com](https://www.ovhcloud.com/fr/vps/))
-
-### 🔎 Alternatives
-
-- **VPS-2** (~6‑7 €/mois) : 6 vCores, 12 Go RAM, NVMe 100 Go, 1 Gbps → recommandé si tu veux plus de ressources
-- **VPS-3** (~12‑14 €/mois) : 8 vCores, 24 Go RAM, 200 Go NVMe → excellent pour plusieurs services lourds
-
-### 🔑 Pourquoi ce choix de VPS
-
-- Accès root complet
-- Docker + Compose contrôlable
-- Backups inclus
-- Capable d’héberger :
-  - Laravel + PHP
-  - Python + API
-  - DB SQL
-  - Reverse Proxy
-- Coût maîtrisé
-
----
-
-## 📌 Conseils pratiques de production
-
-### Sécurité
-
-- Configurer un firewall
-- Activer HTTPS avec Certbot
-- Surveiller les backups
-
-### Performances
-
-- Allouer plus de RAM si tu prévois une charge importante
-- Surveiller logs & métriques
-
----
-
-## 📚 Structure du repo
-
-```
-portfolio-project/
-├── README.md
-├── docker-compose.yml
-├── laravel/
-├── python-api/
-└── docs/
-```
-
----
-
-## 🧭 Roadmap
-
-1. Set up VPS OVH
-2. Déployer Docker
-3. Développer API films en Laravel
-4. Développer scan NAS en Python
-5. Backoffice Laravel
-6. Éventuelle API publique mobile
-
----
-
-## 📎 Résumé
-
-**MyHomeHub** est une **architecture professionnelle et claire**, capable de :
-
-- être montrée en entretien
-- évoluer vers mobile
-- être maintenue et déployée facilement
-- utiliser Docker et VPS Cloud
-
-#TODO Makefile pour mysql php artisan ????
+You can see the result of calling grpc microservices written in go (server) with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-python`.

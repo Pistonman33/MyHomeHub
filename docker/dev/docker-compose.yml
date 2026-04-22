@@ -98,6 +98,11 @@ services:
       - "traefik.http.routers.go-api.entrypoints=websecure"
       - "traefik.http.routers.go-api.tls=true"
       - "traefik.http.services.go-api.loadbalancer.server.port=50051"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - myhomehub_network
 
@@ -106,6 +111,26 @@ services:
       context: ../../go/grpc
       dockerfile: services/ctt/client/Dockerfile
     container_name: myhomehub_grpc-client
+    depends_on:
+      grpc-ctt:
+        condition: service_healthy
+    environment:
+      - LICENSE_ID=167818
+    networks:
+      - myhomehub_network
+
+  grpc-client-python:
+    container_name: myhomehub_grpc-client-python
+    build:
+      context: ../../
+      dockerfile: python/grpc/client/Dockerfile
+    depends_on:
+      grpc-ctt:
+        condition: service_healthy
+    environment:
+      - LICENSE_ID=167818
+    ports:
+      - "2080:2080"
     networks:
       - myhomehub_network
 
@@ -130,7 +155,8 @@ services:
     image: fullstorydev/grpcui
     container_name: myhomehub_grpc_doc
     depends_on:
-      - grpc-ctt
+      grpc-ctt:
+        condition: service_healthy
     command:
       - "-plaintext"
       - "grpc-ctt:50051"

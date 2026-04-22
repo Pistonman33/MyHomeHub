@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"time"
+	"os"
+	"strconv"
 
 	ctt "myhomehub/go/grpc/gen/ctt"
 
@@ -30,9 +32,20 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	licenseStr := os.Getenv("LICENSE_ID")
+
+	if licenseStr == "" {
+		log.Fatal("LICENSE_ID environment variable not set")
+	}
+
+	licenseInt, err := strconv.Atoi(licenseStr)
+	if err != nil {
+		log.Fatalf("Invalid LICENSE_ID: %v", err)
+	}
+
 	// Requête
 	req := &ctt.GetPlayerResultRequest{
-		License: 167818,
+		License: int32(licenseInt),
 	}
 
 	// Appel RPC
