@@ -58,6 +58,7 @@ services:
     volumes:
       - ../../laravel:/var/www
       - ../../.env:/var/www/.env:ro
+      - ../../laravel/proto:/var/www/proto:ro
     depends_on:
       - mysql
     expose:

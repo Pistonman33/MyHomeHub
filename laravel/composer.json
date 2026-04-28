@@ -11,6 +11,8 @@
     "php": "^8.3",
     "diglactic/laravel-breadcrumbs": "^10.0",
     "google/apiclient": "^2.18",
+    "google/protobuf": "^4.27",
+    "grpc/grpc": "^1.57",
     "guzzlehttp/guzzle": "^7.2",
     "laravel/framework": "^13.0",
     "laravel/helpers": "^1.7",

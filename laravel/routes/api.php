@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GrpcController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('player-result', [GrpcController::class, 'getPlayerResult']);
 
 Route::group(['middleware' => 'auth:api'], function() {
      Route::post('movies', 'MoviesController@saveMovie');
