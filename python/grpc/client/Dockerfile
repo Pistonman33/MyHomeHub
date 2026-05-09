@@ -6,11 +6,15 @@ WORKDIR /app
 COPY python/grpc/client/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 # copy source code python
-COPY python/grpc/client/client.py /app/client.py
+COPY python/grpc/client/ /app/
 
 # copy proto GO files
-COPY go/grpc/proto/ctt /proto
+COPY go/grpc/proto /proto
 
 # create lib directory for generated code
 RUN mkdir -p /app/lib
@@ -20,11 +24,11 @@ RUN python -m grpc_tools.protoc \
     -I/proto \
     --python_out=/app/lib \
     --grpc_python_out=/app/lib \
-    /proto/*.proto
+    $(find /proto -name "*.proto")
 
 # Ajouter lib au PYTHONPATH
-ENV PYTHONPATH="/app/lib"
+ENV PYTHONPATH="/app/lib:/app"
 
 EXPOSE 2080
 
-CMD ["python", "client.py"]
+CMD ["tail", "-f", "/dev/null"]

@@ -5,3 +5,4 @@ docker/traefik/certs/*
 docker/nginx/logs/*
 !docker/traefik/certs/.gitkeep
 .env
+go/grpc/services/video/files/*

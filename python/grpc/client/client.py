@@ -1,8 +1,8 @@
 import grpc
 import os
 
-import player_result_pb2 as ctt_pb2
-import player_result_pb2_grpc as ctt_pb2_grpc
+from ctt import player_result_pb2 as ctt_pb2
+from ctt import player_result_pb2_grpc as ctt_pb2_grpc
 
 license_id = int(os.getenv("LICENSE_ID", "0"))
 

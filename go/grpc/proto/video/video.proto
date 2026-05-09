@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package video;
+
+option go_package = "myhomehub/go/grpc/gen/video";
+
+message VideoRequest {
+  string name = 1;
+}
+
+message VideoChunk {
+  bytes data = 1;
+}
+
+service VideoService {
+  rpc StreamVideo(VideoRequest) returns (stream VideoChunk);
+}

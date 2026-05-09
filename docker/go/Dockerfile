@@ -1,41 +1,47 @@
 # ── Build stage ────────────────────────────────────────────────
 FROM golang:1.23-alpine AS builder
 
-RUN apk --no-cache add protobuf && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2 && \
+ARG SERVICE
+ARG PORT
+
+RUN apk --no-cache add protobuf
+
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2 && \
     go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.4.0
 
 WORKDIR /app
 
-# Source code copy
+COPY go/grpc/go.mod go/grpc/go.sum ./
+RUN go mod download
+
 COPY go/grpc/ .
 
-# protobuf file generate file for go code
-RUN mkdir -p gen/ctt && \
+# Generate ALL proto files
+RUN find proto -name "*.proto" > protos.txt && \
     protoc \
-      --go_out=gen/ctt      --go_opt=paths=source_relative \
-      --go-grpc_out=gen/ctt --go-grpc_opt=paths=source_relative \
-      -I proto/ctt \
-      proto/ctt/player_result.proto
-
-# go mod tidy to import all library neede for the project and create go.sum
+      --go_out=gen --go_opt=paths=source_relative \
+      --go-grpc_out=gen --go-grpc_opt=paths=source_relative \
+      -I proto \
+      $(cat protos.txt)
+      
 RUN go mod tidy
 
-# Build the application with optimizations for size and performance
+# Build selected service
 RUN CGO_ENABLED=0 GOOS=linux go build \
       -ldflags="-w -s" \
-      -o ctt-service \
-      ./services/ctt
+      -o service \
+      ./services/${SERVICE}
 
 # ── Run stage ──────────────────────────────────────────────────
 FROM alpine:3.20
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata ffmpeg
 
 WORKDIR /app
 
-COPY --from=builder /app/ctt-service .
+COPY --from=builder /app/service .
 
-EXPOSE 50051
+EXPOSE ${PORT}
+ENV APP_PORT=${PORT}
 
-CMD ["./ctt-service"]
+CMD ["./service"]

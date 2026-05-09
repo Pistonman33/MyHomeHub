@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MyHomeHub — gRPC Video Streaming</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+      body {
+        margin: 0;
+        background: #0b0c10;
+        color: #eaeaea;
+        font-family: system-ui, Arial;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: auto;
+        padding: 40px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 38px;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #aaa;
+        margin-bottom: 40px;
+      }
+
+      video {
+        width: 100%;
+        max-width: 900px;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      }
+
+      .section {
+        text-align: left;
+        margin-top: 50px;
+        line-height: 1.7;
+      }
+
+      code {
+        background: #111;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+
+      .schema {
+        background: #111;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>🎬 gRPC Video Streaming Demo</h1>
+      <p class="subtitle">
+        Architecture microservices inspirée des plateformes modernes de
+        streaming
+      </p>
+
+      <video id="video" controls></video>
+
+      <div class="section">
+        <h2>⚙️ Comment fonctionne le streaming</h2>
+
+        <p>Lorsque cette page charge la vidéo, le navigateur demande :</p>
+
+        <code>/video/goldorak/index.m3u8</code>
+
+        <p>
+          Ce fichier est la playlist HLS utilisée pour le streaming adaptatif.
+        </p>
+
+        <h3>1️⃣ Vérification du cache</h3>
+
+        <ul>
+          <li>✅ Si le HLS existe → lecture immédiate</li>
+          <li>❌ Sinon → génération automatique</li>
+        </ul>
+
+        <h3>2️⃣ Téléchargement dynamique via gRPC</h3>
+
+        <p>
+          Si la vidéo n’existe pas encore, le
+          <strong>Video Gateway</strong> télécharge la vidéo originale depuis un
+          microservice gRPC.
+        </p>
+
+        <p>
+          La vidéo est reconstruite <strong>chunk par chunk</strong> grâce à un
+          streaming binaire gRPC :
+        </p>
+
+        <code>VideoService.StreamVideo()</code>
+
+        <p>
+          👉 Le fichier vidéo exact est donc récupéré dynamiquement avant toute
+          conversion.
+        </p>
+
+        <h3>3️⃣ Normalisation FFmpeg</h3>
+
+        <p>La vidéo source (AVI, MPG, etc.) est automatiquement nettoyée :</p>
+
+        <ul>
+          <li>correction timestamps</li>
+          <li>conversion codecs</li>
+          <li>compatibilité navigateur</li>
+        </ul>
+
+        <h3>4️⃣ Génération HLS</h3>
+
+        <p>FFmpeg segmente ensuite la vidéo :</p>
+
+        <code>index.m3u8 + seg_000.ts → seg_XXX.ts</code>
+
+        <p>Chaque segment ≈ 4 secondes, permettant un démarrage instantané.</p>
+
+        <h3>5️⃣ Lecture progressive</h3>
+
+        <p>
+          Le navigateur télécharge uniquement les segments nécessaires,
+          exactement comme Netflix ou Disney+.
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>🧠 Schéma global de l’architecture</h2>
+
+        <div class="schema">
+          <svg width="100%" height="300" viewBox="0 0 900 300">
+            <!-- Browser -->
+            <rect
+              x="20"
+              y="110"
+              width="140"
+              height="60"
+              rx="10"
+              fill="#1f2833"
+            />
+            <text x="45" y="145" fill="white">Browser</text>
+
+            <!-- Gateway -->
+            <rect
+              x="220"
+              y="110"
+              width="170"
+              height="60"
+              rx="10"
+              fill="#45a29e"
+            />
+            <text x="245" y="145" fill="black">Video Gateway</text>
+
+            <!-- gRPC -->
+            <rect
+              x="470"
+              y="40"
+              width="170"
+              height="60"
+              rx="10"
+              fill="#66fcf1"
+            />
+            <text x="495" y="75" fill="black">gRPC Video Service</text>
+
+            <!-- FFmpeg -->
+            <rect
+              x="470"
+              y="180"
+              width="170"
+              height="60"
+              rx="10"
+              fill="#c5c6c7"
+            />
+            <text x="515" y="215" fill="black">FFmpeg</text>
+
+            <!-- HLS -->
+            <rect
+              x="720"
+              y="110"
+              width="150"
+              height="60"
+              rx="10"
+              fill="#ffcb77"
+            />
+            <text x="740" y="145" fill="black">HLS Segments</text>
+
+            <!-- Arrows -->
+            <line
+              x1="160"
+              y1="140"
+              x2="220"
+              y2="140"
+              stroke="white"
+              marker-end="url(#arrow)"
+            />
+            <line
+              x1="390"
+              y1="120"
+              x2="470"
+              y2="70"
+              stroke="white"
+              marker-end="url(#arrow)"
+            />
+            <line
+              x1="390"
+              y1="160"
+              x2="470"
+              y2="210"
+              stroke="white"
+              marker-end="url(#arrow)"
+            />
+            <line
+              x1="640"
+              y1="140"
+              x2="720"
+              y2="140"
+              stroke="white"
+              marker-end="url(#arrow)"
+            />
+
+            <defs>
+              <marker
+                id="arrow"
+                markerWidth="10"
+                markerHeight="10"
+                refX="6"
+                refY="3"
+                orient="auto"
+              >
+                <path d="M0,0 L0,6 L9,3 z" fill="white" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <p>Pipeline complet :</p>
+
+        <ul>
+          <li>Browser → demande HLS</li>
+          <li>Gateway → vérifie cache</li>
+          <li>Si absent → download vidéo via gRPC</li>
+          <li>FFmpeg → normalise + segmente</li>
+          <li>HLS → streaming progressif</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      const video = document.getElementById("video");
+      const src = "https://stream.thiebault.test/video/goldorak/index.m3u8";
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = src;
+      }
+    </script>
+  </body>
+</html>

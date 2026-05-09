@@ -73,17 +73,20 @@ Services:
 
 ```
 docker-compose.yml
-├── traefik               --> reverse proxy + automatic SSL (Let's Encrypt)
-├── nginx                 --> web server for Laravel and static site
-├── laravel               --> PHP-FPM container for the app
-├── scheduler             --> container for Laravel scheduled tasks (`php artisan schedule:work`)
-├── mysql                 --> database container
-└── grpc-ctt              --> grpc written on GO that returns player results by license
-└── grpc-client           --> grpc client written on GO that call grpc ctt services
-└── grpc-client-python    --> grpc client written on python that call grpc ctt services with protobuff files
-└── grpcui                --> grpc Ui to test grpc
-└── mailhog               --> Mailpit is packed full of features for developers wanting to test SMTP and emails.
-└── node.                 --> Node js use with laravel for vite server, npm libraries needed and tailwind css.
+├── traefik                   --> reverse proxy + automatic SSL (Let's Encrypt)
+├── nginx                     --> web server for Laravel and static site
+├── laravel                   --> PHP-FPM container for the app
+├── scheduler                 --> container for Laravel scheduled tasks (`php artisan schedule:work`)
+└── grpc-ctt                  --> grpc written on GO that returns player results by license
+└── grpc-video                --> grpc written on GO that streams video from the server
+└── grpc-client               --> grpc client written on GO that call grpc ctt services
+└── grpc-client-ctt-python    --> grpc client written on python that call grpc ctt services with protobuff files
+└── grpc-client-video-python  --> grpc client written on python that call grpc video to download backend video by chunks
+└── grpc-video-gateway        --> grpc client written on GO that call grpc video to download backen video by chunks and stream it hlc.
+├── mysql                     --> database container
+└── grpcui                    --> grpc Ui to test grpc
+└── mailhog                   --> Mailpit is packed full of features for developers wanting to test SMTP and emails.
+└── node.                     --> Node js use with laravel for vite server, npm libraries needed and tailwind css.
 ```
 
 ### Traefik
@@ -98,8 +101,8 @@ Need to add following records on /etc/hosts for web domain
 127.0.0.1       thiebault.test
 127.0.0.1       blog.thiebault.test
 127.0.0.1       media.thiebault.test
-127.0.0.1       go.thiebault.test
 127.0.0.1       doc.thiebault.test
+127.0.0.1       stream.thiebault.test
 ```
 
 Traefik [dashboard](https://traefik.thiebault.test/dashboard/#/)
@@ -500,8 +503,14 @@ If a container crashed and need to be inside to chek file:
 cd docker/dev && docker compose run --rm --entrypoint sh grpc-client-python
 ```
 
+#### Grpc client / server developped on go for microservices with streaming files.
+
+You can see a streamin example with go stream grpc video on the following [url](https://thiebault.test/test_stream_grpc.html).
+
 ### 🟨 Python
 
 #### Grpc client developped on python for microservices interact and protobuff on go.
 
-You can see the result of calling grpc microservices written in go (server) with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-python`.
+You can see the result of calling grpc microservices written in go (server) with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-ctt-python`.
+
+You can see the results of calling grpc streaaming video with chunks with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-video-python`.

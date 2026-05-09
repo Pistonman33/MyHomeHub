@@ -22,6 +22,7 @@ services:
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.service=api@internal"
+
     networks:
       - myhomehub_network
   nginx:
@@ -80,6 +81,9 @@ services:
     build:
       context: ../../
       dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE: ctt
+        PORT: 50051
     container_name: myhomehub_grpc-ctt
     environment:
       DB_HOST: mysql
@@ -87,19 +91,27 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-      APP_PORT: 50051
     depends_on:
       - mysql
-    expose:
-      - "50051"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.go-api.rule=Host(`go.thiebault.test`)"
-      - "traefik.http.routers.go-api.entrypoints=websecure"
-      - "traefik.http.routers.go-api.tls=true"
-      - "traefik.http.services.go-api.loadbalancer.server.port=50051"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - myhomehub_network
+  grpc-video:
+    build:
+      context: ../../
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE: video
+        PORT: 50052
+    container_name: myhomehub_grpc-video
+    volumes:
+      - ../../go/grpc/services/video/files:/app/files
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50052"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -119,11 +131,12 @@ services:
     networks:
       - myhomehub_network
 
-  grpc-client-python:
-    container_name: myhomehub_grpc-client-python
+  grpc-client-ctt-python:
+    container_name: myhomehub_grpc-client-ctt-python
     build:
       context: ../../
       dockerfile: python/grpc/client/Dockerfile
+    command: python client.py
     depends_on:
       grpc-ctt:
         condition: service_healthy
@@ -133,6 +146,45 @@ services:
       - "2080:2080"
     networks:
       - myhomehub_network
+
+  grpc-client-video-python:
+    container_name: myhomehub_grpc-client-video-python
+    build:
+      context: ../../
+      dockerfile: python/grpc/client/Dockerfile
+    command: python video_client.py
+    depends_on:
+      grpc-video:
+        condition: service_healthy
+    environment:
+      - VIDEO_SERVICE=grpc-video:50052
+    ports:
+      - "2081:2080"
+    networks:
+      - myhomehub_network
+
+  video-gateway:
+    build:
+      context: ../../
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE: video-gateway
+        PORT: 8085
+    container_name: myhomehub_video_gateway
+    ports:
+      - "8085:8085"
+    depends_on:
+      - grpc-video
+    networks:
+      - myhomehub_network
+    labels:
+      - "traefik.enable=true"
+
+      # ROUTE PUBLIQUE
+      - "traefik.http.routers.video.rule=Host(`stream.thiebault.test`)"
+      - "traefik.http.routers.video.entrypoints=websecure"
+      - "traefik.http.routers.video.tls=true"
+      - "traefik.http.services.video.loadbalancer.server.port=8085"
 
   mysql:
     image: mysql:8.0
