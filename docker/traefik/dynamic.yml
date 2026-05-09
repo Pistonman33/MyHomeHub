@@ -1,0 +1,10 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /traefik/certs/thiebault.test.pem
+        keyFile: /traefik/certs/thiebault.test-key.pem
+
+  certificates:
+    - certFile: /traefik/certs/thiebault.test.pem
+      keyFile: /traefik/certs/thiebault.test-key.pem

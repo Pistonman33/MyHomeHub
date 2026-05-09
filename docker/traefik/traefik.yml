@@ -6,11 +6,11 @@ providers:
   docker:
     exposedByDefault: false
 
+  file:
+    filename: /traefik/dynamic.yml
+    watch: true
+
 api:
   dashboard: true
-
-tls:
-  certificates:
-    - certFile: /traefik/certs/myhome.hub.test.pem
-      keyFile: /traefik/certs/myhome.hub.test-key.pem
-
+log:
+  level: DEBUG
