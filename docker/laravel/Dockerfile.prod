@@ -1,50 +1,74 @@
 FROM php:8.3-fpm-alpine
 
+# =========================================
+# Dependencies système + extensions PHP
+# =========================================
 RUN apk add --no-cache \
     bash \
     git \
+    curl \
+    zip \
+    unzip \
+    shadow \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    zip \
-    unzip \
     oniguruma-dev \
     icu-dev \
-    curl \
-    shadow \
     libxml2-dev \
+    libzip-dev \
     mysql-client \
     mariadb-connector-c \
-    libzip-dev \
     && docker-php-ext-install \
     pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
 
+# =========================================
+# Composer
+# =========================================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# =========================================
+# Working directory
+# =========================================
 WORKDIR /var/www
 
-RUN mkdir -p storage/logs bootstrap/cache
-
-RUN mkdir -p /var/www/vendor && chown -R www-data:www-data /var/www/vendor
-
-# Copy Laravel app
+# =========================================
+# Copier l’app AVANT permissions
+# =========================================
 COPY laravel .
 
-#Fix permissions pour Composer et storage
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# =========================================
+# Créer les dossiers Laravel critiques
+# =========================================
+RUN mkdir -p storage/logs \
+    bootstrap/cache \
+    vendor
 
+# =========================================
+# Permissions globales (IMPORTANT)
+# =========================================
+RUN chown -R www-data:www-data /var/www
+
+# =========================================
+# Installer dépendances PHP
+# =========================================
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+    && composer clear-cache
+
+# =========================================
+# Env file (optionnel, mais ok en image)
+# =========================================
 COPY laravel/.env.example .env
 
-USER root
-# Install PHP dependencies via Composer (no dev, optimized)
-# --no-interaction pour CI
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-RUN composer clear-cache
-
+# =========================================
 # Entrypoint
+# =========================================
 COPY docker/laravel/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# =========================================
+# IMPORTANT: passer en user à la fin
+# =========================================
 USER www-data
 
 ENTRYPOINT ["/entrypoint.sh"]

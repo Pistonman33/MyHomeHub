@@ -79,6 +79,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Copy docker-compose to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker/prod/docker-compose.yml"
+          target: "/var/www/myhomehub/docker/prod/"
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
         with:

@@ -53,8 +53,6 @@ services:
     container_name: myhomehub_laravel
     expose:
       - "9000"
-    volumes:
-      - ../storage:/var/www/storage
     env_file:
       - .env
     networks:
