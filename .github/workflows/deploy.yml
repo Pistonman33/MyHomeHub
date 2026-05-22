@@ -42,17 +42,14 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Login GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build CI image for tests
         run: |
@@ -60,13 +57,27 @@ jobs:
             -t myhomehub-ci \
             -f docker/laravel/Dockerfile.ci .
 
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
       - name: Run tests
         run: |
           docker run --rm \
             -w /var/www \
             -e DB_HOST=127.0.0.1 \
+            -e DB_DATABASE=myhomehub_test \
+            -e DB_USERNAME=root \
+            -e DB_PASSWORD=root \
             myhomehub-ci \
-            sh -c "php artisan config:clear && php artisan migrate && php artisan test"
+            sh -c "
+              php artisan config:clear &&
+              php artisan migrate --force &&
+              php artisan test
+            "
 
   deploy:
     needs: [build, tests]
@@ -80,6 +91,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/myhomehub/docker/prod
+
+            echo "Login GHCR"
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u pistonman33 --password-stdin
+
 
             echo "Pull latest image"
             docker compose pull
