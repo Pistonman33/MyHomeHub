@@ -42,7 +42,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-cmd="mysqladmin ping -h mysql -uroot -proot --silent"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
@@ -57,18 +57,13 @@ jobs:
             -t myhomehub-ci \
             -f docker/laravel/Dockerfile.ci .
 
-      - name: Wait for MySQL
-        run: |
-          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
-
       - name: Run tests
         run: |
           docker run --rm \
             -w /var/www \
-            -e DB_HOST=127.0.0.1 \
+            -e DB_CONNECTION=mysql \
+            -e DB_HOST=mysql \
+            -e DB_PORT=3306 \
             -e DB_DATABASE=myhomehub_test \
             -e DB_USERNAME=root \
             -e DB_PASSWORD=root \
