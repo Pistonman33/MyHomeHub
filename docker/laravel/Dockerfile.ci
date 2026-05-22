@@ -1,17 +1,38 @@
 FROM ghcr.io/pistonman33/myhomehub:latest
 
-# Switch on root to install require-dev
 USER root
 
-# Install dev dependencies for Laravel (testing and code quality)
-RUN composer install --prefer-dist --no-interaction --ignore-platform-reqs
+WORKDIR /var/www
 
-# Copy the testing environment file
+# Install system dependencies (si pas déjà dans l'image prod)
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    curl \
+    libzip-dev \
+    zip \
+    && docker-php-ext-install pdo_mysql zip
+
+# Installer Composer si absent
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copier uniquement composer files pour cache
+COPY laravel/composer.json laravel/composer.lock ./
+
+# Installer dépendances PHP (DEV + TEST)
+RUN composer install \
+    --prefer-dist \
+    --no-interaction \
+    --no-progress
+
+# Copier le reste du projet
+COPY laravel/ .
+
+# Charger env de test
 COPY laravel/.env.testing .env
 
-# Fix permissions for www-data
-RUN chown -R www-data:www-data /var/www/vendor /var/www/storage /var/www/bootstrap/cache
+# Permissions Laravel
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 775 storage bootstrap/cache
 
-# Switch back
 USER www-data
-WORKDIR /var/www
