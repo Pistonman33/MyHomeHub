@@ -19,11 +19,15 @@ jobs:
       - name: Login GHCR
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker image
-        run: |
-          docker build \
-          -t ghcr.io/pistonman33/myhomehub:latest \
-          -f docker/laravel/Dockerfile.prod .
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/laravel/Dockerfile.prod
+          push: true
+          tags: ghcr.io/pistonman33/myhomehub:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Push Docker image
         run: |
