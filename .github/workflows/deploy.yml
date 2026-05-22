@@ -16,8 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build & Push Docker image
         uses: docker/build-push-action@v5
@@ -28,10 +28,6 @@ jobs:
           tags: ghcr.io/pistonman33/myhomehub:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Push Docker image
-        run: |
-          docker push ghcr.io/pistonman33/myhomehub:latest
 
   tests:
     needs: build
@@ -55,7 +51,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build CI image for tests
+      - name: Build CI image
         run: |
           docker build \
             -t myhomehub-ci \
@@ -86,6 +82,7 @@ jobs:
   deploy:
     needs: [build, tests]
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
@@ -95,10 +92,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/myhomehub/docker/prod
-
-            echo "Login GHCR"
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u pistonman33 --password-stdin
-
 
             echo "Pull latest image"
             docker compose pull
