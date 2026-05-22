@@ -1,10 +1,10 @@
-FROM ghcr.io/pistonman33/myhomehub:latest
+FROM php:8.3-fpm
 
 USER root
 
 WORKDIR /var/www
 
-# Install system dependencies (si pas déjà dans l'image prod)
+# System dependencies
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,25 +13,25 @@ RUN apt-get update && apt-get install -y \
     zip \
     && docker-php-ext-install pdo_mysql zip
 
-# Installer Composer si absent
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copier uniquement composer files pour cache
+# Copy composer files first (cache layer)
 COPY laravel/composer.json laravel/composer.lock ./
 
-# Installer dépendances PHP (DEV + TEST)
 RUN composer install \
     --prefer-dist \
     --no-interaction \
-    --no-progress
+    --no-progress \
+    --no-scripts
 
-# Copier le reste du projet
+# Copy app
 COPY laravel/ .
 
-# Charger env de test
+# Env test
 COPY laravel/.env.testing .env
 
-# Permissions Laravel
+# Laravel permissions (important: récursif + safe)
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 storage bootstrap/cache
 
