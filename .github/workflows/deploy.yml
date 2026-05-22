@@ -63,27 +63,29 @@ jobs:
       - name: Run tests
         run: |
           docker run --rm \
-            --network host \
             -w /var/www \
             -e DB_HOST=127.0.0.1 \
             myhomehub-ci \
             sh -c "php artisan config:clear && php artisan migrate && php artisan test"
 
-  # deploy:
-  #   needs: tests
-  #   runs-on: ubuntu-latest
+  deploy:
+    needs: [build, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/myhomehub/docker/prod
 
-  #   steps:
-  #     - name: Deploy on VPS
-  #       uses: appleboy/ssh-action@v1
+            echo "Pull latest image"
+            docker compose pull
 
-  #       with:
-  #         host: ${{ secrets.SERVER_IP }}
-  #         username: ${{ secrets.SERVER_USER }}
-  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+            echo "Restart stack"
+            docker compose up -d --remove-orphans
 
-  #         script: |
-  #           cd /var/www/myhomehub
-  #           docker compose pull
-  #           docker compose up -d
-  #           docker system prune -f
+            echo "Cleanup"
+            docker image prune -f
