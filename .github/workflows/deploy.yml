@@ -4,8 +4,16 @@ on:
   push:
     branches: [main]
 
+  workflow_dispatch:
+    inputs:
+      deploy_only:
+        description: "Skip build and tests and deploy only"
+        required: false
+        default: "false"
+
 jobs:
   build:
+    if: github.event.inputs.deploy_only != 'true'
     runs-on: ubuntu-latest
 
     permissions:
@@ -22,14 +30,15 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-          -t ghcr.io/pistonman33/myhomehub:latest \
-          -f docker/laravel/Dockerfile.prod .
+            -t ghcr.io/pistonman33/myhomehub:latest \
+            -f docker/laravel/Dockerfile.prod .
 
       - name: Push Docker image
         run: |
           docker push ghcr.io/pistonman33/myhomehub:latest
 
   tests:
+    if: github.event.inputs.deploy_only != 'true'
     needs: build
     runs-on: ubuntu-latest
 
@@ -75,10 +84,20 @@ jobs:
             "
 
   deploy:
+    if: |
+      always() &&
+      (
+        github.event.inputs.deploy_only == 'true' ||
+        (needs.build.result == 'success' && needs.tests.result == 'success')
+      )
+
     needs: [build, tests]
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Copy docker-compose to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -86,7 +105,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker/prod/docker-compose.yml"
-          target: "/var/www/myhomehub/docker/prod/"
+          target: "/var/www/myhomehub/"
+
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
         with:

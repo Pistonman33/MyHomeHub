@@ -63,8 +63,6 @@ services:
   scheduler:
     image: ghcr.io/pistonman33/myhomehub:latest
     container_name: myhomehub_scheduler
-    volumes:
-      - ../storage:/var/www/storage
     command: php artisan schedule:work
     networks:
       - myhomehub_network
