@@ -1,32 +1,30 @@
 name: myhomehub
 
 services:
-  # traefik:
-  #   image: traefik:3.0
-  #   container_name: myhomehub_traefik
-  #   command:
-  #     - "--providers.docker=true"
-  #     - "--providers.docker.exposedbydefault=false"
-  #     - "--entrypoints.web.address=:80"
-  #     - "--entrypoints.websecure.address=:443"
-  #     - "--certificatesresolvers.le.acme.email=webmaster@thiebault.be"
-  #     - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-  #     - "--certificatesresolvers.le.acme.tlschallenge=true"
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - traefik_certs:/letsencrypt
-  #   networks:
-  #     - myhomehub_network
-  #   restart: unless-stopped
+  traefik:
+    image: traefik:3.0
+    container_name: myhomehub_traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.email=webmaster@thiebault.be"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/letsencrypt
+    networks:
+      - myhomehub_network
+    restart: unless-stopped
 
   nginx:
     image: ghcr.io/pistonman33/myhomehub-static:latest
     container_name: myhomehub_nginx
-    ports:
-      - "8080:80"
     depends_on:
       - laravel
     labels:
