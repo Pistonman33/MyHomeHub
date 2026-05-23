@@ -48,6 +48,9 @@ services:
   laravel:
     image: ghcr.io/pistonman33/myhomehub:latest
     container_name: myhomehub_laravel
+    # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
+    volumes:
+      - laravel_storage:/var/www/storage
     expose:
       - "9000"
     env_file:
@@ -73,6 +76,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${CONTAINER_MYSQL_ROOT_PASSWORD}
+    # ON VPS HERE /var/lib/docker/volumes/myhomehub_mysql_data
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -85,3 +89,4 @@ networks:
 volumes:
   mysql_data:
   traefik_certs:
+  laravel_storage:
