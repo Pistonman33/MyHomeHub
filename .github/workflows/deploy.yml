@@ -4,16 +4,8 @@ on:
   push:
     branches: [main]
 
-  workflow_dispatch:
-    inputs:
-      deploy_only:
-        description: "Skip build and tests and deploy only"
-        required: false
-        default: "false"
-
 jobs:
   build:
-    if: github.event.inputs.deploy_only != 'true'
     runs-on: ubuntu-latest
 
     permissions:
@@ -30,15 +22,23 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t ghcr.io/pistonman33/myhomehub:latest \
+            -t ghcr.io/pistonman33/myhomehub-laravel:latest \
             -f docker/laravel/Dockerfile.prod .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/pistonman33/myhomehub:latest
+          docker push ghcr.io/pistonman33/myhomehub-laravel:latest
+
+      - name: Build static Docker image
+        run: |
+          docker build \  
+            -t ghcr.io/pistonman33/myhomehub-static:latest \
+            -f docker/nginx/Dockerfile.prod .
+      - name: Push static Docker image
+        run: |
+          docker push ghcr.io/pistonman33/myhomehub-static:latest
 
   tests:
-    if: github.event.inputs.deploy_only != 'true'
     needs: build
     runs-on: ubuntu-latest
 
@@ -84,13 +84,6 @@ jobs:
             "
 
   deploy:
-    if: |
-      always() &&
-      (
-        github.event.inputs.deploy_only == 'true' ||
-        (needs.build.result == 'success' && needs.tests.result == 'success')
-      )
-
     needs: [build, tests]
     runs-on: ubuntu-latest
 
