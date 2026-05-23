@@ -2,7 +2,7 @@ name: myhomehub
 
 services:
   traefik:
-    image: traefik:3.0
+    image: traefik:v2.11
     container_name: myhomehub_traefik
     command:
       - "--providers.docker=true"
@@ -27,6 +27,8 @@ services:
     container_name: myhomehub_nginx
     depends_on:
       - laravel
+    volumes:
+      - laravel_public:/var/www/public:ro
     labels:
       - "traefik.enable=true"
 
@@ -48,6 +50,7 @@ services:
     container_name: myhomehub_laravel
     volumes:
       - /var/www/myhomehub/storage/app/public:/var/www/storage/app/public
+      - laravel_public:/var/www/public
     expose:
       - "9000"
     env_file:
@@ -86,3 +89,4 @@ networks:
 volumes:
   mysql_data:
   traefik_certs:
+  laravel_public:
