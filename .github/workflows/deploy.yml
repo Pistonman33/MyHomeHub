@@ -37,7 +37,7 @@ jobs:
         run: |
           docker build \
             -t ghcr.io/pistonman33/myhomehub-static:latest \
-            -f docker/static/Dockerfile .
+            -f docker/nginx/Dockerfile.prod .
 
       - name: Push Static image
         run: |
