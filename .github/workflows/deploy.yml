@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: docker/nginx/Dockerfile
+          file: docker/nginx/Dockerfile.prod
           push: true
           tags: ghcr.io/pistonman33/myhomehub-static:latest
 
