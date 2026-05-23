@@ -23,21 +23,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Laravel image
-        run: |
-          docker build \
-            -t ghcr.io/pistonman33/myhomehub-laravel:latest \
-            -f docker/laravel/Dockerfile.prod .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Laravel image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/laravel/Dockerfile.prod
+          push: true
+          tags: ghcr.io/pistonman33/myhomehub-laravel:latest
 
       - name: Push Laravel image
         run: |
           docker push ghcr.io/pistonman33/myhomehub-laravel:latest
 
-      - name: Build Static image
-        run: |
-          docker build \
-            -t ghcr.io/pistonman33/myhomehub-static:latest \
-            -f docker/nginx/Dockerfile.prod .
+      - name: Build and push Static image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/static/Dockerfile
+          push: true
+          tags: ghcr.io/pistonman33/myhomehub-static:latest
 
       - name: Push Static image
         run: |
