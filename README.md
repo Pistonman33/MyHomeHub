@@ -336,155 +336,6 @@ This document summarizes the production deployment process for a Laravel project
 
 ---
 
-# Production info
-
-## 1. Production Docker Compose
-
-File: `docker-compose.prod.yml`
-
-- **Traefik**: reverse proxy + automatic SSL (Let's Encrypt)
-- **Nginx**: web server for Laravel and static site
-- **Laravel**: PHP-FPM container for the app
-- **Scheduler**: container for Laravel scheduled tasks (`php artisan schedule:work`)
-- **MySQL**: database container
-
-### Key Points
-
-- The production `.env` **must NOT be versioned**.
-  → It should exist **directly on the VPS**.
-- Exposed ports: `80` for ACME challenge (HTTP → HTTPS), `443` for HTTPS.
-- Persistent volumes for Laravel and MySQL ensure data is not lost.
-- Laravel command in prod: `php-fpm` for main app, `php artisan schedule:work` for scheduler.
-
----
-
-## 2. Laravel Dockerfile (Production)
-
-- Based on `php:8.3-fpm-alpine`
-- Installs PHP extensions required for Laravel
-- Copies Laravel app into `/var/www`
-- Installs dependencies with `composer install --no-dev --optimize-autoloader`
-- Sets proper permissions for `www-data`
-- Entrypoint `/entrypoint.sh` handles `storage:link` creation
-
----
-
-## 3. GitHub Actions CI/CD Workflow
-
-Workflow file: `deploy.yml`
-
-### Steps
-
-1. **Build Docker Image**
-   - GitHub Actions builds the Laravel image using the production Dockerfile:
-
-```bash
-docker build -t ghcr.io/<OWNER>/myhomehub:latest -f laravel/Dockerfile.prod .
-
-```
-
-Also we can test it locally the build image from prod with the following command:
-
-```bash
-docker build -t myhomehub-prod -f docker/laravel/Dockerfile.prod .
-```
-
-    - Push to GHCR:
-
-Authenticates to GitHub Container Registry using ${{ secrets.GITHUB_TOKEN }}
-
-Pushes the built image:
-
-```bash
-docker push ghcr.io/<OWNER>/myhomehub:latest
-```
-
-2. **Tests**
-
-- We build a laravel container with the Dockerfile.ci
-- We used the laravel prod build with other permission and composer install with dev depencies for use artisan test command
-- Also use another mysql temporaly server for testing.
-- Execute all test on laravel defined:
-
-```bash
-php artisan config:clear
-php artisan migrate
-php artisan test
-```
-
-3. **Deploy on VPS**
-
-- This step need first satisfy build and test step before!
-
-- SSH into VPS and pull the latest image from GHCR:
-
-```bash
-cd /var/www/myhomehub
-docker compose pull
-docker compose up -d
-docker system prune -f
-```
-
-- Laravel containers run with the production .env already on the VPS
-
-- Scheduler container runs php artisan schedule:work
-
-- Nginx reads the Laravel container via fastcgi_pass
-
-- GitHub Secrets Used
-
-```
-SERVER_IP → VPS IP
-SERVER_USER → SSH user
-SSH_PRIVATE_KEY → SSH private key
-GITHUB_TOKEN → automatically provided by GitHub for GHCR login
-```
-
-⚠️ Never commit DB_PASSWORD, APP_KEY, SSH keys, or full .env in a public repo.
-
-- Environment Variables
-  Production .env is on the VPS only
-
-CI/CD only uses GitHub secrets for SSH, GHCR login, or dynamic variables
-
-In development, use a local .env with Docker Compose
-
-- Traefik + SSL
-
-Ports 80 and 443 exposed
-Let’s Encrypt handles HTTPS automatically
-HTTP → HTTPS redirection recommended
-Configuration via labels in docker-compose.prod.yml
-
-- Best Practices
-
-Public repo → safe for code, Dockerfiles, Nginx, Traefik configs, but never secrets
-
-Private repo → safer if you store internal scripts or CI logic
-
-Always test locally/dev before deploying to production
-
-Store sensitive secrets outside the repo, either in GitHub Secrets or directly on the VPS
-
-- Vercel-style GHCR Workflow Advantages
-
-No .env in repo → secrets stay safe on VPS
-
-Reproducible builds → image built once in CI, deployed anywhere
-
-Clean separation between build (CI) and runtime (prod)
-
-- Optional Diagram
-  +----------------+ +-----------------+ +----------------+
-  | | 80/443| | 9000 | |
-  | Traefik +------->+ Nginx +------->+ Laravel |
-  | (SSL, proxy) | | (PHP FPM proxy) | | PHP-FPM |
-  +----------------+ +-----------------+ +----------------+
-  | |
-  | |
-  v v
-  Static files /www/html MySQL container
-
 ### 🟨 Go
 
 #### Grpc client / server developped on go for microservices.
@@ -514,3 +365,343 @@ You can see a streamin example with go stream grpc video on the following [url](
 You can see the result of calling grpc microservices written in go (server) with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-ctt-python`.
 
 You can see the results of calling grpc streaaming video with chunks with a client developped on python and same proto from server directly inside the container `myhomehub_grpc-client-video-python`.
+
+# Production Infrastructure
+
+## Overview
+
+Production infrastructure is fully Dockerized and deployed on an OVH VPS.
+
+The stack is composed of:
+
+- **Traefik** → Reverse proxy + HTTPS termination
+- **Nginx** → Multi-site web server
+- **Laravel PHP-FPM** → PHP runtime only
+- **Scheduler** → Laravel cron/scheduler worker
+- **MySQL** → Database
+- **GitHub Actions** → CI/CD pipeline
+- **GHCR** → Docker image registry
+
+---
+
+# Global Production Architecture
+
+```text
+                            INTERNET
+                                |
+                                v
+                    +----------------------+
+                    |       Traefik        |
+                    |----------------------|
+                    | - HTTPS termination  |
+                    | - Let's Encrypt SSL  |
+                    | - Domain routing     |
+                    +----------------------+
+                                |
+                                v
+                    +----------------------+
+                    |        Nginx         |
+                    |----------------------|
+                    | Multi-site webserver |
+                    |                      |
+                    | thiebault.be         |
+                    | -> Static website    |
+                    |                      |
+                    | myhome.thiebault.be  |
+                    | -> Laravel public/   |
+                    +----------------------+
+                             |       |
+             Static files <--+       +--> PHP requests
+                                     |
+                                     v
+                          +------------------+
+                          | Laravel PHP-FPM |
+                          |------------------|
+                          | Executes PHP only|
+                          | No static files  |
+                          +------------------+
+                                     |
+                                     v
+                          +------------------+
+                          |      MySQL       |
+                          +------------------+
+```
+
+---
+
+# Understanding Each Component
+
+---
+
+## 1. Traefik
+
+Traefik is the public entrypoint of the infrastructure.
+
+Responsibilities:
+
+- HTTPS termination
+- Automatic Let's Encrypt certificates
+- Domain routing
+- HTTP → HTTPS redirection
+- Docker service discovery
+
+Traefik is **NOT** a web server.
+
+It does NOT:
+
+- execute PHP
+- serve Laravel assets
+- serve static files directly
+
+Traefik only forwards requests to the correct container.
+
+---
+
+## 2. Nginx (Multi-Site Web Server)
+
+Nginx is the actual web server.
+
+Responsibilities:
+
+- Serve static files
+- Serve Laravel public assets
+- Forward PHP requests to PHP-FPM
+- Handle multi-site configuration
+
+The same Nginx container handles:
+
+### Static website
+
+```text
+thiebault.be
+-> /var/www/static
+```
+
+### Laravel application
+
+```text
+myhome.thiebault.be
+-> /var/www/public
+```
+
+Nginx uses multiple `server {}` blocks (virtual hosts).
+
+Example:
+
+```nginx
+server {
+    server_name thiebault.be;
+    root /var/www/static;
+}
+
+server {
+    server_name myhome.thiebault.be;
+    root /var/www/public;
+}
+```
+
+---
+
+# IMPORTANT: Nginx vs PHP-FPM
+
+One of the most important concepts of the architecture:
+
+## Nginx serves files
+
+Examples:
+
+```text
+/build/assets/app.css
+/images/logo.png
+/favicon.ico
+```
+
+Nginx serves these files directly from disk.
+
+---
+
+## PHP-FPM executes PHP only
+
+PHP-FPM does NOT:
+
+- serve CSS
+- serve JS
+- serve images
+- expose HTTP
+
+PHP-FPM only executes Laravel PHP code.
+
+Example flow:
+
+```text
+Browser
+-> Nginx
+-> PHP-FPM
+-> Laravel executes
+-> HTML response
+```
+
+---
+
+# Laravel Nginx Configuration
+
+Final production configuration:
+
+```nginx
+server {
+    listen 80;
+    server_name myhome.thiebault.be blog.thiebault.be media.thiebault.be;
+
+    root /var/www/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+
+        fastcgi_pass laravel:9000;
+
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
+    }
+}
+```
+
+---
+
+# Docker Compose Production
+
+File:
+
+```text
+docker-compose.prod.yml
+```
+
+Services:
+
+| Service   | Role                    |
+| --------- | ----------------------- |
+| Traefik   | Reverse proxy + SSL     |
+| Nginx     | Web server              |
+| Laravel   | PHP-FPM runtime         |
+| Scheduler | Laravel scheduled tasks |
+| MySQL     | Database                |
+
+---
+
+# Volumes
+
+Persistent volumes ensure data survives container recreation.
+
+Important volumes:
+
+```yaml
+volumes:
+  mysql_data:
+  traefik_certs:
+  laravel_public:
+```
+
+---
+
+# Shared Laravel Public Volume
+
+Critical concept:
+
+```yaml
+laravel_public:/var/www/public
+```
+
+This volume is shared between:
+
+- Laravel container
+- Nginx container
+
+Why?
+
+Because:
+
+- Laravel generates Vite assets
+- Nginx must serve them
+
+Example:
+
+```text
+Laravel builds:
+/var/www/public/build/assets/app.css
+
+Nginx serves:
+/build/assets/app.css
+```
+
+---
+
+# Laravel Production Container
+
+Laravel runs with:
+
+```bash
+php-fpm
+```
+
+This container:
+
+- executes PHP
+- runs Laravel
+- exposes port 9000 internally
+
+It does NOT expose HTTP publicly.
+
+---
+
+# Scheduler Container
+
+Separate container for Laravel scheduled tasks:
+
+```bash
+php artisan schedule:work
+```
+
+This isolates:
+
+- web traffic
+- cron jobs
+
+Better stability and scalability.
+
+---
+
+# GitHub Actions CI/CD
+
+Workflow:
+
+```text
+.github/workflows/deploy.yml
+```
+
+Pipeline:
+
+```text
+1. Build Docker images (nginx webserver multi site / laravel php executaion)
+2. Run tests
+3. Push image to GHCR
+4. Deploy on VPS
+```
+
+---
+
+# HTTPS / SSL
+
+Handled automatically by Traefik + Let's Encrypt.
+
+Ports exposed:
+
+```text
+80  -> ACME challenge / redirect
+443 -> HTTPS
+```
+
+---
