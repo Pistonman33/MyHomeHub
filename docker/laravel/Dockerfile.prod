@@ -19,6 +19,8 @@ RUN apk add --no-cache \
     libzip-dev \
     mysql-client \
     mariadb-connector-c \
+    nodejs-current \
+    npm \
     && docker-php-ext-install \
     pdo pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache soap
 
@@ -36,6 +38,19 @@ WORKDIR /var/www
 # Copier l’app AVANT permissions
 # =========================================
 COPY laravel .
+
+# =========================================
+# 🔥 AJOUT IMPORTANT
+# Build Vite frontend assets DIRECTEMENT
+# dans l’image Docker pendant le build CI/CD
+#
+# Cela génère:
+# /public/build/manifest.json
+#
+# Plus besoin de Node sur le VPS
+# Plus besoin de make npm-build
+# =========================================
+RUN npm install && npm run build
 
 # =========================================
 # Créer les dossiers Laravel critiques

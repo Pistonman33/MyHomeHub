@@ -121,6 +121,3 @@ jobs:
 
             echo "Cleanup"
             docker image prune -f
-
-            echo "Create node assets for vite"
-            make npm-build
