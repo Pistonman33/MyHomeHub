@@ -46,7 +46,7 @@ services:
     restart: unless-stopped
 
   laravel:
-    image: ghcr.io/pistonman33/myhomehub:latest
+    image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_laravel
     volumes:
       - /var/www/myhomehub/storage/app/public:/var/www/storage/app/public
@@ -61,7 +61,7 @@ services:
     command: php-fpm
 
   scheduler:
-    image: ghcr.io/pistonman33/myhomehub:latest
+    image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_scheduler
     command: php artisan schedule:work
     networks:
