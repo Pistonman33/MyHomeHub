@@ -38,11 +38,6 @@ WORKDIR /var/www
 COPY laravel .
 
 # =========================================
-# Copy built Vite assets from frontend stage (previous build here !!!!)
-# =========================================
-COPY --from=frontend app/public/build /var/www/public/build
-
-# =========================================
 # Créer les dossiers Laravel critiques
 # =========================================
 RUN mkdir -p storage/logs \
