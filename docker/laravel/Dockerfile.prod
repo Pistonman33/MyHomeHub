@@ -81,11 +81,12 @@ COPY laravel/.env.example .env
 COPY docker/laravel/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+ENTRYPOINT ["/entrypoint.sh"]
+
 # =========================================
 # IMPORTANT: passer en user à la fin
 # =========================================
 USER www-data
 
-ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["php-fpm"]
