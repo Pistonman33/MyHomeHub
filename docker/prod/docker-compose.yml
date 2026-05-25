@@ -35,6 +35,7 @@ services:
     depends_on:
       - laravel
     volumes:
+      # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
       - laravel_public:/var/www/public:ro
       - /var/www/myhomehub/storage/app/public:/var/www/storage/app/public:ro
     labels:
@@ -62,7 +63,9 @@ services:
     image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_laravel
     volumes:
-      - /var/www/myhomehub/storage/app/public:/var/www/storage/app/public
+      # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
+      - /var/www/myhomehub/storage/app:/var/www/storage/app
+      # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
       - laravel_public:/var/www/public
     expose:
       - "9000"
