@@ -79,6 +79,9 @@ services:
   scheduler:
     image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_scheduler
+    volumes:
+      # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
+      - /var/www/myhomehub/storage/app:/var/www/myhomehub/storage/app
     command: php artisan schedule:work
     networks:
       - myhomehub_network
