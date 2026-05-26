@@ -24,6 +24,8 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # KEEP CERTS IN VOLUMe MANAGED BY DOCKER FOR PERSISTENCE
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_traefik_certs
       - traefik_certs:/letsencrypt
     networks:
       - myhomehub_network
@@ -36,8 +38,11 @@ services:
       - laravel
     volumes:
       # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_public
       - laravel_public:/var/www/public:ro
-      - /var/www/myhomehub/storage/app/public:/var/www/storage/app/public:ro
+      # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
+      - laravel_storage:/var/www/storage/app/public
     labels:
       - "traefik.enable=true"
 
@@ -63,10 +68,14 @@ services:
     image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_laravel
     volumes:
-      # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
-      - /var/www/myhomehub/storage/app:/var/www/storage/app
+      # KEEP BACKUPS ON THE FOLDER OUTSIDE THE CONTAINER FOR SAVE ANOTHER SERVER
+      - /opt/backups/laravel:/var/www/storage/app/backups
       # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_public
       - laravel_public:/var/www/public
+      # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
+      - laravel_storage:/var/www/storage/app/public
     expose:
       - "9000"
     env_file:
@@ -81,7 +90,8 @@ services:
     container_name: myhomehub_scheduler
     volumes:
       # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
-      - /var/www/myhomehub/storage/app:/var/www/myhomehub/storage/app
+      # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
+      - laravel_storage:/var/www/storage/app/public
     command: php artisan schedule:work
     networks:
       - myhomehub_network
@@ -109,3 +119,4 @@ volumes:
   mysql_data:
   traefik_certs:
   laravel_public:
+  laravel_storage:

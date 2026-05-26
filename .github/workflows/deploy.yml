@@ -102,7 +102,25 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker/prod/docker-compose.yml"
-          target: "/var/www/myhomehub/"
+          target: "/opt/"
+
+      - name: Copy .env file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker/prod/.env"
+          target: "/opt/"
+
+      - name: Copy README.md file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker/prod/README.md"
+          target: "/opt/"
 
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
@@ -111,7 +129,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/myhomehub/docker/prod
+            cd /opt/docker/prod
 
             echo "Pull latest image"
             docker compose pull
