@@ -104,15 +104,6 @@ jobs:
           source: "docker/prod/docker-compose.yml"
           target: "/opt/"
 
-      - name: Copy .env file to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker/prod/.env"
-          target: "/opt/"
-
       - name: Copy README.md file to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
