@@ -68,8 +68,6 @@ services:
     image: ghcr.io/pistonman33/myhomehub-laravel:latest
     container_name: myhomehub_laravel
     volumes:
-      # KEEP BACKUPS ON THE FOLDER OUTSIDE THE CONTAINER FOR SAVE ANOTHER SERVER
-      - /opt/backups/laravel:/var/www/storage/app/backups
       # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_public
       - laravel_public:/var/www/public
