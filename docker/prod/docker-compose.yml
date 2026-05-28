@@ -89,7 +89,7 @@ services:
     volumes:
       # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
-      - laravel_storage:/var/www/storage/app/public
+      - laravel_storage:/var/www/storage/app
     command: php artisan schedule:work
     networks:
       - myhomehub_network
