@@ -42,7 +42,7 @@ services:
       - laravel_public:/var/www/public:ro
       # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
-      - laravel_storage:/var/www/storage/app/public
+      - laravel_storage:/var/www/storage/app
     labels:
       - "traefik.enable=true"
 
@@ -73,7 +73,7 @@ services:
       - laravel_public:/var/www/public
       # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
-      - laravel_storage:/var/www/storage/app/public
+      - laravel_storage:/var/www/storage/app
     expose:
       - "9000"
     env_file:
