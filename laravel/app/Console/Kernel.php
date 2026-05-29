@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        if (App::environment('prod')) {
+        if (App::environment('production')) {
           // BACKUP SCHEDULE
           $schedule->command('backup:clean')->daily()->at('1:45');
           $schedule->command('backup:run')->daily()->at('2:00');
