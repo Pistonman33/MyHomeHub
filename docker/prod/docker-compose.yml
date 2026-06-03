@@ -58,6 +58,17 @@ services:
       - "traefik.http.routers.static.tls=true"
       - "traefik.http.routers.static.tls.certresolver=le"
 
+      # 🔥 WWW redirect to non-www
+      - "traefik.http.routers.www-static.rule=Host(`www.thiebault.be`)"
+      - "traefik.http.routers.www-static.entrypoints=websecure"
+      - "traefik.http.routers.www-static.tls=true"
+      - "traefik.http.routers.www-static.tls.certresolver=le"
+      - "traefik.http.routers.www-static.middlewares=redirect-www-to-nonwww"
+
+      - "traefik.http.middlewares.redirect-www-to-nonwww.redirectregex.regex=^https://www\\.thiebault\\.be(.*)"
+      - "traefik.http.middlewares.redirect-www-to-nonwww.redirectregex.replacement=https://thiebault.be$1"
+      - "traefik.http.middlewares.redirect-www-to-nonwww.redirectregex.permanent=true"
+
       # 🔥 IMPORTANT port
       - "traefik.http.services.laravel.loadbalancer.server.port=80"
     networks:
