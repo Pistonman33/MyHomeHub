@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use App\Models\Birthday;
 
 class Kernel extends ConsoleKernel
@@ -32,10 +33,14 @@ class Kernel extends ConsoleKernel
           $schedule->command('backup:run')->daily()->at('2:00');
           // BIRTHDAY EMAILS SCHEDULE
           $schedule->call(function () {
+            Log::info('Scheduler: Birthday::sentBirthdayMail started');
             Birthday::sentBirthdayMail();
+            Log::info('Scheduler: Birthday::sentBirthdayMail finished');
           })->dailyAt('6:10');
           $schedule->call(function () {
+            Log::info('Scheduler: Birthday::sentMonthlyBirthdayMail started');
             Birthday::sentMonthlyBirthdayMail();
+            Log::info('Scheduler: Birthday::sentMonthlyBirthdayMail finished');
           })->weeklyOn(1, '5:00');
 
           // CTT SYNC SCHEDULE

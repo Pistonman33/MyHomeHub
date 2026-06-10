@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Friend;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BirthdayMail;
 
@@ -19,7 +20,17 @@ class Birthday extends Model
       		$age = $birthdate->diffInYears($ami->annivdate);
       		$contentMail.="<strong>$ami->lastname $ami->firstname</strong> à ".$age." ans ($ami->name)<br/>";
       	}
-        Mail::to(env('MAIL_TO'))->send(new BirthdayMail($contentMail));
+        try {
+          Mail::to(env('MAIL_TO'))->send(new BirthdayMail($contentMail));
+          Log::info('Birthday email sent', ['type' => 'daily', 'recipient' => env('MAIL_TO')]);
+        } catch (\Throwable $e) {
+          Log::error('Birthday email failed', [
+            'type' => 'daily',
+            'recipient' => env('MAIL_TO'),
+            'message' => $e->getMessage(),
+            'exception' => get_class($e),
+          ]);
+        }
       }
 
     }
@@ -35,7 +46,17 @@ class Birthday extends Model
       		$age = $birthdate->diffInYears($ami->annivdate);
           $contentMail.="[".date("l d F Y",strtotime($ami->annivdate))."] <strong>$ami->lastname $ami->firstname </strong>à ".$age." ans ($ami->name)<br/>";
         }
-        Mail::to(env('MAIL_TO'))->send(new BirthdayMail($contentMail));
+        try {
+          Mail::to(env('MAIL_TO'))->send(new BirthdayMail($contentMail));
+          Log::info('Birthday email sent', ['type' => 'monthly', 'recipient' => env('MAIL_TO')]);
+        } catch (\Throwable $e) {
+          Log::error('Birthday email failed', [
+            'type' => 'monthly',
+            'recipient' => env('MAIL_TO'),
+            'message' => $e->getMessage(),
+            'exception' => get_class($e),
+          ]);
+        }
       }
     }
 }
