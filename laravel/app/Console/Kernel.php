@@ -33,11 +33,13 @@ class Kernel extends ConsoleKernel
           $schedule->command('backup:run')->daily()->at('2:00');
           // BIRTHDAY EMAILS SCHEDULE
           $schedule->call(function () {
+            // Check logs in /var/www/storage/logs from the myhomehub_scheduler container!!!
             Log::info('Scheduler: Birthday::sentBirthdayMail started');
             Birthday::sentBirthdayMail();
             Log::info('Scheduler: Birthday::sentBirthdayMail finished');
           })->dailyAt('6:10');
           $schedule->call(function () {
+            // Check logs in /var/www/storage/logs from the myhomehub_scheduler container!!!
             Log::info('Scheduler: Birthday::sentMonthlyBirthdayMail started');
             Birthday::sentMonthlyBirthdayMail();
             Log::info('Scheduler: Birthday::sentMonthlyBirthdayMail finished');
