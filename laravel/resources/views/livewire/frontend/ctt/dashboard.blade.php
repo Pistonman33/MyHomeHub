@@ -25,7 +25,7 @@
             <div class="flex items-center justify-between mt-4">
 
                 {{-- Ranking principal --}}
-                <div class="text-5xl font-bold tracking-wide leading-none">
+                <div class="text-4xl font-bold tracking-wide leading-none">
                     {{ $season_detail->ranking ?? 'N/A' }}
                 </div>
 
