@@ -214,7 +214,7 @@ Behavior:
 - Nothing is written to public/build.
 - node_modules is required locally but should not be versioned.
 
-For production, we run `make npm-build` to compile files in laravel
+For production, we run `make npm-build` on dev environment to compile files in laravel
 Behavior:
 
 - Compiled CSS and JS are written to public/build.
