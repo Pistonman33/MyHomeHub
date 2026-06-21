@@ -321,6 +321,12 @@ It's a sync tool thta adds only new values.
 php artisan ctt:sync <license_id> <season_year>
 ```
 
+I ahve also created a parser dom to get points for each matches on data.aftt because not available in the Tabt API SOAP
+
+```
+php artisan ctt:aftt_parse
+```
+
 I have also created a dashboard on the frontend laravel project in the folowing url:
 
 CTT [dashboard](https://myhome.thiebault.test/ctt)
