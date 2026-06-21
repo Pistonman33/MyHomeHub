@@ -64,6 +64,11 @@ class CttMatch extends Model
         return $this->belongsTo(CttSeason::class, 'season_year', 'year');
     }
 
+    public function pointsHistory()
+    {
+        return $this->hasOne(CttPlayerPointsHistory::class, 'match_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Helpers

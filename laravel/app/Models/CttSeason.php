@@ -29,7 +29,10 @@ class CttSeason extends Model
         'year',
         'name',
         'is_current',
-        'ranking'
+        'ranking',
+        'starting_points',
+        'current_points',
+        'ranking_belgium'
     ];
 
     /*
