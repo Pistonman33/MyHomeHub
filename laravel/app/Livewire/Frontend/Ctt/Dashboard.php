@@ -38,12 +38,12 @@ class Dashboard extends Component
             'percentage' => $total ? round($wins/$total*100) : 0
         ];
     }
-    public function getCurrentRanking()
+    public function getSeasonInfo()
     {
         $s = $this->season;
         if (!$s || $s === 'all')
             $s = date('Y');
-        return CttSeason::where('year', $s)->value('ranking');
+        return CttSeason::where('year', $s)->first();
     }
 
     public function getRankingStats()
@@ -115,7 +115,7 @@ class Dashboard extends Component
             'rankingStats' => $this->getRankingStats(),
             'matchesGrouped' => $this->getLastMatches(),
             'seasons' => $this->getSeasons(),
-            'currentRanking' => $this->getCurrentRanking(),
+            'season_detail' => $this->getSeasonInfo()
         ]);    
     }
 }

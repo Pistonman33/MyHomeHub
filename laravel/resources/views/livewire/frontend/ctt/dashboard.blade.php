@@ -16,38 +16,82 @@
     </div>
 
     {{-- STATS TOP BLOCKS --}}
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {{-- Classement actuel --}}
-        <div class="col-span-1 bg-gray-800/80 text-white rounded-xl shadow-lg p-6 flex flex-col justify-between">
+        <div class="bg-gray-800/80 text-white rounded-xl shadow-lg p-6 flex flex-col">
             <div class="text-sm opacity-70">Classement actuel</div>
+
             <div class="flex items-center justify-between mt-4">
-                <div class="text-4xl font-bold tracking-wide">{{ $currentRanking ?? 'N/A' }}</div>
+
+                {{-- Ranking principal --}}
+                <div class="text-5xl font-bold tracking-wide leading-none">
+                    {{ $season_detail->ranking ?? 'N/A' }}
+                </div>
+
+                {{-- Ranking Belgique --}}
+                <div class="text-right leading-none">
+                    <div class="text-3xl font-semibold">
+                        {{ $season_detail->ranking_belgium ?? 'N/A' }}e
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        Belgique
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        {{-- Total Matches --}}
-        <div class="col-span-1 bg-gray-700/70 rounded-xl shadow-lg p-6">
-            <div class="text-gray-300 text-sm">Total Matches</div>
-            <div class="text-3xl font-bold text-white">{{ $stats['total'] }}</div>
+        @php
+            $delta = $season_detail->current_points - $season_detail->starting_points;
+        @endphp
+
+        <div class="bg-gray-800/80 rounded-xl shadow-lg p-6 flex flex-col justify-between">
+            <div class="text-sm text-gray-300">Évolution des points</div>
+
+            <div class="mt-4 space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Début saison</span>
+                    <span class="text-white font-semibold">{{ number_format($season_detail->starting_points ?? 0, 2) }}
+                        pts</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Actuel</span>
+                    <span class="text-white font-semibold">{{ number_format($season_detail->current_points ?? 0, 2) }}
+                        pts</span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Évolution</span>
+                    <span class="font-bold {{ $delta >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                        {{ $delta > 0 ? '+' : '' }}{{ number_format($delta, 2, ',', ' ') }} pts
+                    </span>
+                </div>
+            </div>
         </div>
 
-        {{-- Victoires --}}
-        <div class="col-span-1 bg-green-900/70 rounded-xl shadow-lg p-6">
-            <div class="text-gray-300 text-sm">Victoires</div>
-            <div class="text-3xl font-bold text-green-500">{{ $stats['wins'] }}</div>
-        </div>
+        <div class="bg-gray-700/70 rounded-xl shadow-lg p-6 flex flex-col ">
+            <div class="text-sm text-gray-300">Performance</div>
 
-        {{-- Défaites --}}
-        <div class="col-span-1 bg-yellow-900/70 rounded-xl shadow-lg p-6">
-            <div class="text-gray-300 text-sm">Défaites</div>
-            <div class="text-3xl font-bold text-yellow-500">{{ $stats['losses'] }}</div>
-        </div>
+            <div class="flex justify-between mt-4">
+                <div>
+                    <div class="text-green-500 text-3xl font-bold">{{ $stats['wins'] }}</div>
+                    <div class="text-xs text-gray-400">Victoires</div>
+                </div>
 
-        {{-- Winrate --}}
-        <div class="col-span-1 bg-blue-900/70 rounded-xl shadow-lg p-6">
-            <div class="text-gray-300 text-sm">Winrate</div>
-            <div class="text-3xl font-bold text-blue-400">{{ $stats['percentage'] }}%</div>
+                <div>
+                    <div class="text-red-400 text-3xl font-bold">{{ $stats['losses'] }}</div>
+                    <div class="text-xs text-gray-400">Défaites</div>
+                </div>
+
+                <div>
+                    <div class="text-blue-400 text-3xl font-bold">
+                        {{ $stats['percentage'] }}%
+                    </div>
+                    <div class="text-xs text-gray-400">Winrate</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -83,19 +127,19 @@
                         {{-- Victoires / Défaites --}}
                         <div class="flex justify-between text-xs font-semibold">
                             <div class="text-green-500">{{ $r->wins }}</div>
-                            <div class="text-yellow-500">{{ $r->losses }}</div>
+                            <div class="text-red-400">{{ $r->losses }}</div>
                         </div>
 
                         {{-- Progress bar --}}
                         <div class="w-full h-3 bg-gray-700/40 rounded-full overflow-hidden flex">
                             <div class="h-full bg-green-500" style="width: {{ $winPct }}%"></div>
-                            <div class="h-full" style="width: {{ $lossPct }}%; background-color: #fb972b;"></div>
+                            <div class="h-full" style="width: {{ $lossPct }}%; background-color: #ef4444;"></div>
                         </div>
 
                         {{-- Pourcentage --}}
                         <div class="flex justify-between text-xs font-semibold">
                             <div class="text-green-500">{{ $winPct }}%</div>
-                            <div class="text-yellow-500">{{ $lossPct }}%</div>
+                            <div class="text-red-400">{{ $lossPct }}%</div>
                         </div>
 
                     </div>
@@ -135,8 +179,8 @@
                         <div>
                             <div
                                 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                                @if ($opponent->last_ranking < $currentRanking) bg-orange-400 text-white
-                                @elseif ($opponent->last_ranking > $currentRanking) bg-teal-400 text-white
+                                @if ($opponent->last_ranking < $season_detail->ranking) bg-orange-400 text-white
+                                @elseif ($opponent->last_ranking > $season_detail->ranking) bg-teal-400 text-white
                                 @else bg-gray-500 text-white @endif">
                                 {{ $opponent->last_ranking }}
                             </div>
@@ -147,7 +191,7 @@
                     <div class="flex flex-col gap-1 mt-2">
                         <div class="flex justify-between text-xs font-medium">
                             <span class="text-green-500">{{ $opponent->wins }} Victoires ({{ $winsPercent }}%)</span>
-                            <span class="text-yellow-500">{{ $opponent->losses }} Défaites
+                            <span class="text-red-400">{{ $opponent->losses }} Défaites
                                 ({{ $lossesPercent }}%)
                             </span>
                         </div>
@@ -157,7 +201,7 @@
                             <div class="absolute h-full rounded-full"
                                 style="width: {{ $winsPercent }}%; background-color: #22c55e;"></div>
                             <div class="absolute h-full rounded-full"
-                                style="width: {{ $lossesPercent }}%; background-color: #fb972b; left: {{ $winsPercent }}%;">
+                                style="width: {{ $lossesPercent }}%; background-color: #ef4444; left: {{ $winsPercent }}%;">
                             </div>
                         </div>
                     </div>
@@ -174,14 +218,27 @@
             @foreach ($matchesGrouped as $matches)
                 <div class="rounded-xl shadow-sm p-4 flex flex-col gap-3 bg-gray-700/40">
 
-                    {{-- CLUB + DATE --}}
-                    <div class="mb-2">
-                        <h2 class="font-semibold text-lg text-white">{{ $matches->first()->opponent_club }}</h2>
-                        <div class="text-xs text-gray-400">
-                            {{ \Carbon\Carbon::parse($matches->first()->date)->format('d M Y') }}
+                    {{-- CLUB + DATE + TOTAL POINTS --}}
+                    <div class="mb-2 flex justify-between items-start">
+                        <div>
+                            <h2 class="font-semibold text-lg text-white">
+                                {{ $matches->first()->opponent_club }}
+                            </h2>
+                            <div class="text-xs text-gray-400">
+                                {{ \Carbon\Carbon::parse($matches->first()->date)->format('d M Y') }}
+                            </div>
                         </div>
-                    </div>
 
+                        @php
+                            $totalDelta = $matches->sum(fn($m) => $m->pointsHistory?->delta_points ?? 0);
+                        @endphp
+
+                        <span
+                            class="px-3 py-1 rounded-full text-xs font-bold
+                            {{ $totalDelta >= 0 ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300' }}">
+                            {{ $totalDelta > 0 ? '+' : '' }}{{ number_format($totalDelta, 2) }} pts
+                        </span>
+                    </div>
                     {{-- MATCHES LIST --}}
                     <div class="space-y-2">
                         @foreach ($matches as $match)
@@ -190,13 +247,32 @@
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                                        @if ($match->opponent_ranking < $currentRanking) bg-orange-400 text-white
-                                        @elseif ($match->opponent_ranking > $currentRanking) bg-teal-400 text-white
+                                        @if ($match->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
+                                        @elseif ($match->opponent_ranking > $season_detail->ranking) bg-teal-400 text-white
                                         @else bg-gray-500 text-white @endif">
                                         {{ $match->opponent_ranking }}
                                     </div>
-                                    <div class="font-medium text-white">
-                                        {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                                    <div>
+                                        <div class="font-medium text-white">
+                                            {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                                        </div>
+
+                                        @if ($match->pointsHistory)
+                                            <div class="flex items-center gap-2 text-xs">
+                                                {{-- Opponent points --}}
+                                                <span class="text-gray-400">
+                                                    {{ number_format($match->pointsHistory->opponent_points, 2) }} pts
+                                                </span>
+
+                                                {{-- Delta --}}
+                                                <span
+                                                    class="font-semibold
+            {{ $match->pointsHistory->delta_points >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                                                    {{ $match->pointsHistory->delta_points > 0 ? '+' : '' }}
+                                                    {{ number_format($match->pointsHistory->delta_points, 2) }}
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -204,7 +280,7 @@
                                 <div class="flex items-center gap-2">
                                     <span
                                         class="w-6 text-center px-2 py-1 text-xs rounded text-white
-                                        {{ $match->result == 'V' ? 'bg-green-500' : 'bg-yellow-500' }}">
+                                        {{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
                                         {{ $match->result }}
                                     </span>
                                     <div class="font-semibold w-10 text-right text-white">
@@ -244,7 +320,7 @@
                     labels: ['Victoires', 'Défaites'],
                     datasets: [{
                         data: [wins, losses],
-                        backgroundColor: ['#22c55e', '#fb972b'],
+                        backgroundColor: ['#22c55e', '#ef4444'],
                         borderWidth: 0
                     }]
                 },

@@ -46,7 +46,9 @@ class CttSeason extends Model
         'name' => 'string',
         'is_current' => 'boolean',
         'ranking'=> 'string',
-
+        'starting_points',
+        'current_points',
+        'ranking_belgium'
     ];
 
     /*
