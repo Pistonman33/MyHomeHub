@@ -53,6 +53,12 @@ COPY laravel .
 RUN npm install && npm run build
 
 # =========================================
+# Conserver une copie des fichiers public buildés
+# =========================================
+RUN mkdir -p /tmp/public-dist \
+    && cp -a public/. /tmp/public-dist/
+
+# =========================================
 # Créer les dossiers Laravel critiques
 # =========================================
 RUN mkdir -p storage/logs \
@@ -82,10 +88,8 @@ COPY docker/laravel/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # =========================================
-# IMPORTANT: passer en user à la fin
+# IMPORTANT: garder root pour l’entrée afin d’initier le volume public
 # =========================================
-USER www-data
-
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["php-fpm"]
