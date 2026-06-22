@@ -149,7 +149,7 @@
     </div>
 
     {{-- TOP 10 OPPONENTS --}}
-    <h2 class="text-lg font-semibold mb-6 text-white">Top 10 adversaires</h2>
+    <h2 class="text-lg font-semibold mb-6 text-white">Top 10 adversaires rencontrés</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         @foreach ($this->getTopOpponents() as $index => $opponent)
             @php
@@ -209,6 +209,111 @@
 
             </div>
         @endforeach
+    </div>
+
+    {{-- TOP / FLOP adversaires --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+        <!-- TOP -->
+        <div class="bg-gray-800/70 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">🏆 Top 3 adversaires</h2>
+                <span class="text-xs text-gray-400">points gagnés</span>
+            </div>
+
+            <ul class="space-y-3">
+                @foreach ($topOpponents as $opp)
+                    <li class="flex items-center justify-between gap-8 pb-3">
+                        <!-- LEFT: ranking badge -->
+                        <div class="flex-shrink-0">
+                            <span
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
+            @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
+            @elseif ($opp->opponent_ranking > $season_detail->ranking)
+                bg-teal-400 text-white
+            @else
+                bg-gray-500 text-white @endif">
+                                {{ $opp->opponent_ranking }}
+                            </span>
+                        </div>
+                        <!-- CENTER: player info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="text-gray-200 font-medium truncate">
+                                {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                                @if (!empty($opp->opponent_club))
+                                    <span class="truncate">{{ $opp->opponent_club }}</span>
+                                    <span>•</span>
+                                @endif
+
+                                <span>{{ $opp->opponent_points ?? 'N/A' }} pts</span>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="text-right">
+                            <div class="text-green-400 font-bold">
+                                +{{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
+                            </div>
+                        </div>
+
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+
+        <!-- FLOP -->
+        <div class="bg-gray-800/70 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">💀 Flop 3 adversaires</h2>
+                <span class="text-xs text-gray-400">points perdus</span>
+            </div>
+
+            <ul class="space-y-3">
+                @foreach ($flopOpponents as $opp)
+                    <li class="flex items-center justify-between gap-8 pb-3">
+                        <!-- LEFT: ranking badge -->
+                        <div class="flex-shrink-0">
+                            <span
+                                class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
+            @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
+            @elseif ($opp->opponent_ranking > $season_detail->ranking)
+                bg-teal-400 text-white
+            @else
+                bg-gray-500 text-white @endif">
+                                {{ $opp->opponent_ranking }}
+                            </span>
+                        </div>
+                        <!-- CENTER: player info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="text-gray-200 font-medium truncate">
+                                {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                                @if (!empty($opp->opponent_club))
+                                    <span class="truncate">{{ $opp->opponent_club }}</span>
+                                    <span>•</span>
+                                @endif
+
+                                <span>{{ $opp->opponent_points ?? 'N/A' }} pts</span>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="text-right">
+                            <div class="text-red-400 font-bold">
+                                {{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
+                            </div>
+                        </div>
+
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+
     </div>
 
     {{-- LAST MATCHES --}}

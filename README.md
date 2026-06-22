@@ -214,7 +214,7 @@ Behavior:
 - Nothing is written to public/build.
 - node_modules is required locally but should not be versioned.
 
-For production, we run `make npm-build` on dev environment to compile files in laravel
+For production, the Dockerfile.prod compile files (vite) in build/assets and also updated the volume public shared between nginx and laravel
 Behavior:
 
 - Compiled CSS and JS are written to public/build.
@@ -722,3 +722,11 @@ Need to extract data from the laravle storage volumes managed by docker.
 ```
 
 And after that a script on my Nas connect to the vps server and sync backups file on the NAS to get a backup outside from the vps server.
+
+---
+
+# TODO
+
+CTT: TOP 10 addversaires => adversaires plus rencontrés
+Faire TOP adversaires gagnés avec le nombre de points gagnés
+FAIRE TOP adversaires perdus avec le plus de points perdus.

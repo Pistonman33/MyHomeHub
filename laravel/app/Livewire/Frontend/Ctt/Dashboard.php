@@ -5,6 +5,7 @@ namespace App\Livewire\Frontend\Ctt;
 use Livewire\Component;
 use App\Models\CttMatch;
 use App\Models\CttSeason;
+use App\Models\CttPlayerPointsHistory;
 use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Component
@@ -84,6 +85,51 @@ class Dashboard extends Component
             'losses' => $this->getStats()['losses']
         ]);
     }
+    
+    public function getTop3Opponents()
+    {
+      return CttPlayerPointsHistory::query()
+            ->select(
+                'ctt_matches.opponent_firstname',
+                'ctt_matches.opponent_lastname',
+                'ctt_player_points_history.delta_points',
+                'ctt_player_points_history.opponent_points',
+                'ctt_matches.opponent_ranking',
+                'ctt_matches.opponent_club'
+
+            )
+            ->join(
+                'ctt_matches',
+                'ctt_player_points_history.match_id',
+                '=',
+                'ctt_matches.id'
+            )
+            ->orderByDesc('ctt_player_points_history.delta_points')
+            ->limit(3)
+            ->get();
+    }
+
+    public function getFlop3Opponents()
+    {
+      return CttPlayerPointsHistory::query()
+            ->select(
+                'ctt_matches.opponent_firstname',
+                'ctt_matches.opponent_lastname',
+                'ctt_player_points_history.delta_points',
+                'ctt_player_points_history.opponent_points',
+                'ctt_matches.opponent_ranking',
+                'ctt_matches.opponent_club'
+            )
+            ->join(
+                'ctt_matches',
+                'ctt_player_points_history.match_id',
+                '=',
+                'ctt_matches.id'
+            )
+            ->orderBy('ctt_player_points_history.delta_points')
+            ->limit(3)
+            ->get();    
+    }
 
     public function getTopOpponents()
     {
@@ -115,7 +161,9 @@ class Dashboard extends Component
             'rankingStats' => $this->getRankingStats(),
             'matchesGrouped' => $this->getLastMatches(),
             'seasons' => $this->getSeasons(),
-            'season_detail' => $this->getSeasonInfo()
+            'season_detail' => $this->getSeasonInfo(),
+            'topOpponents' => $this->getTop3Opponents(),
+            'flopOpponents' => $this->getFlop3Opponents()
         ]);    
     }
 }
