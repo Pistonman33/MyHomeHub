@@ -3,6 +3,7 @@
 namespace App\Livewire\Frontend\Ctt;
 
 use Livewire\Component;
+use App\Models\CttPlayer;
 use App\Models\CttMatch;
 use App\Models\CttSeason;
 use App\Models\CttPlayerPointsHistory;
@@ -11,14 +12,17 @@ use Illuminate\Support\Facades\DB;
 class Dashboard extends Component
 {
     public $season = 'all';
+    public $player = '167818';
 
     public function baseQuery()
     {
         $query = CttMatch::query();
-
+        $query->where('player_license', '167818');
         if ($this->season !== 'all') {
             $query->where('season_year', $this->season);
         }
+
+        $query->where('player_license', $this->player);
 
         return $query;
     }
@@ -69,13 +73,20 @@ class Dashboard extends Component
                 return $match->date . '-' . $match->opponent_club;
             });
     }
-    
+
     public function getSeasons()
     {
         return CttMatch::select('season_year')
+            ->where('player_license', $this->player)
             ->distinct()
             ->orderByDesc('season_year')
             ->pluck('season_year');
+    }
+
+    public function getPlayers()
+    {
+        return CttPlayer::select('license', 'firstname', 'lastname')
+            ->get();
     }
 
     public function updatedSeason()
@@ -161,9 +172,7 @@ class Dashboard extends Component
             'rankingStats' => $this->getRankingStats(),
             'matchesGrouped' => $this->getLastMatches(),
             'seasons' => $this->getSeasons(),
-            'season_detail' => $this->getSeasonInfo(),
-            'topOpponents' => $this->getTop3Opponents(),
-            'flopOpponents' => $this->getFlop3Opponents()
+            'currentRanking' => $this->getCurrentRanking(),
         ]);    
     }
 }
