@@ -3,22 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CttMatch;
-use App\Models\CttPlayerSeason;
 
-class CttSeason extends Model
+class CttPlayerSeason extends Model
 {
-    protected $table = 'ctt_seasons';
-
     /*
     |--------------------------------------------------------------------------
-    | Primary Key Configuration
+    | Table
     |--------------------------------------------------------------------------
     */
 
-    protected $primaryKey = 'year';
-    public $incrementing = false;
-    protected $keyType = 'int';
+    protected $table = 'ctt_player_seasons';
 
     /*
     |--------------------------------------------------------------------------
@@ -28,8 +22,11 @@ class CttSeason extends Model
 
     protected $fillable = [
         'year',
-        'name',
-        'is_current',
+        'player_license',
+        'ranking',
+        'starting_points',
+        'current_points',
+        'ranking_belgium',
     ];
 
     /*
@@ -40,25 +37,25 @@ class CttSeason extends Model
 
     protected $casts = [
         'year' => 'integer',
-        'name' => 'string',
-        'is_current' => 'boolean',
+        'starting_points' => 'decimal:2',
+        'current_points' => 'decimal:2',
+        'ranking_belgium' => 'integer',
     ];
 
     /*
     |--------------------------------------------------------------------------
-    | Relations
+    | Relationships
     |--------------------------------------------------------------------------
     */
 
-    public function matches()
+    public function season()
     {
-        return $this->hasMany(CttMatch::class, 'season_year', 'year');
+        return $this->belongsTo(CttSeason::class, 'year', 'year');
     }
 
-    public function playerSeasons()
+    public function player()
     {
-        return $this->hasMany(CttPlayerSeason::class, 'year', 'year');
+        return $this->belongsTo(CttPlayer::class, 'player_license', 'license');
     }
 
- 
 }

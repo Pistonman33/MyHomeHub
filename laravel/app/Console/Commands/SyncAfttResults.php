@@ -33,7 +33,7 @@ class SyncAfttResults extends Command
     public function handle(AfttClient $client, AfttParser $parser)
     {
         $this->info('Starting AFTT parsing...');
-
+        $license = env('AFTT_LICENSE');
         // 1. login
         $session = $client->login();
 
@@ -45,18 +45,20 @@ class SyncAfttResults extends Command
 
         $season = CttSeason::firstWhere('is_current', 1);
 
+        $playerSeason = $season->playerSeasons()->firstWhere('player_license', $license);
+
 
         $this->info('Points départs: ' . $data['starting_points']);
         $this->info('Points actuels: ' . $data['recent_points']);
         $this->info('Ranking: ' . $data['ranking_belgium']);
 
-        $season->fill([
+        $playerSeason->fill([
             'starting_points' => $data['starting_points'] ?? null,
             'current_points'  => $data['recent_points'] ?? null,
             'ranking_belgium' => $data['ranking_belgium'] ?? null,
         ]);
 
-        $season->save();
+        $playerSeason->save();
         
         // 4. parse matches
         $matches = $parser->parseMatches($html);
@@ -68,6 +70,7 @@ class SyncAfttResults extends Command
 
                 $matchRow = CttMatch::where('match_id', $match['match_id'])
                         ->whereDate('date', $match_date)
+                        ->where('player_license', $license)
                         ->whereRaw("LOWER(CONCAT(opponent_firstname, ' ', opponent_lastname)) = ?", [
                             strtolower(trim($player['name']))
                         ])
@@ -77,7 +80,8 @@ class SyncAfttResults extends Command
                     exit;
                 }else{
                     CttPlayerPointsHistory::updateOrCreate(
-                        ['match_id' => $matchRow->id],
+                        ['match_id' => $matchRow->id, 'player_license' => $license],
+                        
                         [
                             'delta_points' => $player['delta'],
                             'opponent_points' => $player['opponent_points'],
@@ -87,26 +91,19 @@ class SyncAfttResults extends Command
             }
         }
         
-        // 5. calculate all is good
         $this->info('Calculating points history...');
-        
-        $points_in_season = $season->starting_points;
-        
-        $season = CttSeason::with('matches.pointsHistory')->where('is_current', 1)->first();
-        
-        foreach ($season->matches as $match) {
-            if ($match->pointsHistory) {
-                $points_in_season += $match->pointsHistory->delta_points;
-            }
-        }
-        
-        if (round($points_in_season, 2) != round($season->current_points, 2)) {
-            $this->error("Points mismatch: calculated $points_in_season, but current points is {$season->current_points}");
-        }else{
-            $this->info("Points match: calculated $points_in_season, current points is {$season->current_points}");
+
+        $points_in_season = $playerSeason->starting_points + $season->matches->sum(function ($match) use ($license) {
+            return optional(
+                $match->pointsHistory->firstWhere('player_license', $license)
+            )->delta_points ?? 0;
+        });
+
+        if (round($points_in_season, 2) != round($playerSeason->current_points, 2)) {
+            $this->error("Points mismatch: calculated $points_in_season, but current points is {$playerSeason->current_points}");
+        } else {
+            $this->info("Points match: calculated $points_in_season, current points is {$playerSeason->current_points}");
         }
 
-
-        $this->info('Ending AFTT parsing...');
-    }
+        $this->info('Ending AFTT parsing...');    }
 }

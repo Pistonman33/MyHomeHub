@@ -4,12 +4,20 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 class="text-3xl font-bold text-white">🏓 CTT Dashboard</h1>
 
+        <select wire:model.live="player"
+            class="border rounded-lg px-4 py-2 bg-gray-800 text-white border-gray-700 self-end sm:self-auto">
+            @foreach ($players as $p)
+                <option value="{{ $p->license }}">
+                    {{ $p->firstname }} {{ $p->lastname }}
+                </option>
+            @endforeach
+        </select>
         <select wire:model.live="season"
             class="border rounded-lg px-4 py-2 bg-gray-800 text-white border-gray-700 self-end sm:self-auto">
             <option value="all">Toutes saisons</option>
             @foreach ($seasons as $s)
-                <option value="{{ $s }}">
-                    {{ $s - 1 }} - {{ $s }}
+                <option value="{{ $s->year }}">
+                    {{ $s->name }}
                 </option>
             @endforeach
         </select>
@@ -335,7 +343,9 @@
                         </div>
 
                         @php
-                            $totalDelta = $matches->sum(fn($m) => $m->pointsHistory?->delta_points ?? 0);
+                            $totalDelta = $matches->sum(
+                                fn($m) => $m->pointsHistoryForPlayer($license)?->delta_points ?? 0,
+                            );
                         @endphp
 
                         <span
@@ -362,19 +372,20 @@
                                             {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
                                         </div>
 
-                                        @if ($match->pointsHistory)
+                                        @if ($match->pointsHistoryForPlayer($license))
                                             <div class="flex items-center gap-2 text-xs">
                                                 {{-- Opponent points --}}
                                                 <span class="text-gray-400">
-                                                    {{ number_format($match->pointsHistory->opponent_points, 2) }} pts
+                                                    {{ number_format($match->pointsHistoryForPlayer($license)->opponent_points, 2) }}
+                                                    pts
                                                 </span>
 
                                                 {{-- Delta --}}
                                                 <span
                                                     class="font-semibold
-            {{ $match->pointsHistory->delta_points >= 0 ? 'text-green-400' : 'text-red-400' }}">
-                                                    {{ $match->pointsHistory->delta_points > 0 ? '+' : '' }}
-                                                    {{ number_format($match->pointsHistory->delta_points, 2) }}
+            {{ $match->pointsHistoryForPlayer($license)->delta_points >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                                                    {{ $match->pointsHistoryForPlayer($license)->delta_points > 0 ? '+' : '' }}
+                                                    {{ number_format($match->pointsHistoryForPlayer($license)->delta_points, 2) }}
                                                 </span>
                                             </div>
                                         @endif

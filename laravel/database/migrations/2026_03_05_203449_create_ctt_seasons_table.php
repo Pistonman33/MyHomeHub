@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('ctt_seasons', function (Blueprint $table) {
             $table->integer('year')->primary(); 
             $table->string('name')->nullable();
-            $table->string('ranking')->nullable();
 
             $table->boolean('is_current')->default(false);
 

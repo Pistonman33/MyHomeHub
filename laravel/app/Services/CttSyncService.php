@@ -6,6 +6,7 @@ use SoapClient;
 use App\Models\CttPlayer;
 use App\Models\CttSeason;
 use App\Models\CttMatch;
+use App\Models\CttPlayerSeason;
 
 class CttSyncService
 {
@@ -41,10 +42,20 @@ class CttSyncService
             ['year' => $year],
             [
                 'name' => ($year-1)."-$year",
-                'is_current' => $year == date('Y')  ? true : false,
-                'ranking' => $member->Ranking ?? null,
+                'is_current' => $year == date('Y')  ? true : false
             ]
         );
+
+        // create or update player season in db
+        CttPlayerSeason::updateOrCreate(
+            [
+                'year' => $year,
+                'player_license' => $license,
+            ],
+            [
+                'ranking' => $member->Ranking ?? null,
+            ]
+        );        
         // create or update player in db
         $player = CttPlayer::updateOrCreate(
             ['license' => $member->UniqueIndex],

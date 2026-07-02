@@ -66,7 +66,13 @@ class CttMatch extends Model
 
     public function pointsHistory()
     {
-        return $this->hasOne(CttPlayerPointsHistory::class, 'match_id');
+        return $this->hasMany(CttPlayerPointsHistory::class, 'match_id');
+    }
+
+    public function pointsHistoryForPlayer($license)
+    {
+        return $this->hasMany(CttPlayerPointsHistory::class, 'match_id')
+            ->where('player_license', $license)->first();
     }
 
     /*
