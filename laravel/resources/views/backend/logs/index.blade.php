@@ -6,12 +6,17 @@
             <div>
                 <h2 class="h4 mb-1">Analyse des logs</h2>
                 <p class="text-muted mb-0">Fichier : {{ $logFile }}</p>
+                @if (str_contains($logFile, 'scheduler'))
+                    <p class="text-muted mb-0"><small>Source : scheduler Docker</small></p>
+                @else
+                    <p class="text-muted mb-0"><small>Source : application Laravel</small></p>
+                @endif
             </div>
             <div class="btn-group" role="group">
-                <a href="{{ route('admin.logs.download') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-download"></i> Télécharger
                 </a>
-                <form action="{{ route('admin.logs.clear') }}" method="POST" class="d-inline"
+                <form action="{{ route('admin.logs.clear', ['source' => $source ?? 'auto']) }}" method="POST" class="d-inline"
                     onsubmit="return confirm('Vider le fichier de log ?');">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger">
@@ -73,6 +78,14 @@
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.logs.index') }}" class="form-inline">
+                    <div class="form-group mr-3 mb-2">
+                        <label for="source" class="mr-2">Source</label>
+                        <select name="source" id="source" class="form-control">
+                            <option value="auto" {{ $source === 'auto' ? 'selected' : '' }}>Auto</option>
+                            <option value="laravel" {{ $source === 'laravel' ? 'selected' : '' }}>Laravel</option>
+                            <option value="scheduler" {{ $source === 'scheduler' ? 'selected' : '' }}>Scheduler</option>
+                        </select>
+                    </div>
                     <div class="form-group mr-3 mb-2">
                         <label for="level" class="mr-2">Niveau</label>
                         <select name="level" id="level" class="form-control">

@@ -101,9 +101,13 @@ services:
       # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
       - laravel_storage:/var/www/storage/app
+      # DEDICATED SCHEDULER LOG FILE
+      - laravel_storage:/var/www/storage/logs
     env_file:
       - .env
-    command: php artisan schedule:work
+    command: >-
+      sh -c "mkdir -p /var/www/storage/logs &&
+             php artisan schedule:work --verbose --run-output-file=/var/www/storage/logs/scheduler.log"
     networks:
       - myhomehub_network
     restart: unless-stopped

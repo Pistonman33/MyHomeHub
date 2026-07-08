@@ -32,9 +32,10 @@ class LogAnalyzerController extends Controller
         $level = $request->get('level', 'all');
         $search = $request->get('search', '');
         $perPage = $request->get('perPage', 50);
+        $source = $request->get('source', 'auto');
 
         // Parser les logs
-        $logs = $this->parseLogs();
+        $logs = $this->parseLogs($source);
 
         // Filtrer par niveau
         if ($level !== 'all' && isset(self::LOG_LEVELS[strtolower($level)])) {
@@ -74,7 +75,7 @@ class LogAnalyzerController extends Controller
 
         // Calculer les statistiques
         $stats = $this->getStats($logs);
-        $logFile = $this->resolveLogFile();
+        $logFile = $this->resolveLogFile($source);
 
         return view('backend.logs.index', [
             'logs' => $paginatedLogs,
@@ -84,32 +85,51 @@ class LogAnalyzerController extends Controller
             'levels' => self::LOG_LEVELS,
             'stats' => $stats,
             'logFile' => $logFile,
+            'source' => $source,
         ]);
     }
 
     /**
      * Résoudre le fichier de log à analyser.
      */
-    private function resolveLogFile(): string
+    private function resolveLogFile(string $source = 'auto'): string
     {
         $today = Carbon::now()->format('Y-m-d');
-        $dailyLogFile = storage_path('logs/laravel-' . $today . '.log');
 
-        if (file_exists($dailyLogFile)) {
-            return $dailyLogFile;
+        if ($source === 'scheduler') {
+            $candidates = [
+                storage_path('logs/scheduler-' . $today . '.log'),
+                storage_path('logs/scheduler.log'),
+            ];
+        } elseif ($source === 'laravel') {
+            $candidates = [
+                storage_path('logs/laravel-' . $today . '.log'),
+                storage_path('logs/laravel.log'),
+            ];
+        } else {
+            $candidates = [
+                storage_path('logs/scheduler-' . $today . '.log'),
+                storage_path('logs/scheduler.log'),
+                storage_path('logs/laravel-' . $today . '.log'),
+                storage_path('logs/laravel.log'),
+            ];
         }
 
-        $fallbackLogFile = storage_path('logs/laravel.log');
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                return $candidate;
+            }
+        }
 
-        return file_exists($fallbackLogFile) ? $fallbackLogFile : $dailyLogFile;
+        return $candidates[0];
     }
 
     /**
      * Parser le fichier de log
      */
-    private function parseLogs()
+    private function parseLogs(string $source = 'auto')
     {
-        $logFile = $this->resolveLogFile();
+        $logFile = $this->resolveLogFile($source);
 
         if (!file_exists($logFile)) {
             return [];
@@ -192,9 +212,10 @@ class LogAnalyzerController extends Controller
     /**
      * Télécharger le fichier de log complet
      */
-    public function download()
+    public function download(Request $request)
     {
-        $logFile = $this->resolveLogFile();
+        $source = $request->get('source', 'auto');
+        $logFile = $this->resolveLogFile($source);
 
         if (!file_exists($logFile)) {
             return back()->withErrors(['message' => 'Fichier de log non trouvé']);
@@ -210,7 +231,8 @@ class LogAnalyzerController extends Controller
      */
     public function clear(Request $request)
     {
-        $logFile = $this->resolveLogFile();
+        $source = $request->get('source', 'auto');
+        $logFile = $this->resolveLogFile($source);
 
         if (!file_exists($logFile)) {
             return back()->withErrors(['message' => 'Fichier de log non trouvé']);
