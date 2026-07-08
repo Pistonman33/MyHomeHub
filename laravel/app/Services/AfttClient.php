@@ -6,13 +6,26 @@ use Illuminate\Support\Facades\Http;
 
 class AfttClient
 {
+    protected ?int $license = null;
+    protected ?string $password = null;
+
+    public function setCredentials(int $license, string $password): void
+    {
+        $this->license = $license;
+        $this->password = $password;
+    }
+
     public function login(): array
     {
+        if (! $this->license || ! $this->password) {
+            throw new \RuntimeException('AFTT credentials are not set.');
+        }
+
         $response = Http::withHeaders([
             'User-Agent' => 'Mozilla/5.0',
         ])->asForm()->post(env('AFTT_BASE_URL') . '/index.php', [
-            'licence' => env('AFTT_LICENSE'),
-            'password' => env('AFTT_PASSWORD'),
+            'licence' => $this->license,
+            'password' => $this->password,
         ]);
 
         // 🔥 conversion CookieJar -> array compatible withCookies()

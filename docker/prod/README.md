@@ -50,3 +50,9 @@ tail -f /var/log/export-backups.log
 ```
 
 DB sql store in /opt/backups and rsync by Nas
+
+# Restore Backup DB from disk
+
+```
+docker exec -i myhomehub_mysql mysql DB_DATABASE -u DB_USERNAME -pDB_PASSWORD < /opt/docker/prod/backup_ctt.sql
+```

@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 
 use App\Services\AfttClient;
 use App\Services\AfttParser;
+use App\Models\CttPlayer;
 use App\Models\CttSeason;
 use App\Models\CttMatch;
 use App\Models\CttPlayerPointsHistory;
@@ -18,7 +19,7 @@ class SyncAfttResults extends Command
      *
      * @var string
      */
-    protected $signature = 'ctt:aftt_parse'; // php artisan ctt:aftt_parse
+    protected $signature = 'ctt:aftt_parse {license?}'; // php artisan ctt:aftt_parse {license}
 
     /**
      * The console command description.
@@ -33,7 +34,36 @@ class SyncAfttResults extends Command
     public function handle(AfttClient $client, AfttParser $parser)
     {
         $this->info('Starting AFTT parsing...');
-        $license = env('AFTT_LICENSE');
+        $license = $this->argument('license');
+
+        if ($license) {
+            return $this->processLicense($license, $client, $parser);
+        }
+
+        $players = CttPlayer::all();
+        if ($players->isEmpty()) {
+            $this->error('No CTT players defined in database.');
+            return 1;
+        }
+
+        foreach ($players as $player) {
+            $this->line('Parsing AFTT data for license ' . $player->license);
+            $this->processLicense($player->license, $client, $parser);
+        }
+
+        return 0;
+    }
+
+    protected function processLicense(int $license, AfttClient $client, AfttParser $parser): int
+    {
+        $player = CttPlayer::find($license);
+        if (! $player || ! $player->password) {
+            $this->error("Player with license $license not found or password is missing.");
+            return 1;
+        }
+
+        $client->setCredentials($license, $player->decrypted_password);
+
         // 1. login
         $session = $client->login();
 
@@ -105,5 +135,8 @@ class SyncAfttResults extends Command
             $this->info("Points match: calculated $points_in_season, current points is {$playerSeason->current_points}");
         }
 
-        $this->info('Ending AFTT parsing...');    }
+        $this->info('Ending AFTT parsing...');
+
+        return 0;
+    }
 }

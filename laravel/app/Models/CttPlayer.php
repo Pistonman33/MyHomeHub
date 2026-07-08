@@ -19,9 +19,23 @@ class CttPlayer extends Model
         'lastname',
         'status',
         'club',
+        'password',
     ];
 
     protected $casts = [
         'license' => 'integer',
     ];
+
+    protected $hidden = [
+        'password',
+    ];
+
+    public function getDecryptedPasswordAttribute(): ?string
+    {
+        if (! $this->password) {
+            return null;
+        }
+
+        return decrypt($this->password);
+    }
 }

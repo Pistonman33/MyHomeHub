@@ -46,11 +46,10 @@ class Kernel extends ConsoleKernel
           })->weeklyOn(1, '5:00');
 
           // CTT SYNC SCHEDULE
-          $currentYear = date('Y');
-          $cmd = 'ctt:sync 167818 '.$currentYear;
-          $schedule->command($cmd)->dailyAt('8:00');
+          $cttYear = (int) date('n') >= 9 ? ((int) date('Y') + 1) : (int) date('Y');
+          $schedule->command('ctt:sync --year=' . $cttYear)->monthlyOn(2, '05:00');
+          $schedule->command('ctt:aftt_parse')->monthlyOn(2, '05:30');
 
-          
           // ONLY FOR OVH
           //$this->scheduleRunsHourly($schedule);
         }
