@@ -13,11 +13,12 @@
                 @endif
             </div>
             <div class="btn-group" role="group">
-                <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}"
+                    class="btn btn-outline-secondary">
                     <i class="fa-solid fa-download"></i> Télécharger
                 </a>
-                <form action="{{ route('admin.logs.clear', ['source' => $source ?? 'auto']) }}" method="POST" class="d-inline"
-                    onsubmit="return confirm('Vider le fichier de log ?');">
+                <form action="{{ route('admin.logs.clear', ['source' => $source ?? 'auto']) }}" method="POST"
+                    class="d-inline" onsubmit="return confirm('Vider le fichier de log ?');">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger">
                         <i class="fa-solid fa-broom"></i> Vider
