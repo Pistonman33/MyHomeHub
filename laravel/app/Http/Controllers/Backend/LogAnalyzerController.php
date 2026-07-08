@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
@@ -75,6 +74,7 @@ class LogAnalyzerController extends Controller
 
         // Calculer les statistiques
         $stats = $this->getStats($logs);
+        $logFile = $this->resolveLogFile();
 
         return view('backend.logs.index', [
             'logs' => $paginatedLogs,
@@ -83,8 +83,25 @@ class LogAnalyzerController extends Controller
             'perPage' => $perPage,
             'levels' => self::LOG_LEVELS,
             'stats' => $stats,
-            'logFile' => storage_path('logs/laravel.log'),
+            'logFile' => $logFile,
         ]);
+    }
+
+    /**
+     * Résoudre le fichier de log à analyser.
+     */
+    private function resolveLogFile(): string
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $dailyLogFile = storage_path('logs/laravel-' . $today . '.log');
+
+        if (file_exists($dailyLogFile)) {
+            return $dailyLogFile;
+        }
+
+        $fallbackLogFile = storage_path('logs/laravel.log');
+
+        return file_exists($fallbackLogFile) ? $fallbackLogFile : $dailyLogFile;
     }
 
     /**
@@ -92,7 +109,7 @@ class LogAnalyzerController extends Controller
      */
     private function parseLogs()
     {
-        $logFile = storage_path('logs/laravel.log');
+        $logFile = $this->resolveLogFile();
 
         if (!file_exists($logFile)) {
             return [];
@@ -177,13 +194,15 @@ class LogAnalyzerController extends Controller
      */
     public function download()
     {
-        $logFile = storage_path('logs/laravel.log');
+        $logFile = $this->resolveLogFile();
 
         if (!file_exists($logFile)) {
             return back()->withErrors(['message' => 'Fichier de log non trouvé']);
         }
 
-        return response()->download($logFile, 'laravel.log');
+        $fileName = basename($logFile);
+
+        return response()->download($logFile, $fileName);
     }
 
     /**
@@ -191,7 +210,7 @@ class LogAnalyzerController extends Controller
      */
     public function clear(Request $request)
     {
-        $logFile = storage_path('logs/laravel.log');
+        $logFile = $this->resolveLogFile();
 
         if (!file_exists($logFile)) {
             return back()->withErrors(['message' => 'Fichier de log non trouvé']);

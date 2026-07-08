@@ -183,3 +183,13 @@ Breadcrumbs::for('admin.backup.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Backup', route('admin.backup.index'));
 });
+
+/*
+|--------------------------------------------------------------------------
+| Logs
+|--------------------------------------------------------------------------
+*/
+Breadcrumbs::for('admin.logs.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Logs', route('admin.logs.index'));
+});

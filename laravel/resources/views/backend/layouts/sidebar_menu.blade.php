@@ -122,5 +122,11 @@
                 Backup manager
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.logs.index') }}">
+                <i class="fa-solid fa-file-lines"></i>
+                Log analyzer
+            </a>
+        </li>
     </ul>
 </div>
