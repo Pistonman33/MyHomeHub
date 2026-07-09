@@ -43,17 +43,40 @@ class Rule extends Model
             return false;
         }
 
-        // Le match_pattern contient des mots-clés séparés par |
-        // Chaque mot-clé est testé avec une recherche LIKE (insensible à la casse)
-        $patterns = array_map('trim', explode('|', $this->match_pattern));
-
-        foreach ($patterns as $pattern) {
-            if (!empty($pattern) && stripos($details, $pattern) !== false) {
-                return true;
-            }
+        // Gérer les détails vides/null
+        if (empty($details)) {
+            return false;
         }
 
-        return false;
+        $matchType = $this->match_type ?? 'KEYWORD';
+
+        switch ($matchType) {
+            case 'REGEX':
+                // Pattern regex
+                try {
+                    return preg_match('/' . $this->match_pattern . '/i', $details) === 1;
+                } catch (\Exception $e) {
+                    \Log::warning("[Rule] Invalid regex pattern: " . $this->match_pattern);
+                    return false;
+                }
+
+            case 'EXACT':
+                // Correspondance exacte (case-insensitive)
+                return strtolower($details) === strtolower(trim($this->match_pattern));
+
+            case 'KEYWORD':
+            default:
+                // Le match_pattern contient des mots-clés séparés par |
+                // Chaque mot-clé est testé avec une recherche LIKE (insensible à la casse)
+                $patterns = array_map('trim', explode('|', $this->match_pattern));
+
+                foreach ($patterns as $pattern) {
+                    if (!empty($pattern) && stripos($details, $pattern) !== false) {
+                        return true;
+                    }
+                }
+                return false;
+        }
     }
 
     /**
