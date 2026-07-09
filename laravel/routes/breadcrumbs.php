@@ -65,6 +65,21 @@ Breadcrumbs::for('admin.finance.all', function (BreadcrumbTrail $trail) {
     $trail->push('All transactions', route('admin.finance.all'));
 });
 
+Breadcrumbs::for('admin.finance.rules.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.index');
+    $trail->push('Règles de catégorisation', route('admin.finance.rules.index'));
+});
+
+Breadcrumbs::for('admin.finance.rules.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.rules.index');
+    $trail->push('Créer une règle', route('admin.finance.rules.create'));
+});
+
+Breadcrumbs::for('admin.finance.rules.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.finance.rules.index');
+    $trail->push('Modifier une règle');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Stats

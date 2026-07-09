@@ -20,7 +20,7 @@ return new class extends Migration
             
             $table->string('libelle_template')->nullable();
 
-            $table->unsignedBigInteger('category_id');
+            $table->unsignedInteger('category_id');
 
             $table->boolean('active')->default(true);
 
