@@ -33,8 +33,33 @@
         @endif
 
         <div class="card">
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ route('admin.finance.rules.index') }}" class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label for="category" class="form-label small text-muted mb-1">Filtrer par catégorie</label>
+                        <select name="category" id="category" class="form-control form-control-sm">
+                            <option value="">Toutes les catégories</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}"
+                                    {{ (string) $selectedCategoryId === (string) $category->id ? 'selected' : '' }}>
+                                    {{ $category->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrer</button>
+                    </div>
+                    @if ($selectedCategoryId)
+                        <div class="col-md-2">
+                            <a href="{{ route('admin.finance.rules.index') }}" class="btn btn-sm btn-outline-dark">Tout
+                                voir</a>
+                        </div>
+                    @endif
+                </form>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-sm table-hover mb-0 rules-table">
                     <thead class="bg-light">
                         <tr>
                             <th>Nom</th>
@@ -81,7 +106,7 @@
                                     @endif
                                 </td>
                                 <td class="text-right">
-                                    <div class="btn-group btn-group-sm" role="group">
+                                    <div class="btn-group btn-group-sm rule-action-group" role="group">
                                         <a href="{{ route('admin.finance.rules.edit', $rule->id) }}"
                                             class="btn btn-outline-primary" title="Modifier">
                                             <i class="fa-solid fa-edit"></i>

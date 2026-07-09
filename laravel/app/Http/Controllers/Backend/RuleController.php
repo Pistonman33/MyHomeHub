@@ -16,15 +16,24 @@ class RuleController extends Controller
      */
     public function index(Request $request)
     {
-        $rules = Rule::with('category')
-                    ->byPriority()
-                    ->paginate(20);
+        $selectedCategoryId = $request->input('category');
 
-        $categories = Categorie::orderBy('nom')->get();
+        $rules = Rule::with('category')
+                    ->when($selectedCategoryId, function ($query) use ($selectedCategoryId) {
+                        return $query->where('category_id', $selectedCategoryId);
+                    })
+                    ->byPriority()
+                    ->paginate(20)
+                    ->appends($request->only('category'));
+
+        $categories = Categorie::whereHas('rules')
+            ->orderBy('nom')
+            ->get();
 
         return view('backend.finance.rules.index', [
             'rules' => $rules,
             'categories' => $categories,
+            'selectedCategoryId' => $selectedCategoryId,
         ]);
     }
 
