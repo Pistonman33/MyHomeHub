@@ -3,6 +3,7 @@
 namespace App\Livewire\Frontend\Ctt;
 
 use Livewire\Component;
+use App\Models\CttPlayer;
 use App\Models\CttMatch;
 use App\Models\CttSeason;
 use App\Models\CttPlayerSeason;
@@ -14,11 +15,12 @@ class Dashboard extends Component
 {
     public $season = 'all';
     public $player = '167818';
+    public $player = '167818';
 
     public function baseQuery()
     {
         $query = CttMatch::query();
-
+        $query->where('player_license', '167818');
         if ($this->season !== 'all') {
             $query->where('season_year', $this->season);
         }
@@ -102,6 +104,12 @@ class Dashboard extends Component
             'wins' => $this->getStats()['wins'],
             'losses' => $this->getStats()['losses'],
         ]);
+    }
+
+    public function getPlayers()
+    {
+        return CttPlayer::select('license', 'firstname', 'lastname')
+            ->get();
     }
 
     public function updatedSeason()

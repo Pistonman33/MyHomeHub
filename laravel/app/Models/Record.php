@@ -12,6 +12,29 @@ use Illuminate\Support\Facades\DB;
 
 class Record extends Model
 {
+    protected $table = 'records';
+
+    protected $fillable = [
+        'fk_id_compte',
+        'mouvement',
+        'date',
+        'montant',
+        'retrait',
+        'libelle',
+        'details',
+        'validate',
+        'deleted',
+        'fk_id_categorie',
+    ];
+
+    /**
+     * Relation avec Categorie
+     */
+    public function category()
+    {
+        return $this->belongsTo(Categorie::class, 'fk_id_categorie');
+    }
+
     // STATS SECTION
     static function getSumPriceDepotRetrait($date,$retrait) {
       $query = Record::selectRaw(DB::raw('SUM(montant) as total'))

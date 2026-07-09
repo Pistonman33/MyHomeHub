@@ -726,7 +726,3 @@ And after that a script on my Nas connect to the vps server and sync backups fil
 ---
 
 # TODO
-
-CTT: TOP 10 addversaires => adversaires plus rencontrés
-Faire TOP adversaires gagnés avec le nombre de points gagnés
-FAIRE TOP adversaires perdus avec le plus de points perdus.

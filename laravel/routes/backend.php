@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\Auth\LoginController;
 use App\Http\Controllers\Backend\Auth\RegisterController;
+use App\Http\Controllers\Backend\RuleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,17 @@ Route::prefix('finance')->name('finance.')->group(function () {
 
     Route::get('delete/{transactionid}', 'FinanceController@delete')
         ->name('delete');
+
+    // Rules management
+    Route::prefix('rules')->name('rules.')->group(function () {
+        Route::get('/', [RuleController::class, 'index'])->name('index');
+        Route::get('create', [RuleController::class, 'create'])->name('create');
+        Route::post('/', [RuleController::class, 'store'])->name('store');
+        Route::get('{rule}/edit', [RuleController::class, 'edit'])->name('edit');
+        Route::put('{rule}', [RuleController::class, 'update'])->name('update');
+        Route::delete('{rule}', [RuleController::class, 'destroy'])->name('destroy');
+        Route::post('{rule}/toggle', [RuleController::class, 'toggleActive'])->name('toggle');
+    });
 
     // Debug / maintenance
     Route::get('update-records', function () {
@@ -140,6 +152,17 @@ Route::prefix('backup')->name('backup.')->group(function () {
     Route::get('download/{file_name}', 'BackupController@download')->name('download');
     Route::get('restore/{file_name}', 'BackupController@restore')->name('restore');
     Route::get('delete/{file_name}', 'BackupController@delete')->name('delete');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Logs
+|--------------------------------------------------------------------------
+*/
+Route::prefix('logs')->name('logs.')->group(function () {
+    Route::get('/', 'LogAnalyzerController@index')->name('index');
+    Route::post('clear', 'LogAnalyzerController@clear')->name('clear');
+    Route::get('download', 'LogAnalyzerController@download')->name('download');
 });
 
 /*
