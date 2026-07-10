@@ -162,6 +162,21 @@ class LogAnalyzerController extends Controller
                     'lineNumber' => $lineNumber,
                     'extra' => '',
                 ];
+            // Fallback for simple lines emitted by scheduler like: "INFO  No scheduled commands are ready to run."
+            } elseif (preg_match('/^\s*([A-Z]+)\s+(.*)$/', trim($line), $m)) {
+                if ($currentLog !== null) {
+                    $logs[] = $currentLog;
+                }
+
+                $currentLog = [
+                    'date' => date('Y-m-d H:i:s', filemtime($logFile)),
+                    'channel' => 'scheduler',
+                    'level' => strtolower($m[1]),
+                    'message' => trim($m[2]),
+                    'lineNumber' => $lineNumber,
+                    'extra' => '',
+                ];
+
             } elseif ($currentLog !== null && !empty(trim($line))) {
                 // C'est une continuation du message précédent
                 $currentLog['extra'] .= trim($line) . "\n";
