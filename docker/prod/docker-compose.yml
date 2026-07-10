@@ -110,6 +110,8 @@ services:
       - .env
     command: >-
       sh -c "mkdir -p /var/www/storage/logs &&
+        touch /var/www/storage/logs/scheduler-$(date +%F).log &&
+        chown www-data:www-data /var/www/storage/logs/scheduler-$(date +%F).log &&
         php artisan schedule:work --verbose --run-output-file=/var/www/storage/logs/scheduler-$(date +%F).log"
     networks:
       - myhomehub_network
