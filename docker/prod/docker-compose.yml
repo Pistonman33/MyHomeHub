@@ -85,6 +85,9 @@ services:
       # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
       - laravel_storage:/var/www/storage/app
+      # KEEP FOLDER FOR LARAVEL STORAGE PERSISTENT AND PERMISSIONS MANAGEMENT BY DOCKER
+      # SHARED LOGS SCHEDULER BETWEEN LARAVEL AND SCHEDULER
+      - laravel_logs:/var/www/storage/logs
     expose:
       - "9000"
     env_file:
@@ -102,12 +105,12 @@ services:
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_storage
       - laravel_storage:/var/www/storage/app
       # DEDICATED SCHEDULER LOG FILE
-      - laravel_storage:/var/www/storage/logs
+      - laravel_logs:/var/www/storage/logs
     env_file:
       - .env
     command: >-
       sh -c "mkdir -p /var/www/storage/logs &&
-             php artisan schedule:work --verbose --run-output-file=/var/www/storage/logs/scheduler.log"
+        php artisan schedule:work --verbose --run-output-file=/var/www/storage/logs/scheduler-$(date +%F).log"
     networks:
       - myhomehub_network
     restart: unless-stopped
@@ -135,3 +138,4 @@ volumes:
   traefik_certs:
   laravel_public:
   laravel_storage:
+  laravel_logs:

@@ -715,7 +715,7 @@ Ports exposed:
 # Backup system
 
 There is a root cron on the VPS that extract from `/var/lib/docker/volumes/myhomehub_laravel_storage/_data` all backups from laravel and store it on `/opt/backups` by rsync cmd.
-Need to extract data from the laravle storage volumes managed by docker.
+Need to extract data from the laravel storage volumes managed by docker.
 
 ```
 0 2 * * * /opt/scripts/export-backups.sh >> /var/log/export-backups.log 2>&1
@@ -726,3 +726,7 @@ And after that a script on my Nas connect to the vps server and sync backups fil
 ---
 
 # TODO
+
+Checks logs scheuler visible on production and volume right !``
+Checks backup arrives to NAS
+Check clean backup on thiebault.be !!!
