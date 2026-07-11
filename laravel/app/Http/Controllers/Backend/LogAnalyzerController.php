@@ -96,20 +96,13 @@ class LogAnalyzerController extends Controller
     {
         $today = Carbon::now()->format('Y-m-d');
 
-        if ($source === 'scheduler') {
-            $candidates = [
-                storage_path('logs/scheduler-' . $today . '.log'),
-                storage_path('logs/scheduler.log'),
-            ];
-        } elseif ($source === 'laravel') {
+        if ($source === 'scheduler' || $source === 'laravel') {
             $candidates = [
                 storage_path('logs/laravel-' . $today . '.log'),
                 storage_path('logs/laravel.log'),
             ];
         } else {
             $candidates = [
-                storage_path('logs/scheduler-' . $today . '.log'),
-                storage_path('logs/scheduler.log'),
                 storage_path('logs/laravel-' . $today . '.log'),
                 storage_path('logs/laravel.log'),
             ];

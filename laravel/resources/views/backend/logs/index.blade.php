@@ -6,11 +6,7 @@
             <div>
                 <h2 class="h4 mb-1">Analyse des logs</h2>
                 <p class="text-muted mb-0">Fichier : {{ $logFile }}</p>
-                @if (str_contains($logFile, 'scheduler'))
-                    <p class="text-muted mb-0"><small>Source : scheduler Docker</small></p>
-                @else
-                    <p class="text-muted mb-0"><small>Source : application Laravel</small></p>
-                @endif
+                <p class="text-muted mb-0"><small>Source : application Laravel</small></p>
             </div>
             <div class="btn-group" role="group">
                 <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}"
@@ -84,7 +80,6 @@
                         <select name="source" id="source" class="form-control">
                             <option value="auto" {{ $source === 'auto' ? 'selected' : '' }}>Auto</option>
                             <option value="laravel" {{ $source === 'laravel' ? 'selected' : '' }}>Laravel</option>
-                            <option value="scheduler" {{ $source === 'scheduler' ? 'selected' : '' }}>Scheduler</option>
                         </select>
                     </div>
                     <div class="form-group mr-3 mb-2">
