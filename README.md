@@ -727,6 +727,6 @@ And after that a script on my Nas connect to the vps server and sync backups fil
 
 # TODO
 
-Checks logs scheuler visible on production and volume right !``
 Checks backup arrives to NAS
 Check clean backup on thiebault.be !!!
+Check clean laravel log now

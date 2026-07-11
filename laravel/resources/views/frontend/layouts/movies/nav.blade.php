@@ -1,6 +1,6 @@
 <nav>
     <a href="{{ url('/') }}" class="logo">
-        <img src="/apple-touch-icon-57x57-precomposed.png">
+        <img src="/favicon/media/favicon-32x32.png" alt="Logo My Media Library">
     </a>
     <input type="checkbox" class="menu-btn" id="menu-btn" />
     <label class="menu-icon" for="menu-btn">
@@ -15,4 +15,4 @@
         <input type="text" placeholder="Avengers" id="search">
         <i class="fa fa-search"></i>
     </div>
-  </nav>
+</nav>

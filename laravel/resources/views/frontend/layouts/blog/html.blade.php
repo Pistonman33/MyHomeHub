@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-
+    @include('frontend.layouts.blog.favicon')
     <title>Blog Thiébault Michaël Web developer</title>
 
     @include('frontend.layouts.blog.tailwindcss')
