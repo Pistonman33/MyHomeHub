@@ -7,7 +7,6 @@ use App\Models\CttPlayer;
 use App\Models\CttMatch;
 use App\Models\CttSeason;
 use App\Models\CttPlayerSeason;
-use App\Models\CttPlayer;
 use App\Models\CttPlayerPointsHistory;
 use Illuminate\Support\Facades\DB;
 
