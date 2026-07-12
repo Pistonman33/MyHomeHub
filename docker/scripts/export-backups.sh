@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#Export backups from Docker volume to host machine
 LOGFILE="/var/log/export-backups.log"
 
 echo "=== $(date) ===" >> $LOGFILE
