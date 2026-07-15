@@ -99,6 +99,8 @@ services:
 
   scheduler:
     image: ghcr.io/pistonman33/myhomehub-laravel:latest
+    # NEED to be launched with the same user as the laravel container to avoid permission issues on the shared storage/logs folder
+    user: www-data
     container_name: myhomehub_scheduler
     volumes:
       # KEEP BACKUPS AND IMAGES STORE ON THE FOLDER OUTSIDE THE CONTAINER
