@@ -32,7 +32,9 @@ jobs:
           context: .
           file: docker/laravel/Dockerfile.prod
           push: true
-          tags: ghcr.io/pistonman33/myhomehub-laravel:latest
+          tags: |
+            ghcr.io/pistonman33/myhomehub-laravel:latest
+            ghcr.io/pistonman33/myhomehub-laravel:${{ github.sha }}
 
       - name: Build and push Static image
         uses: docker/build-push-action@v5
@@ -40,7 +42,9 @@ jobs:
           context: .
           file: docker/nginx/Dockerfile.prod
           push: true
-          tags: ghcr.io/pistonman33/myhomehub-static:latest
+          tags: |
+            ghcr.io/pistonman33/myhomehub-static:latest
+            ghcr.io/pistonman33/myhomehub-static:${{ github.sha }}
 
   tests:
     needs: build
@@ -121,12 +125,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/docker/prod
+            export IMAGE_TAG=${{ github.sha }}
 
-            echo "Pull latest image"
+            echo "Pull image for commit $IMAGE_TAG"
             docker compose pull
 
             echo "Restart stack"
-            docker compose up -d --remove-orphans
+            docker compose up -d --pull always --force-recreate --remove-orphans
+
+            echo "Deployed image versions"
+            docker compose images
+
+            echo "Verify deployed Laravel source"
+            docker exec myhomehub_laravel sh -c "grep -q 'finance.*dashboard' /var/www/routes/backend.php"
+            docker exec myhomehub_laravel sh -c "grep -q 'annualDashboard' /var/www/app/Http/Controllers/Backend/FinanceController.php"
+            docker exec myhomehub_laravel php artisan route:list --path=admin/finance/dashboard
 
             echo "Cleanup"
             docker image prune -f

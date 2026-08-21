@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: ghcr.io/pistonman33/myhomehub-static:latest
+    image: ghcr.io/pistonman33/myhomehub-static:${IMAGE_TAG:-latest}
     container_name: myhomehub_nginx
     depends_on:
       - laravel
@@ -76,7 +76,7 @@ services:
     restart: unless-stopped
 
   laravel:
-    image: ghcr.io/pistonman33/myhomehub-laravel:latest
+    image: ghcr.io/pistonman33/myhomehub-laravel:${IMAGE_TAG:-latest}
     container_name: myhomehub_laravel
     volumes:
       # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
@@ -98,7 +98,7 @@ services:
     command: php-fpm
 
   scheduler:
-    image: ghcr.io/pistonman33/myhomehub-laravel:latest
+    image: ghcr.io/pistonman33/myhomehub-laravel:${IMAGE_TAG:-latest}
     # NEED to be launched with the same user as the laravel container to avoid permission issues on the shared storage/logs folder
     user: www-data
     container_name: myhomehub_scheduler
