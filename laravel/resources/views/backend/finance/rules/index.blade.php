@@ -5,14 +5,15 @@
 @extends('backend.layouts.app')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid admin-page admin-rules-page">
         <div class="row mb-4">
             <div class="col-md-8">
-                <h1 class="h2">Règles de Catégorisation</h1>
+                <span class="admin-eyebrow">MyFinance</span>
+                <h1 class="admin-page-title">Règles de catégorisation</h1>
                 <p class="text-muted">Gérez les règles automatiques pour catégoriser les transactions bancaires</p>
             </div>
-            <div class="col-md-4 text-right">
-                <a href="{{ route('admin.finance.rules.create') }}" class="btn btn-primary">
+            <div class="col-md-4 text-right admin-page-action">
+                <a href="{{ route('admin.finance.rules.create') }}" class="admin-primary-action">
                     <i class="fa-solid fa-plus"></i> Nouvelle Règle
                 </a>
             </div>
@@ -32,7 +33,7 @@
             </div>
         @endif
 
-        <div class="card">
+        <div class="card admin-panel">
             <div class="card-body border-bottom">
                 <form method="GET" action="{{ route('admin.finance.rules.index') }}" class="row g-2 align-items-end">
                     <div class="col-md-4">
@@ -152,7 +153,7 @@
         </div>
 
         <!-- Info Cards -->
-        <div class="row mt-4">
+        <div class="row mt-4 admin-summary-cards">
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">

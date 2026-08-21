@@ -1,22 +1,22 @@
 @extends('backend.layouts.html')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid admin-page admin-logs-page">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="h4 mb-1">Analyse des logs</h2>
+                <span class="admin-eyebrow">Management</span>
+                <h1 class="admin-page-title">Analyse des logs</h1>
                 <p class="text-muted mb-0">Fichier : {{ $logFile }}</p>
                 <p class="text-muted mb-0"><small>Source : application Laravel</small></p>
             </div>
-            <div class="btn-group" role="group">
-                <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}"
-                    class="btn btn-outline-secondary">
+            <div class="btn-group admin-page-action" role="group">
+                <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}" class="admin-secondary-action">
                     <i class="fa-solid fa-download"></i> Télécharger
                 </a>
                 <form action="{{ route('admin.logs.clear', ['source' => $source ?? 'auto']) }}" method="POST"
                     class="d-inline" onsubmit="return confirm('Vider le fichier de log ?');">
                     @csrf
-                    <button type="submit" class="btn btn-outline-danger">
+                    <button type="submit" class="admin-danger-action">
                         <i class="fa-solid fa-broom"></i> Vider
                     </button>
                 </form>
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <div class="card shadow-sm mb-4">
+        <div class="card admin-panel shadow-sm mb-4">
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.logs.index') }}" class="form-inline">
                     <div class="form-group mr-3 mb-2">
@@ -112,7 +112,7 @@
         </div>
 
         @if (count($logs) > 0)
-            <div class="card shadow-sm">
+            <div class="card admin-panel shadow-sm">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">

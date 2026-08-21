@@ -148,3 +148,19 @@
         @endguest
     </div>
 </div>
+
+<script>
+    document.addEventListener('show.bs.collapse', function(event) {
+        if (!event.target.matches('.sidebar-section__links')) {
+            return;
+        }
+
+        document.querySelectorAll('.sidebar-section__links.show').forEach(function(section) {
+            if (section !== event.target) {
+                bootstrap.Collapse.getOrCreateInstance(section, {
+                    toggle: false
+                }).hide();
+            }
+        });
+    });
+</script>

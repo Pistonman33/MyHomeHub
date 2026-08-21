@@ -1,93 +1,97 @@
-<div class="p-4 bg-white rounded shadow">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4">Posts List</h2>
-        <a href="{{ route('admin.blog.posts.create') }}" class="btn btn-primary">
-            <i class="fa-solid fa-plus"></i> Create a New Post
+<div class="blog-posts-page">
+    <div class="blog-posts-header">
+        <div>
+            <span class="blog-eyebrow">MyBlog</span>
+            <h1>Posts</h1>
+            <p>Gérez les articles et leur publication depuis un seul endroit.</p>
+        </div>
+        <a href="{{ route('admin.blog.posts.create') }}" class="blog-create-button">
+            <i class="fa-solid fa-plus"></i><span>Créer un post</span>
         </a>
     </div>
-    <input type="text" class="form-control mb-3" placeholder="Rechercher..." wire:model.live.debounce.300ms="search">
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th wire:click="sortBy('title')" style="cursor: pointer;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Title</span>
-                        @if ($sortField == 'title')
-                            @if ($sortDirection == 'asc')
-                                <i class="fa-solid fa-sort-up"></i>
-                            @else
-                                <i class="fa-solid fa-sort-down"></i>
-                            @endif
-                        @endif
-                    </div>
-                </th>
-                <th wire:click="sortBy('status')" style="cursor: pointer;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Status</span>
-                        @if ($sortField == 'status')
-                            @if ($sortDirection == 'asc')
-                                <i class="fa-solid fa-sort-up"></i>
-                            @else
-                                <i class="fa-solid fa-sort-down"></i>
-                            @endif
-                        @endif
-                    </div>
-                </th>
-                <th>Categories</th>
-                <th>Tags</th>
-                <th wire:click="sortBy('created_at')" style="cursor: pointer;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Created At</span>
-                        @if ($sortField == 'created_at')
-                            @if ($sortDirection == 'asc')
-                                <i class="fa-solid fa-sort-up"></i>
-                            @else
-                                <i class="fa-solid fa-sort-down"></i>
-                            @endif
-                        @endif
-                    </div>
-                </th>
+    <div class="blog-posts-toolbar">
+        <label class="blog-search" for="blog-post-search"><i class="fa-solid fa-magnifying-glass"></i><input
+                id="blog-post-search" type="search" placeholder="Rechercher un titre, une catégorie ou un tag..."
+                wire:model.live.debounce.300ms="search"></label>
+        <span class="blog-result-hint"><i class="fa-solid fa-circle"></i> Filtrage instantané</span>
+    </div>
 
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($posts as $post)
-                <tr>
-                    <td>{{ $post->title }}</td>
-                    <td>{{ ucfirst($post->status) }}</td>
-                    <td>
-                        @foreach ($post->categories as $category)
-                            <span class="badge bg-info text-dark">{{ $category->name }}</span>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($post->tags as $tag)
-                            <span class="badge bg-secondary">{{ $tag->name }}</span>
-                        @endforeach
-                    </td>
-                    <td>{{ $post->created_at->format('d/m/Y') }}</td>
-                    <td>
-                        {{-- Edit --}}
-                        <a href="{{ route('admin.blog.posts.edit', $post->id) }}">
-                            <i class="fa-solid fa-pen-to-square fa-lg mt-3 text-primary" style="cursor:pointer;"
-                                title="Edit post"></i>
-                        </a>
-                        {{-- Delete --}}
-                        <i class="fa-solid fa-trash fa-lg mt-3 text-danger" style="cursor:pointer;"
-                            onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"
-                            wire:click.stop="delete({{ $post->id }})">
-                        </i>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    {{-- Pagination Bootstrap --}}
-    <div class="mt-3">
-        {{ $posts->links('pagination::bootstrap-5') }}
+    <div class="blog-posts-table-card">
+        <div class="blog-posts-card-heading">
+            <div>
+                <h2>Liste des posts</h2><span>{{ $posts->total() }} article(s) au total</span>
+            </div><i class="fa-solid fa-newspaper"></i>
+        </div>
+        <div class="table-responsive">
+            <table class="table blog-posts-table">
+                <thead>
+                    <tr>
+                        <th wire:click="sortBy('title')" class="is-sortable">
+                            <div><span>Titre</span>
+                                @if ($sortField == 'title')
+                                    <i class="fa-solid fa-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </div>
+                        </th>
+                        <th wire:click="sortBy('status')" class="is-sortable">
+                            <div><span>Statut</span>
+                                @if ($sortField == 'status')
+                                    <i class="fa-solid fa-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </div>
+                        </th>
+                        <th>Catégories</th>
+                        <th>Tags</th>
+                        <th wire:click="sortBy('created_at')" class="is-sortable">
+                            <div><span>Créé le</span>
+                                @if ($sortField == 'created_at')
+                                    <i class="fa-solid fa-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }}"></i>
+                                @endif
+                            </div>
+                        </th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($posts as $post)
+                        <tr>
+                            <td class="blog-post-title">
+                                <strong>{{ $post->title }}</strong><small>#{{ $post->id }}</small></td>
+                            <td><span class="blog-status blog-status--{{ $post->status }}"><i
+                                        class="fa-solid fa-circle"></i>{{ ucfirst($post->status) }}</span></td>
+                            <td>
+                                @foreach ($post->categories as $category)
+                                    <span class="blog-taxonomy blog-taxonomy--category">{{ $category->name }}</span>
+                                @endforeach
+                            </td>
+                            <td>
+                                @foreach ($post->tags as $tag)
+                                    <span class="blog-taxonomy">#{{ $tag->name }}</span>
+                                @endforeach
+                            </td>
+                            <td class="blog-post-date">{{ $post->created_at->format('d/m/Y') }}</td>
+                            <td class="blog-post-actions">
+                                <a href="{{ route('admin.blog.posts.edit', $post->id) }}" title="Modifier le post"><i
+                                        class="fa-solid fa-pen-to-square"></i></a>
+                                <button type="button" title="Supprimer le post"
+                                    onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"
+                                    wire:click.stop="delete({{ $post->id }})"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="blog-empty-state"><i
+                                    class="fa-regular fa-file-lines"></i><strong>Aucun post trouvé</strong><span>Essayez
+                                    une autre recherche.</span></td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="blog-posts-pagination">
+            {{ $posts->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 </div>
