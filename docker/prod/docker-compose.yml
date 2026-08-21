@@ -35,7 +35,8 @@ services:
     image: ghcr.io/pistonman33/myhomehub-static:${IMAGE_TAG:-latest}
     container_name: myhomehub_nginx
     depends_on:
-      - laravel
+      laravel:
+        condition: service_healthy
     volumes:
       # SHARED FOLDER WEBSERVER STATIC FRONTEND FILES FOR NGINX AND LARAVEL
       # ON VPS HERE /var/lib/docker/volumes/myhomehub_laravel_public
@@ -96,6 +97,12 @@ services:
       - myhomehub_network
     restart: unless-stopped
     command: php-fpm
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /var/www/public/index.php && test -f /var/www/public/build/manifest.json"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   scheduler:
     image: ghcr.io/pistonman33/myhomehub-laravel:${IMAGE_TAG:-latest}

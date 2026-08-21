@@ -148,6 +148,7 @@ jobs:
 
             echo "Restart stack"
             docker compose up -d --force-recreate --remove-orphans
+            docker compose ps
 
             echo "Deployed image versions"
             docker compose images
