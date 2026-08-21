@@ -48,7 +48,7 @@
                                     <input type="hidden" name="infomovie_id" value="" />
                                     <input type="hidden" name="movie_id" value="" />
                                     <div class="card-columns">
-                                        @each('backend.movies.pending_card', $infomovies, 'movie', 'movies.no-pending_card')
+                                        @each('backend.movies.pending_card', $infomovies, 'movie', 'backend.movies.no-pending_card')
                                     </div>
                                     <div class="form-group row mb-0">
                                         <div class="col-md-6 offset-md-4">
