@@ -1,5 +1,6 @@
 body {
   font-size: 0.875rem;
+  background: #f5f8fc;
 }
 
 .feather {
@@ -17,19 +18,20 @@ body {
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 100; /* Behind the navbar */
-  padding: 48px 0 80px 0; /* Height of navbar + space for footer */
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  width: 228px;
+  padding: 0;
+  color: #f7fbff;
+  background: #062c59;
+  box-shadow: 4px 0 18px rgba(9, 36, 68, .12);
 }
 
 .sidebar-sticky {
   position: relative;
-  top: 0;
-  height: calc(100vh - 48px);
-  padding-top: 0.5rem;
-  padding-bottom: 2rem;
+  height: 100vh;
+  padding: 18px 10px 14px;
   overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  overflow-y: auto;
 }
 
 @supports ((position: -webkit-sticky) or (position: sticky)) {
@@ -40,23 +42,36 @@ body {
 }
 
 .sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin: 2px 0;
+  padding: 7px 10px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, .8);
+  font-size: .72rem;
   font-weight: 500;
-  color: #333;
 }
 
 .sidebar .nav-link i {
-  margin-right: 4px;
-  color: #999;
+  width: 20px;
+  margin-right: 7px;
+  color: rgba(255, 255, 255, .75);
+  text-align: center;
 }
 
 .sidebar .nav-link.active {
-  color: #007bff;
+  color: #fff;
+  background: #2166cb;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .16);
 }
 
 .sidebar .nav-link:hover i,
 .sidebar .nav-link.active i {
   color: inherit;
 }
+
+.sidebar-brand { display: grid; justify-items: center; padding: 2px 0 20px; color: #fff; text-decoration: none; }.sidebar-brand:hover { color: #fff; text-decoration: none; }.sidebar-brand__mark { display: grid; place-items: center; width: 44px; height: 36px; color: #f4b33d; font-size: 1.85rem; }.sidebar-brand__name { margin-top: 5px; font-size: 1rem; font-weight: 700; }.sidebar-brand small { margin-top: 3px; color: rgba(255,255,255,.62); font-size: .6rem; }.sidebar-sections { padding-bottom: 112px; }.sidebar-section { margin-bottom: 8px; }.sidebar-section__toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 8px 10px 5px; border: 0; background: transparent; color: rgba(255,255,255,.55); font-size: .62rem; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: .04em; }.sidebar-section__toggle:hover, .sidebar-section__toggle.is-active { color: #fff; }.sidebar-section__toggle i { transition: transform .2s ease; font-size: .55rem; }.sidebar-section__toggle[aria-expanded="false"] i { transform: rotate(-90deg); }.sidebar-section__links { padding: 2px 0; }.sidebar-account { position: absolute; right: 10px; bottom: 12px; left: 10px; padding-top: 9px; border-top: 1px solid rgba(255,255,255,.15); }.sidebar-account a, .sidebar-account__user { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 10px; color: rgba(255,255,255,.78); font-size: .7rem; text-decoration: none; }.sidebar-account a:hover { color: #fff; }.sidebar-account a i { width: 16px; text-align: center; }.sidebar-account__user { color: #fff; font-weight: 600; }.sidebar-account__avatar { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #2166cb; font-size: .65rem; }
 
 .sidebar-heading {
   font-size: 0.75rem;
@@ -68,41 +83,23 @@ body {
  */
 
 [role="main"] {
-  padding-top: 70px; /* Space for fixed navbar */
-  padding-bottom: 40px; /* Space for fixed footer */
+  box-sizing: border-box;
+  width: calc(100% - 228px);
+  max-width: calc(100% - 228px);
+  flex: 0 0 calc(100% - 228px);
+  min-height: 100vh;
+  margin-left: 228px;
+  padding: 26px 30px 58px;
+}
+
+.admin-main .container,
+.admin-main .container-fluid {
+  width: 100%;
+  max-width: none;
 }
 
 /*
  * Navbar
  */
 
-.navbar-brand {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  font-size: 1rem;
-  background-color: rgba(0, 0, 0, 0.25);
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
-}
-
-.navbar .form-control {
-  padding: 0.75rem 1rem;
-  border-width: 0;
-  border-radius: 0;
-}
-
-.form-control-dark {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.form-control-dark:focus {
-  border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
-}
-
-.breadcrumb {
-  color: #fff;
-  background-color: rgb(52, 58, 64);
-  margin: 0 !important;
-}
+@media (max-width: 767px) { .sidebar { position: relative; width: 100%; height: auto; }.sidebar-sticky { height: auto; min-height: 0; }.sidebar-account { position: static; margin-top: 8px; } [role="main"] { width: 100%; max-width: 100%; flex-basis: 100%; margin-left: 0; padding: 20px 15px 50px; } }
