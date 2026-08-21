@@ -142,7 +142,7 @@
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 d-sm-flex">
+                            <div class="d-flex flex-column flex-sm-row gap-3">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fa-solid fa-save"></i>
                                     @if ($rule)

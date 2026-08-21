@@ -12,6 +12,7 @@ use App\Models\Categorie;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use App\Models\Display;
+use Illuminate\Support\Str;
 
 class FinanceController extends Controller
 {
@@ -214,29 +215,73 @@ class FinanceController extends Controller
       $all_transactions = Record::where("validate",0)
                       ->where("deleted",0)
                       ->join('comptes', 'records.fk_id_compte', '=', 'comptes.compteid')
-                      ->orderBy('date','asc');
+                      ->orderBy('date','asc')
+                      ->get()
+                      ->map(function($transaction){
+                        $group = $this->getQuickGroup($transaction);
+                        return [
+                          'transaction' => $transaction,
+                          'group' => $group,
+                          'group_label' => $this->getQuickGroupLabel($group),
+                          'suggested_label' => $this->buildSuggestedLabel($transaction),
+                        ];
+                      })
+                      ->sortBy(function($row){
+                        $priority = in_array($row['group'], ['paypal', 'amazon']) ? 0 : 1;
+                        return [$priority, $row['transaction']->date];
+                      })
+                      ->values();
       $nb_transaction = $all_transactions->count();
-      $transaction = $all_transactions->offset($offset)
-                            ->limit(1)->first();
+      $batchSize = 4;
+      $offset = max(0, (int) $offset);
 
-      if($offset == 0){
-        $previous = null;
-      } else {
-        $previous = $offset-1;
-      }
-      if($offset >= $nb_transaction-1){
-        $next = null;
-      } else {
-        $next = $offset+1;
+      if($nb_transaction > 0 && $offset >= $nb_transaction){
+        $offset = max(0, (int) floor(($nb_transaction - 1) / $batchSize) * $batchSize);
       }
 
-      return view('backend.finance.update')->with('current_transaction', $transaction)
-                                   ->with('previous_transaction', $previous)
-                                   ->with('next_transaction', $next)
+      $display_transactions = $all_transactions->slice($offset, $batchSize)->values();
+
+      $previous_offset = $offset > 0 ? max(0, $offset - $batchSize) : null;
+      $next_offset = ($offset + $batchSize) < $nb_transaction ? $offset + $batchSize : null;
+
+      return view('backend.finance.update')
+                                   ->with('display_transactions', $display_transactions)
+                                   ->with('previous_offset', $previous_offset)
+                                   ->with('next_offset', $next_offset)
                                    ->with('nb_transaction', $nb_transaction)
                                    ->with('offset', $offset)
                                    ->with('all_category',$all_category);
 
+    }
+
+    private function getQuickGroup($transaction){
+      $details = Str::lower($transaction->details . ' ' . $transaction->libelle);
+      if(Str::contains($details, 'paypal')){
+        return 'paypal';
+      }
+      if(Str::contains($details, 'amazon')){
+        return 'amazon';
+      }
+      return 'other';
+    }
+
+    private function getQuickGroupLabel($group){
+      return match($group){
+        'paypal' => 'PayPal',
+        'amazon' => 'Amazon',
+        default => 'Autres',
+      };
+    }
+
+    private function buildSuggestedLabel($transaction){
+      $source = trim($transaction->libelle ?: $transaction->details ?: '');
+      if($source === ''){
+        return 'Transaction à catégoriser';
+      }
+
+      $source = preg_replace('/\s+/', ' ', $source);
+      $source = trim($source);
+      return Str::limit($source, 80);
     }
 
     public function all(Request $request){

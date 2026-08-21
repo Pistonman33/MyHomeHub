@@ -1,101 +1,205 @@
 @extends('backend.layouts.html')
 @section('content')
-<section>
-  @include('backend.layouts.success')
-	@include('backend.layouts.error')
-  @if($current_transaction)
-  <nav aria-label="Page navigation transactions">
-    <ul class="pagination justify-content-end">
-      <li class="page-item {{ $previous_transaction !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $previous_transaction !== null ? url('admin/finance/show/'.$previous_transaction) : "#"  }}" aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-          <span class="sr-only">Previous</span>
-        </a>
-      </li>
-      <li><button type="button" class="btn btn-info">
-        Transaction(s) <span class="badge badge-light">{{$nb_transaction}}</span>
-        </button>
-      </li>
-      <li class="page-item {{ $next_transaction !== null ? "" : "disabled" }} ">
-        <a class="page-link" href="{{ $next_transaction !== null ? url('admin/finance/show/'.$next_transaction) : "#" }}" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-          <span class="sr-only">Next</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <div class="container">
-      <div class="row justify-content-center">
-          <div class="col-md-12">
-              <div class="card">
-                  <div class="card-header {{ $current_transaction->retrait ? "alert-danger" : "alert-success" }}" align="center">
-                      <span class="pull-left">
-                      {{ App\Models\Display::dateDMY($current_transaction->date) }}
-                      </span>
-                      <span>
-                      {{ $current_transaction->nom }}
-                      </span>
-                      <span class="pull-right">
-                      <?php echo App\Models\Display::transactionAmount($current_transaction); ?>
-                      </span>
-                  </div>
+    <section>
+        @include('backend.layouts.success')
+        @include('backend.layouts.error')
 
-                  <div class="card-body">
-                      <form method="POST" action="{{ route('admin.finance.show') }}" id="TransactionUpdateForm">
-                          @csrf
+        <style>
+            .transaction-card {
 
-                          <div class="form-group row">
-                              <label for="name" class="col-md-2 col-form-label text-md-left">{{ __('Details') }}</label>
+                border: none;
+                border-left: 6px solid #e9ecef;
+                border-radius: 12px;
+                box-shadow: 0 .15rem .5rem rgba(0, 0, 0, .08);
+                transition: .15s;
+            }
 
-                              <div class="col-md-8">
-                                {{ $current_transaction->details }}
-                              </div>
-                          </div>
+            .transaction-card:hover {
 
-                          <div class="form-group row">
-                              <label for="libelle" class="col-md-2 col-form-label text-md-left">{{ __('Libelle') }}</label>
+                transform: translateY(-2px);
+                box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .12);
 
-                              <div class="col-md-8">
-                                  <input id="libelle" type="text" class="form-control" name="libelle" value="{{ old('libelle') }}" required autofocus>
+            }
 
-                                  @if ($errors->has('libelle'))
-                                      <span class="help-block">
-                                          <strong>{{ $errors->first('libelle') }}</strong>
-                                      </span>
-                                  @endif
-                              </div>
-                          </div>
+            .transaction-card.quick-paypal {
+                border-left-color: #0d6efd;
+            }
 
-                          <div class="form-group row">
-                              <label for="catgeory" class="col-md-2 col-form-label text-md-left">{{ __('Categorie') }}</label>
+            .transaction-card.quick-amazon {
+                border-left-color: #fd7e14;
+            }
 
-                              <div class="col-md-8">
-                                <input type="hidden" name="category_id" id="category_id" value="" />
-                                <input type="hidden" name="record_id" value="{{ $current_transaction->id }}" />
-                                <input type="hidden" name="offset" value="{{ $offset }}" />
-                                @foreach ($all_category as $category)
-                                      <button type="button" value="{{ $category->id }}" class="btn" style="background-color:{{ $category->getColor() }};color:white;font-size:14px;margin-top:3px;">{{ $category->nom }}</button>
-                                @endforeach
-                              </div>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <div class="col-md-6 offset-md-4">
-                                <a class="btn btn-xs btn-danger" data-button-type="delete"
-                                   href="{{ url('admin/finance/delete/'.$current_transaction->id) }}"><i class="fa fa-trash-o"></i>
-                                    Delete</a>
-                              </div>
-                          </div>
+            .category-pill {
+                min-width: 110px;
+                margin: 0.2rem;
+                transition: transform .15s ease;
+            }
 
-                      </form>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-  @else
-    <div class="alert alert-warning" role="alert">
-      No transaction to update, please upload file transaction <a href="{{ url('admin/finance/import')}}" class="alert-link">here</a>
-    </div>
-  @endif
-</section>
+            .category-pill:hover {
+                transform: translateY(-1px);
+            }
+
+            .quick-group-badge {
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                font-size: .72rem;
+            }
+
+            .transaction-amount {
+                min-width: 170px;
+                text-align: right;
+                flex-shrink: 0;
+            }
+
+            .transaction-amount .amount {
+                font-size: 1.45rem;
+                font-weight: 700;
+                line-height: 1;
+                white-space: nowrap;
+            }
+
+            .transaction-details {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .transaction-title {
+                font-weight: 600;
+            }
+
+            .category-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .category-pill {
+                margin: 0;
+                white-space: nowrap;
+                flex: 0 0 auto;
+            }
+        </style>
+
+        @if (!empty($display_transactions))
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                <div>
+                    <h4 class="mb-1">Transactions à valider</h4>
+                    <p class="text-muted mb-0">{{ $nb_transaction }} en attente • 4 transactions affichées par lot</p>
+                </div>
+                <div class="btn-group mt-2 mt-md-0">
+                    @if ($previous_offset !== null)
+                        <a class="btn btn-outline-secondary" href="{{ url('admin/finance/show/' . $previous_offset) }}">←
+                            Précédent</a>
+                    @endif
+                    @if ($next_offset !== null)
+                        <a class="btn btn-outline-secondary" href="{{ url('admin/finance/show/' . $next_offset) }}">Suivant
+                            →</a>
+                    @endif
+                </div>
+            </div>
+
+            @php
+                $grouped_transactions = collect($display_transactions)->groupBy('group');
+            @endphp
+
+            @foreach (['paypal', 'amazon', 'other'] as $group_key)
+                @php $rows = $grouped_transactions->get($group_key, collect()); @endphp
+                @if ($rows->isNotEmpty())
+                    <div class="mb-4">
+                        @if ($group_key === 'paypal')
+                            <h5 class="mb-3"><span class="badge badge-primary quick-group-badge">PayPal</span> <small
+                                    class="text-muted">{{ $rows->count() }}
+                                    transaction{{ $rows->count() > 1 ? 's' : '' }}</small></h5>
+                        @elseif($group_key === 'amazon')
+                            <h5 class="mb-3"><span class="badge badge-warning quick-group-badge">Amazon</span> <small
+                                    class="text-muted">{{ $rows->count() }}
+                                    transaction{{ $rows->count() > 1 ? 's' : '' }}</small></h5>
+                        @else
+                            <h5 class="mb-3">Autres transactions</h5>
+                        @endif
+                        <div class="row">
+                            @foreach ($rows as $row)
+                                @php $transaction = $row['transaction']; @endphp
+                                <div class="col-lg-6 mb-3">
+                                    <div
+                                        class="card transaction-card {{ $row['group'] === 'paypal' ? 'quick-paypal' : ($row['group'] === 'amazon' ? 'quick-amazon' : '') }}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+
+                                                <div class="transaction-details">
+
+                                                    <div class="text-muted small">
+                                                        {{ App\Models\Display::dateDMY($transaction->date) }}
+                                                    </div>
+
+                                                    <div class="transaction-title">
+                                                        {{ $transaction->details ?: $transaction->libelle }}
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="transaction-amount">
+
+                                                    <div class="text-muted small">
+                                                        Montant
+                                                    </div>
+
+                                                    <div
+                                                        class="amount {{ $transaction->retrait ? 'text-danger' : 'text-success' }}">
+                                                        {{ App\Models\Display::transactionAmount($transaction) }}
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="mb-2">
+                                                @if ($row['group'] !== 'other')
+                                                    <span
+                                                        class="badge badge-light text-dark">{{ $row['group_label'] }}</span>
+                                                @endif
+                                                <span class="badge badge-secondary">{{ $transaction->nom }}</span>
+                                            </div>
+
+                                            <form method="POST" action="{{ route('admin.finance.show') }}">
+                                                @csrf
+                                                <input type="hidden" name="record_id" value="{{ $transaction->id }}" />
+                                                <input type="hidden" name="offset" value="{{ $offset }}" />
+
+                                                <div class="form-group mb-2">
+                                                    <label class="small text-uppercase text-muted">Libellé</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        name="libelle"
+                                                        value="{{ old('libelle', $row['suggested_label']) }}" required>
+                                                </div>
+
+                                                <div class="form-group mb-0">
+                                                    <label class="small text-uppercase text-muted">Catégorie</label>
+                                                    <div class="category-list">
+                                                        @foreach ($all_category as $category)
+                                                            <button type="submit" name="category_id"
+                                                                value="{{ $category->id }}"
+                                                                class="btn btn-sm category-pill"
+                                                                style="background-color:{{ $category->getColor() }};color:white;">
+                                                                {{ $category->nom }}
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+        @else
+            <div class="alert alert-warning" role="alert">
+                No transaction to update, please upload file transaction <a href="{{ url('admin/finance/import') }}"
+                    class="alert-link">here</a>
+            </div>
+        @endif
+    </section>
 @endsection

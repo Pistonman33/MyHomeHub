@@ -60,13 +60,15 @@ class Display extends Model
         return date("Y",strtotime($date));
     }
 
-    static function transactionAmount(Record $transaction){
-      $output= "&euro;&nbsp;";
-      $output.= number_format($transaction->montant, 2);
-      $output.= $transaction->retrait ? "&nbsp;-" : "&nbsp;+";
-      return $output;
+    static function transactionAmount(Record $transaction)
+    {
+        return sprintf(
+            '€ %.2f %s',
+            $transaction->montant,
+            $transaction->retrait ? '-' : '+'
+        );
     }
-
+    
     static function amount($amount){
       $output= "&euro;&nbsp;";
       $output.= number_format($amount, 2);
