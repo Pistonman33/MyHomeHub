@@ -128,8 +128,19 @@ jobs:
             cd /opt/docker/prod
             export IMAGE_TAG=${{ github.sha }}
 
-            echo "Pull image for commit $IMAGE_TAG"
-            docker compose config
+            echo "Docker version"
+            docker version --format '{{.Server.Version}}'
+            docker compose version
+
+            echo "Login to GHCR"
+            printf '%s' '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io --username '${{ secrets.GHCR_USERNAME }}' --password-stdin
+
+            echo "Resolve production image configuration"
+            docker compose config --images
+
+            echo "Pull images for commit $IMAGE_TAG"
+            docker pull "ghcr.io/pistonman33/myhomehub-laravel:$IMAGE_TAG"
+            docker pull "ghcr.io/pistonman33/myhomehub-static:$IMAGE_TAG"
             docker compose pull
 
             echo "Restart stack"
