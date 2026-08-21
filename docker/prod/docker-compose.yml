@@ -98,7 +98,11 @@ services:
     restart: unless-stopped
     command: php-fpm
     healthcheck:
-      test: ["CMD-SHELL", "test -f /var/www/public/index.php && test -f /var/www/public/build/manifest.json"]
+      test:
+        [
+          "CMD-SHELL",
+          "test -f /var/www/public/index.php && test -f /var/www/public/build/manifest.json",
+        ]
       interval: 5s
       timeout: 5s
       retries: 12
