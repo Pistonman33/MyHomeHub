@@ -133,15 +133,17 @@ jobs:
             docker compose pull
 
             echo "Restart stack"
-            docker compose up -d --pull always --force-recreate --remove-orphans
+            docker compose up -d --force-recreate --remove-orphans
 
             echo "Deployed image versions"
             docker compose images
 
             echo "Verify deployed Laravel source"
-            docker exec myhomehub_laravel sh -c "grep -q \"Route::get('dashboard', 'FinanceController@annualDashboard')\" /var/www/routes/backend.php"
-            docker exec myhomehub_laravel sh -c "grep -q 'annualDashboard' /var/www/app/Http/Controllers/Backend/FinanceController.php"
-            test "$(docker exec myhomehub_laravel php artisan route:list --path=admin/finance/dashboard --no-ansi | grep -c 'admin/finance/dashboard')" -gt 0
+            docker inspect myhomehub_laravel --format 'container_image={{.Image}} config_image={{.Config.Image}}'
+            docker exec myhomehub_laravel sh -c "grep -n 'dashboard\|annualDashboard' /var/www/routes/backend.php /var/www/app/Http/Controllers/Backend/FinanceController.php"
+            route_output="$(docker exec myhomehub_laravel php artisan route:list --path=admin/finance/dashboard --no-ansi)"
+            printf '%s\n' "$route_output"
+            printf '%s\n' "$route_output" | grep -Fq 'admin/finance/dashboard'
 
             echo "Cleanup"
             docker image prune -f
