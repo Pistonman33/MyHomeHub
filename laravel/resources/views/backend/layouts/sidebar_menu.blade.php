@@ -21,6 +21,12 @@
     </h6>
     <ul class="nav flex-column mb-2">
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.finance.dashboard') }}">
+                <i class="fa-solid fa-chart-pie"></i>
+                Annual dashboard
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{{ route('admin.stats.index') }}">
                 <i class="fa-solid fa-signal"></i>
                 Stats info

@@ -39,6 +39,7 @@ Route::get('/', 'HomeController@index')->name('dashboard');
 */
 Route::prefix('finance')->name('finance.')->group(function () {
 
+    Route::get('dashboard', 'FinanceController@annualDashboard')->name('dashboard');
     Route::get('/', 'FinanceController@home')->name('index');
 
     Route::get('import', 'FinanceController@import')->name('import');

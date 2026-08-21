@@ -30,6 +30,12 @@ Breadcrumbs::for('admin.dashboard', function (BreadcrumbTrail $trail) {
 | Finance
 |--------------------------------------------------------------------------
 */
+
+Breadcrumbs::for('admin.finance.dashboard', function (BreadcrumbTrail $trail) {
+    $trail->parent('admin.dashboard');
+    $trail->push('Finance', route('admin.finance.index'));
+});
+
 Breadcrumbs::for('admin.finance.index', function (BreadcrumbTrail $trail) {
     $trail->parent('admin.dashboard');
     $trail->push('Finance', route('admin.finance.index'));

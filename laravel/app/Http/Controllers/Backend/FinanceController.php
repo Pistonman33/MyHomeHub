@@ -43,6 +43,90 @@ class FinanceController extends Controller
                                     ->with('transactions',$this->transactions);
     }
 
+            public function annualDashboard(Request $request)
+            {
+                      $years = Record::where('validate', 1)
+                        ->where('deleted', 0)
+                        ->selectRaw('YEAR(date) as year')
+                        ->distinct()
+                        ->orderByDesc('year')
+                        ->pluck('year');
+
+                      $year = (int) ($request->input('year') ?: ($years->first() ?: date('Y')));
+                      if (!$years->contains($year)) {
+                        $year = (int) ($years->first() ?: date('Y'));
+                      }
+
+                      $transactions = Record::with('category')
+                        ->where('validate', 1)
+                        ->where('deleted', 0)
+                        ->where('date', '>=', $year . '-01-01')
+                        ->where('date', '<', ($year + 1) . '-01-01')
+                        ->get();
+                      $previousTransactions = Record::with('category')
+                        ->where('validate', 1)
+                        ->where('deleted', 0)
+                        ->where('date', '>=', ($year - 1) . '-01-01')
+                        ->where('date', '<', $year . '-01-01')
+                        ->get();
+
+                      $sum = static function ($rows, $retrait = null) {
+                        return (float) $rows->when($retrait !== null, function ($collection) use ($retrait) {
+                          return $collection->where('retrait', $retrait);
+                        })->sum('montant');
+                      };
+                      $revenues = $sum($transactions, 0);
+                      $expenses = $sum($transactions, 1);
+                      $previousExpenses = $sum($previousTransactions, 1);
+                      $previousRevenues = $sum($previousTransactions, 0);
+
+                      $categories = $transactions->where('retrait', 1)
+                        ->groupBy('fk_id_categorie')
+                        ->map(function ($rows) {
+                          $category = $rows->first()->category;
+                          return [
+                            'name' => $category ? $category->nom : 'Sans catégorie',
+                            'color' => $category ? $category->getColor() : '#adb5bd',
+                            'amount' => (float) $rows->sum('montant'),
+                          ];
+                        })->sortByDesc('amount')->values();
+
+                      $monthly = collect(range(1, 12))->map(function ($month) use ($transactions) {
+                        $rows = $transactions->filter(function ($transaction) use ($month) {
+                          return (int) date('n', strtotime($transaction->date)) === $month;
+                        });
+                        return [
+                          'revenue' => (float) $rows->where('retrait', 0)->sum('montant'),
+                          'expense' => (float) $rows->where('retrait', 1)->sum('montant'),
+                          'savings' => (float) $rows->where('retrait', 0)->sum('montant') - (float) $rows->where('retrait', 1)->sum('montant'),
+                        ];
+                      });
+
+                      $comparison = $categories->map(function ($category) use ($previousTransactions) {
+                        $previous = (float) $previousTransactions->where('retrait', 1)->filter(function ($transaction) use ($category) {
+                          return ($transaction->category ? $transaction->category->nom : 'Sans catégorie') === $category['name'];
+                        })->sum('montant');
+                        return array_merge($category, [
+                          'previous' => $previous,
+                          'evolution' => $previous > 0 ? (($category['amount'] - $previous) / $previous) * 100 : null,
+                        ]);
+                      });
+
+                      return view('backend.finance.dashboard', [
+                        'year' => $year,
+                        'years' => $years,
+                        'revenues' => $revenues,
+                        'expenses' => $expenses,
+                        'savings' => $revenues - $expenses,
+                        'monthly' => $monthly,
+                        'categories' => $categories,
+                        'comparison' => $comparison,
+                        'transactionCount' => $transactions->count(),
+                        'previousRevenues' => $previousRevenues,
+                        'previousExpenses' => $previousExpenses,
+                      ]);
+                    }
+
     private function home_manage_year_field($request){
       $records = Record::selectRaw(DB::raw('YEAR(date) as year'))
                     ->where('validate',1)
