@@ -94,6 +94,9 @@ jobs:
   deploy:
     needs: [build, tests]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
 
     steps:
       - name: Checkout
@@ -133,7 +136,7 @@ jobs:
             docker compose version
 
             echo "Login to GHCR"
-            printf '%s' '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io --username '${{ secrets.GHCR_USERNAME }}' --password-stdin
+            printf '%s' '${{ github.token }}' | docker login ghcr.io --username '${{ github.actor }}' --password-stdin
 
             echo "Resolve production image configuration"
             docker compose config --images
