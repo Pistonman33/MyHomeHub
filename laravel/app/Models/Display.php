@@ -63,9 +63,9 @@ class Display extends Model
     static function transactionAmount(Record $transaction)
     {
         return sprintf(
-            '€ %.2f %s',
-            $transaction->montant,
-            $transaction->retrait ? '-' : '+'
+            '%s %s €',
+            $transaction->retrait ? '-' : '+',
+            number_format((float) $transaction->montant, 2, ',', ' ')
         );
     }
     
