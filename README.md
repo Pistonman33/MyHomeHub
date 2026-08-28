@@ -137,6 +137,10 @@ LOG_LEVEL=debug
 
 All environment variable is on the root of the project and not of laravel.
 
+I have also installed a dev tool named laravel-truss only available on dev environment. With this tool you can see all tables and relationship like a schema viewer on the browser.
+
+Truss [DB viewer](https://myhome.thiebault.test/truss)
+
 #### Laravel Scheduler in Docker (`schedule:work`)
 
 In this project, the Laravel task scheduler has own **Docker container** using `schedule:work`.  

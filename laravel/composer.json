@@ -25,6 +25,7 @@
     "symfony/dom-crawler": "^7.4"
   },
   "require-dev": {
+    "albertoarena/laravel-truss": "^1.10",
     "barryvdh/laravel-debugbar": "^4.2",
     "fakerphp/faker": "^1.9.1",
     "laravel/pint": "^1.29",
