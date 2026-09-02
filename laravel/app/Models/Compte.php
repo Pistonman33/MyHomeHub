@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Compte extends Model
 {
+  protected $table = 'comptes';
+  protected $primaryKey = 'compteid';
+  public $incrementing = true;
+  protected $keyType = 'int';
+
   public function IsCompteExists(){
     if(strlen(trim($this->num)) !== 0){
       $compte = Compte::where("num",$this->num)->first();

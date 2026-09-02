@@ -57,7 +57,8 @@
                     @forelse ($posts as $post)
                         <tr>
                             <td class="blog-post-title">
-                                <strong>{{ $post->title }}</strong><small>#{{ $post->id }}</small></td>
+                                <strong>{{ $post->title }}</strong><small>#{{ $post->id }}</small>
+                            </td>
                             <td><span class="blog-status blog-status--{{ $post->status }}"><i
                                         class="fa-solid fa-circle"></i>{{ ucfirst($post->status) }}</span></td>
                             <td>
@@ -90,8 +91,15 @@
                 </tbody>
             </table>
         </div>
-        <div class="blog-posts-pagination">
-            {{ $posts->links('pagination::bootstrap-5') }}
+        <div class="blog-posts-pagination admin-pagination">
+            <div class="admin-pagination-controls">
+                {{ $posts->links('pagination::bootstrap-5') }}
+                <select class="admin-pagination-select" wire:model.live="perPage" aria-label="Nombre de posts par page">
+                    @foreach ([5, 10, 20, 50, 100] as $pageSize)
+                        <option value="{{ $pageSize }}">{{ $pageSize }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </div>
 </div>

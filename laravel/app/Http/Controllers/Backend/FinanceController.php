@@ -57,17 +57,25 @@ class FinanceController extends Controller
                         $year = (int) ($years->first() ?: date('Y'));
                       }
 
+                      $month = $request->filled('month') && (int) $request->input('month') >= 1 && (int) $request->input('month') <= 12
+                        ? (int) $request->input('month')
+                        : null;
+                      $currentStart = $month ? sprintf('%04d-%02d-01', $year, $month) : $year . '-01-01';
+                      $currentEnd = $month ? date('Y-m-d', strtotime($currentStart . ' +1 month')) : ($year + 1) . '-01-01';
+                      $previousStart = $month ? sprintf('%04d-%02d-01', $year - 1, $month) : ($year - 1) . '-01-01';
+                      $previousEnd = $month ? date('Y-m-d', strtotime($previousStart . ' +1 month')) : $year . '-01-01';
+
                       $transactions = Record::with('category')
                         ->where('validate', 1)
                         ->where('deleted', 0)
-                        ->where('date', '>=', $year . '-01-01')
-                        ->where('date', '<', ($year + 1) . '-01-01')
+                        ->where('date', '>=', $currentStart)
+                        ->where('date', '<', $currentEnd)
                         ->get();
                       $previousTransactions = Record::with('category')
                         ->where('validate', 1)
                         ->where('deleted', 0)
-                        ->where('date', '>=', ($year - 1) . '-01-01')
-                        ->where('date', '<', $year . '-01-01')
+                        ->where('date', '>=', $previousStart)
+                        ->where('date', '<', $previousEnd)
                         ->get();
 
                       $sum = static function ($rows, $retrait = null) {
@@ -91,11 +99,12 @@ class FinanceController extends Controller
                           ];
                         })->sortByDesc('amount')->values();
 
-                      $monthly = collect(range(1, 12))->map(function ($month) use ($transactions) {
-                        $rows = $transactions->filter(function ($transaction) use ($month) {
-                          return (int) date('n', strtotime($transaction->date)) === $month;
+                      $monthly = collect($month ? [$month] : range(1, 12))->map(function ($monthNumber) use ($transactions) {
+                        $rows = $transactions->filter(function ($transaction) use ($monthNumber) {
+                          return (int) date('n', strtotime($transaction->date)) === $monthNumber;
                         });
                         return [
+                          'month' => $monthNumber,
                           'revenue' => (float) $rows->where('retrait', 0)->sum('montant'),
                           'expense' => (float) $rows->where('retrait', 1)->sum('montant'),
                           'savings' => (float) $rows->where('retrait', 0)->sum('montant') - (float) $rows->where('retrait', 1)->sum('montant'),
@@ -124,6 +133,7 @@ class FinanceController extends Controller
                         'transactionCount' => $transactions->count(),
                         'previousRevenues' => $previousRevenues,
                         'previousExpenses' => $previousExpenses,
+                        'month' => $month,
                       ]);
                     }
 
@@ -370,63 +380,154 @@ class FinanceController extends Controller
 
     public function all(Request $request){
       $all_category = Categorie::orderBy('nom')->get();
-      $cat = $all_category->first();
-      $filter_category = $cat->nom;
-      $filter_categoryid = $cat->id;
-      if($request->category){
-        $cat = Categorie::find($request->category);
-        $filter_category = $cat->nom;
-        $filter_categoryid = $cat->id;
+
+      $years = Record::where('validate', 1)
+          ->where('deleted', 0)
+          ->selectRaw('YEAR(date) as year')
+          ->distinct()
+          ->orderByDesc('year')
+          ->pluck('year');
+
+      if ($years->isEmpty()) {
+          $years = collect([(int) date('Y')]);
       }
-      return view('backend.finance.all')->with('all_category',$all_category)->with('filter_category',$filter_category)->with('filter_categoryid',$filter_categoryid);
+
+      $selectedYear = (int) ($request->input('year', $years->first() ?: date('Y')));
+      if (!$years->contains($selectedYear)) {
+          $selectedYear = (int) $years->first();
+      }
+
+      $months = Record::where('validate', 1)
+          ->where('deleted', 0)
+          ->whereYear('date', $selectedYear)
+          ->selectRaw('MONTH(date) as month')
+          ->distinct()
+          ->orderBy('month')
+          ->pluck('month');
+
+      if ($months->isEmpty()) {
+          $months = collect([(int) date('n')]);
+      }
+
+      $selectedMonth = $request->filled('month') ? (int) $request->input('month') : null;
+      if ($selectedMonth !== null && !$months->contains($selectedMonth)) {
+          $selectedMonth = null;
+      }
+
+      $selectedCategory = $request->input('category');
+      $selectedSort = in_array($request->input('date_sort'), ['asc', 'desc'], true) ? $request->input('date_sort') : 'desc';
+      $perPage = in_array((int) $request->input('per_page', 20), [5, 10, 20, 50, 100], true)
+          ? (int) $request->input('per_page', 20)
+          : 20;
+
+      $query = Record::with(['category', 'compte'])
+          ->where('validate', 1)
+          ->where('deleted', 0)
+          ->when($selectedYear, fn ($q) => $q->whereYear('date', $selectedYear))
+          ->when($selectedMonth !== null, fn ($q) => $q->whereMonth('date', $selectedMonth))
+          ->when($selectedCategory, fn ($q) => $q->where('fk_id_categorie', $selectedCategory));
+
+      if ($request->filled('search')) {
+          $search = trim($request->input('search'));
+          $query->where(function ($q) use ($search) {
+              $q->where('libelle', 'like', '%' . $search . '%')
+                  ->orWhere('details', 'like', '%' . $search . '%')
+                  ->orWhere('mouvement', 'like', '%' . $search . '%');
+          });
+      }
+
+      $transactions = $query->orderBy('date', $selectedSort)->paginate($perPage)->appends($request->query());
+
+      return view('backend.finance.all', compact(
+          'all_category',
+          'transactions',
+          'years',
+          'months',
+          'selectedYear',
+          'selectedMonth',
+          'selectedCategory',
+          'selectedSort',
+          'perPage'
+      ));
+    }
+
+    public function updateListTransaction(Request $request){
+      $validated = $request->validate([
+          'id' => 'required|exists:records,id',
+          'libelle' => 'nullable|string|max:255',
+          'category_id' => 'nullable|exists:categories,id',
+      ]);
+
+      $transaction = Record::findOrFail($request->input('id'));
+      $transaction->libelle = trim((string) ($validated['libelle'] ?? $transaction->libelle));
+      if ($request->has('category_id') && $request->input('category_id') !== null && $request->input('category_id') !== '') {
+          $transaction->fk_id_categorie = (int) $request->input('category_id');
+      }
+      $transaction->save();
+      $transaction->load('category');
+
+      return response()->json([
+          'success' => true,
+          'libelle' => $transaction->libelle,
+          'category_name' => $transaction->category ? $transaction->category->nom : null,
+          'category_group' => $transaction->category && $transaction->category->group ? $transaction->category->group : null,
+          'category_color' => $transaction->category ? Categorie::getColorById($transaction->category->id) : null,
+      ]);
     }
 
     public function search(Request $request){
-      $output="";
+      $output = "";
 
-      if($request->ajax())
-      {
-          $item_per_page = 20;
-          $page_number = $request->page;
-          $position = (($page_number-1) * $item_per_page);
-          $records=Record::where('validate',1)
-                           ->where('deleted',0)
-                           ->join('categories','categories.id','=','records.fk_id_categorie')
-                           ->orderBy('date','desc')->limit($item_per_page)->offset($position);
-          if($request->search){
-            $records->where('details','LIKE','%'.$request->search."%")
-                     ->orwhere('libelle','LIKE','%'.$request->search."%");
-          }
-          if($request->category){
-            $records->where('categories.id',$request->category);
-          }
+      if ($request->ajax()) {
+          $item_per_page = in_array((int) $request->input('per_page', 20), [10, 20, 50, 100], true)
+              ? (int) $request->input('per_page', 20)
+              : 20;
+          $page_number = max(1, (int) $request->input('page', 1));
+          $position = (($page_number - 1) * $item_per_page);
+          $selectedSort = in_array($request->input('date_sort'), ['asc', 'desc'], true) ? $request->input('date_sort') : 'desc';
+
+          $records = Record::where('validate', 1)
+              ->where('deleted', 0)
+              ->with(['category', 'compte'])
+              ->when($request->category, fn ($q) => $q->where('fk_id_categorie', $request->category))
+              ->when($request->year, fn ($q) => $q->whereYear('date', $request->year))
+              ->when($request->month, fn ($q) => $q->whereMonth('date', $request->month))
+              ->when($request->search, function ($q) use ($request) {
+                  $q->where(function ($query) use ($request) {
+                      $query->where('details', 'LIKE', '%' . $request->search . '%')
+                          ->orWhere('libelle', 'LIKE', '%' . $request->search . '%');
+                  });
+              })
+              ->orderBy('date', $selectedSort)
+              ->limit($item_per_page)
+              ->offset($position);
+
           $result = $records->get();
-          if($result)
-          {
-            foreach ($result as $transaction) {
-              $color =  $transaction->retrait ? "": "orange";
-              $output.=
-              '<tr>'.
-                '<td class="td_date">'.
-                  '<div class="all_transaction_date">'.
-                    '<span class="all_transaction_date_day">'.Display::day($transaction->date).'</span>'.
-                    '<span class="all_transaction_date_month">'.Display::monthTextPrefixe(date("n",strtotime($transaction->date))).'</span>'.
-                    '<span class="all_transaction_date_year">'.Display::year($transaction->date).'</span>'.
-                    '</div>'.
-                '</td>'.
-                '<td>'.$transaction->libelle.'</td>'.
-                '<td>'.
-                  '<span class="badge badge-info" style="background-color:'.Categorie::getColorById($transaction->fk_id_categorie).';color:white;font-size:14px;margin-top:3px;">'.$transaction->nom.'</span>'.
-                '</td>'.
-                '<td>'.
-                  '<div class="col-2 text-right align-self-center amount '.$color .'">'.
-                    Display::transactionAmount($transaction).
-                  '</div>'.
-                '</td>'.
-             '</tr>';
-            }
+          if ($result) {
+              foreach ($result as $transaction) {
+                  $color = $transaction->retrait ? "text-danger" : "text-success";
+                  $accountName = $transaction->compte ? $transaction->compte->nom : 'Compte non renseigné';
+                  $output .=
+                      '<tr data-record-id="' . $transaction->id . '">' .
+                      '<td class="td_date">' .
+                      '<div class="all_transaction_date">' .
+                      '<span class="all_transaction_date_day">' . Display::day($transaction->date) . '</span>' .
+                      '<span class="all_transaction_date_month">' . Display::monthTextPrefixe(date("n", strtotime($transaction->date))) . '</span>' .
+                      '<span class="all_transaction_date_year">' . Display::year($transaction->date) . '</span>' .
+                      '</div>' .
+                      '</td>' .
+                      '<td><button type="button" class="finance-inline-edit" data-field="libelle" data-record-id="' . $transaction->id . '" data-value="' . e($transaction->libelle) . '">' . $transaction->libelle . '</button></td>' .
+                      '<td><button type="button" class="finance-inline-edit finance-category-inline-edit" data-field="category" data-record-id="' . $transaction->id . '" data-category-id="' . $transaction->fk_id_categorie . '" data-category-name="' . e($transaction->category ? $transaction->category->nom : '') . '">' .
+                      ($transaction->category ? '<span class="finance-category-badge" style="background-color:' . Categorie::getColorById($transaction->fk_id_categorie) . ';">' . $transaction->category->nom . '</span>' : '<span class="finance-category-badge" style="background-color:#999;">Sans catégorie</span>') .
+                      '</button></td>' .
+                      '<td><span class="finance-group-badge" data-group-cell>' . ($transaction->category && $transaction->category->group ? $transaction->category->group : '—') . '</span></td>' .
+                      '<td class="text-right"><span class="amount ' . $color . ' finance-amount-tooltip" data-tooltip="Compte : ' . e($accountName) . '" aria-label="Compte : ' . e($accountName) . '">' . Display::transactionAmount($transaction) . '</span></td>' .
+                      '</tr>';
+              }
           }
+          return response($output);
       }
-      return Response($output);
+
+      return response('');
     }
 }

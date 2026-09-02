@@ -21,6 +21,13 @@ class PostList extends Component
     #[Session]
     public string $sortDirection = 'desc';
 
+    public int $perPage = 10;
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     private array $sortableFields = [
         'title',
         'status',
@@ -61,7 +68,7 @@ class PostList extends Component
     }
 
     return view('livewire.backend.posts.post-list', [
-        'posts' => $query->paginate(10)->withPath(route('admin.blog.posts'))
+        'posts' => $query->paginate($this->perPage)->withPath(route('admin.blog.posts'))
     ]);
     }
 }

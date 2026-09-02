@@ -31,7 +31,10 @@ class LogAnalyzerController extends Controller
     {
         $level = $request->get('level', 'all');
         $search = $request->get('search', '');
-        $perPage = $request->get('perPage', 50);
+        $requestedPerPage = $request->get('per_page', $request->get('perPage', 20));
+        $perPage = in_array((int) $requestedPerPage, [5, 10, 20, 50, 100], true)
+            ? (int) $requestedPerPage
+            : 20;
         $source = $request->get('source', 'auto');
 
         // Parser les logs

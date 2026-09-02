@@ -35,6 +35,11 @@ class Record extends Model
         return $this->belongsTo(Categorie::class, 'fk_id_categorie');
     }
 
+    public function compte()
+    {
+      return $this->belongsTo(Compte::class, 'fk_id_compte', 'compteid');
+    }
+
     // STATS SECTION
     static function getSumPriceDepotRetrait($date,$retrait) {
       $query = Record::selectRaw(DB::raw('SUM(montant) as total'))

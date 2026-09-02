@@ -17,14 +17,17 @@ class RuleController extends Controller
     public function index(Request $request)
     {
         $selectedCategoryId = $request->input('category');
+        $perPage = in_array((int) $request->input('per_page', 20), [5, 10, 20, 50, 100], true)
+            ? (int) $request->input('per_page', 20)
+            : 20;
 
         $rules = Rule::with('category')
                     ->when($selectedCategoryId, function ($query) use ($selectedCategoryId) {
                         return $query->where('category_id', $selectedCategoryId);
                     })
                     ->byPriority()
-                    ->paginate(20)
-                    ->appends($request->only('category'));
+                    ->paginate($perPage)
+                    ->appends($request->query());
 
         $categories = Categorie::whereHas('rules')
             ->orderBy('nom')
@@ -34,6 +37,7 @@ class RuleController extends Controller
             'rules' => $rules,
             'categories' => $categories,
             'selectedCategoryId' => $selectedCategoryId,
+            'perPage' => $perPage,
         ]);
     }
 

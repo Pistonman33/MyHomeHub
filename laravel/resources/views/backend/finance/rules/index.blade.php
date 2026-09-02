@@ -96,15 +96,15 @@
                                     <span class="badge bg-info">{{ $rule->priority }}</span>
                                 </td>
                                 <td>
-                                    @if ($rule->active)
-                                        <span class="badge bg-success">
-                                            <i class="fa-solid fa-check"></i> Active
-                                        </span>
-                                    @else
-                                        <span class="badge bg-secondary">
-                                            <i class="fa-solid fa-times"></i> Inactive
-                                        </span>
-                                    @endif
+                                    <form action="{{ route('admin.finance.rules.toggle', $rule->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="admin-rule-switch {{ $rule->active ? 'is-active' : '' }}"
+                                            title="{{ $rule->active ? 'Désactiver' : 'Activer' }}"
+                                            aria-label="{{ $rule->active ? 'Désactiver' : 'Activer' }}">
+                                            <span></span>
+                                        </button>
+                                    </form>
                                 </td>
                                 <td class="text-right">
                                     <div class="btn-group btn-group-sm rule-action-group" role="group">
@@ -112,14 +112,6 @@
                                             class="btn btn-outline-primary" title="Modifier">
                                             <i class="fa-solid fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.finance.rules.toggle', $rule->id) }}" method="POST"
-                                            style="display: inline;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-warning"
-                                                title="{{ $rule->active ? 'Désactiver' : 'Activer' }}">
-                                                <i class="fa-solid fa-power-off"></i>
-                                            </button>
-                                        </form>
                                         <form action="{{ route('admin.finance.rules.destroy', $rule->id) }}" method="POST"
                                             style="display: inline;"
                                             onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette règle ?');">
@@ -147,9 +139,16 @@
             </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-4">
-            {{ $rules->links() }}
+        <div class="admin-pagination mt-4">
+            <div class="admin-pagination-controls">
+                {{ $rules->links() }}
+                <select class="admin-pagination-select" aria-label="Nombre de règles par page"
+                    onchange="window.location='{{ route('admin.finance.rules.index') }}?{{ http_build_query(array_merge(request()->except(['per_page', 'page']), ['per_page' => '__VALUE__'])) }}'.replace('__VALUE__', this.value);">
+                    @foreach ([5, 10, 20, 50, 100] as $pageSize)
+                        <option value="{{ $pageSize }}" @selected((int) $perPage === $pageSize)>{{ $pageSize }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
         <!-- Info Cards -->

@@ -22,6 +22,18 @@ class FriendsList extends Component
     #[Session]
     public string $sortDirection = 'asc';
 
+    public int $perPage = 10;
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     // Create a listener to refresh the list when a new friend is added
     protected $listeners = ['friendAdded' => '$refresh'];
 
@@ -91,7 +103,7 @@ class FriendsList extends Component
                 $query->orderBy('friends.id', 'asc');
         }
         return view('livewire.backend.friends.friends-list',[
-            'friends' => $query->paginate(10)->withPath(route('admin.friends.index'))
+            'friends' => $query->paginate($this->perPage)->withPath(route('admin.friends.index'))
         ]);
     }
     public function avatarColor(string $firstname, string $lastname): string

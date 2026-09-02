@@ -183,7 +183,22 @@ footer {
 }
 .admin-pagination .pagination {
   margin: 0;
-  justify-content: flex-end;
+}
+.admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.admin-pagination-select {
+  min-width: 4.5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #dce3ec;
+  border-radius: 5px;
+  background: #fff;
+  color: #354158;
+  font-size: 0.7rem;
 }
 .admin-pagination .page-link {
   color: #2166cb;
@@ -193,6 +208,34 @@ footer {
   border-color: #2166cb;
   background: #2166cb;
   color: #fff;
+}
+.admin-rule-switch {
+  position: relative;
+  display: inline-flex;
+  width: 2.35rem;
+  height: 1.3rem;
+  padding: 0.15rem;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: #b8c1ce;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+.admin-rule-switch span {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(31, 48, 75, 0.2);
+  transition: transform 160ms ease;
+}
+.admin-rule-switch.is-active {
+  background: #20b45b;
+}
+.admin-rule-switch.is-active span {
+  transform: translateX(1.05rem);
 }
 .admin-register-page .card-header {
   padding: 1rem 1.2rem;

@@ -151,8 +151,16 @@
                 </div>
             </div>
 
-            <div class="mt-3 d-flex justify-content-center">
-                {{ $logs->appends(request()->query())->links() }}
+            <div class="admin-pagination mt-3">
+                <div class="admin-pagination-controls">
+                    {{ $logs->appends(request()->query())->links() }}
+                    <select class="admin-pagination-select" aria-label="Nombre de logs par page"
+                        onchange="window.location='{{ route('admin.logs.index') }}?{{ http_build_query(array_merge(request()->except(['per_page', 'page']), ['per_page' => '__VALUE__'])) }}'.replace('__VALUE__', this.value);">
+                        @foreach ([5, 10, 20, 50, 100] as $pageSize)
+                            <option value="{{ $pageSize }}" @selected((int) $perPage === $pageSize)>{{ $pageSize }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         @else
             <div class="alert alert-info mb-0">Aucun log trouvé pour cette sélection.</div>

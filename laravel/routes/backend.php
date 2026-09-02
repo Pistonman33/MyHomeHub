@@ -50,6 +50,7 @@ Route::prefix('finance')->name('finance.')->group(function () {
     Route::post('show', 'FinanceController@show')->name('show.post');
 
     Route::get('all', 'FinanceController@all')->name('all');
+    Route::post('all/update', 'FinanceController@updateListTransaction')->name('all.update');
     Route::post('search', 'FinanceController@search')->name('search');
 
     Route::get('delete/{transactionid}', 'FinanceController@delete')

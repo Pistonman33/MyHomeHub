@@ -17,13 +17,24 @@
                         <option value="{{ $year }}" selected>{{ $year }}</option>
                     @endif
                 </select><span class="fa-regular fa-calendar"></span>
+                <button type="button" class="finance-dashboard-filter-button" id="dashboard-filter-button">
+                    <i class="fa-solid fa-filter"></i> Filtrer
+                </button>
+                <select id="dashboard-month" name="month" class="finance-dashboard-month-select" aria-label="Mois">
+                    <option value="">Toute l'année</option>
+                    @foreach (range(1, 12) as $monthNumber)
+                        <option value="{{ $monthNumber }}" @selected((int) $monthNumber === (int) ($month ?? 0))>
+                            {{ DateTime::createFromFormat('!m', $monthNumber)->format('F') }}
+                        </option>
+                    @endforeach
+                </select>
             </form>
         </div>
         @php
             $percentChange = function ($current, $previous) {
                 return $previous > 0 ? (($current - $previous) / $previous) * 100 : null;
             };
-            $averageMonthly = $expenses / 12;
+            $averageMonthly = $expenses / ($month ? 1 : 12);
             $savingRate = $revenues > 0 ? ($savings / $revenues) * 100 : 0;
             $maxCategory = max((float) ($categories->first()['amount'] ?? 0), 1);
             $donutStart = 0;
@@ -82,15 +93,15 @@
                 <div class="finance-chart-legend"><span class="legend-green">Revenus</span><span
                         class="legend-red">Dépenses</span><span class="legend-blue">Épargne</span></div>
                 <div class="monthly-chart">
-                    @foreach ($monthly as $month)
+                    @foreach ($monthly as $monthData)
                         <div class="monthly-column">
                             <div class="monthly-bars"><i class="bar-green"
-                                    style="height: {{ min(($month['revenue'] / max($revenues, 1)) * 100, 100) }}%"></i><i
+                                    style="height: {{ min(($monthData['revenue'] / max($revenues, 1)) * 100, 100) }}%"></i><i
                                     class="bar-red"
-                                    style="height: {{ min(($month['expense'] / max($revenues, 1)) * 100, 100) }}%"></i><i
+                                    style="height: {{ min(($monthData['expense'] / max($revenues, 1)) * 100, 100) }}%"></i><i
                                     class="bar-blue"
-                                    style="height: {{ min((max($month['savings'], 0) / max($revenues, 1)) * 100, 100) }}%"></i>
-                            </div><small>{{ date('M', mktime(0, 0, 0, $loop->iteration, 1)) }}</small>
+                                    style="height: {{ min((max($monthData['savings'], 0) / max($revenues, 1)) * 100, 100) }}%"></i>
+                            </div><small>{{ date('M', mktime(0, 0, 0, $monthData['month'], 1)) }}</small>
                         </div>
                     @endforeach
                 </div>
@@ -167,4 +178,12 @@
         </div>
         <footer class="finance-dashboard__footer">Toutes les valeurs sont en euros (€)</footer>
     </div>
+    <script>
+        document.getElementById('dashboard-filter-button')?.addEventListener('click', function() {
+            document.getElementById('dashboard-month')?.classList.toggle('is-visible');
+        });
+        document.getElementById('dashboard-month')?.addEventListener('change', function() {
+            this.form.submit();
+        });
+    </script>
 @endsection

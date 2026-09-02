@@ -92,7 +92,14 @@
 
         {{-- Pagination --}}
         <div class="admin-pagination">
-            {{ $friends->links('pagination::bootstrap-5') }}
+            <div class="admin-pagination-controls">
+                {{ $friends->links('pagination::bootstrap-5') }}
+                <select class="admin-pagination-select" wire:model.live="perPage" aria-label="Nombre d'amis par page">
+                    @foreach ([5, 10, 20, 50, 100] as $pageSize)
+                        <option value="{{ $pageSize }}">{{ $pageSize }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </div>
 </div>
