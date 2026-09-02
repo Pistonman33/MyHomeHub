@@ -88,11 +88,11 @@
                 </div>
                 <div class="btn-group mt-2 mt-md-0">
                     @if ($previous_offset !== null)
-                        <a class="btn btn-outline-secondary" href="{{ url('admin/finance/show/' . $previous_offset) }}">←
-                            Précédent</a>
+                        <a class="admin-secondary-action" href="{{ url('admin/finance/show/' . $previous_offset) }}">←
+                            Previous</a>
                     @endif
                     @if ($next_offset !== null)
-                        <a class="btn btn-outline-secondary" href="{{ url('admin/finance/show/' . $next_offset) }}">Suivant
+                        <a class="admin-primary-action" href="{{ url('admin/finance/show/' . $next_offset) }}">Next
                             →</a>
                     @endif
                 </div>

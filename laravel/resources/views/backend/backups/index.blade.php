@@ -4,10 +4,10 @@
         <div class="admin-page-header">
             <div><span class="admin-eyebrow">Management</span>
                 <h1 class="admin-page-title">Gestion des sauvegardes</h1>
-                <p class="admin-page-subtitle">Créez, téléchargez ou restaurez les sauvegardes de votre application.</p>
+                <p class="admin-page-subtitle">Create, download or restore application backups.</p>
             </div>
             <a id="create-new-backup-button" href="{{ url('admin/backup/create') }}" class="admin-primary-action"><i
-                    class="fa fa-plus"></i><span>Nouvelle sauvegarde</span></a>
+                    class="fa fa-plus"></i><span>New backup</span></a>
         </div>
         <div class="admin-panel">
             <div class="row">
@@ -52,7 +52,7 @@
                         </table>
                     @else
                         <div class="well">
-                            <h4>Aucune sauvegarde disponible</h4>
+                            <h4>No backups available</h4>
                         </div>
                     @endif
                 </div>

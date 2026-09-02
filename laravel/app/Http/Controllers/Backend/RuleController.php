@@ -83,10 +83,10 @@ class RuleController extends Controller
             ]);
 
             Log::info("[RuleController] - Nouvelle règle créée: " . $request->name);
-            return redirect()->route('admin.finance.rules.index')->with('success', 'Règle créée avec succès');
+            return redirect()->route('admin.finance.rules.index')->with('success', 'Rule created successfully');
         } catch (\Exception $e) {
             Log::error("[RuleController] - Erreur lors de la création de la règle: " . $e->getMessage());
-            return back()->withErrors(['general' => 'Erreur lors de la création de la règle'])->withInput();
+            return back()->withErrors(['general' => 'Error creating the rule'])->withInput();
         }
     }
 
@@ -132,10 +132,10 @@ class RuleController extends Controller
             ]);
 
             Log::info("[RuleController] - Règle mise à jour: " . $rule->name);
-            return redirect()->route('admin.finance.rules.index')->with('success', 'Règle mise à jour avec succès');
+            return redirect()->route('admin.finance.rules.index')->with('success', 'Rule updated successfully');
         } catch (\Exception $e) {
             Log::error("[RuleController] - Erreur lors de la mise à jour de la règle: " . $e->getMessage());
-            return back()->withErrors(['general' => 'Erreur lors de la mise à jour de la règle'])->withInput();
+            return back()->withErrors(['general' => 'Error updating the rule'])->withInput();
         }
     }
 
@@ -148,10 +148,10 @@ class RuleController extends Controller
             $ruleName = $rule->name;
             $rule->delete();
             Log::info("[RuleController] - Règle supprimée: " . $ruleName);
-            return back()->with('success', 'Règle supprimée avec succès');
+            return back()->with('success', 'Rule deleted successfully');
         } catch (\Exception $e) {
             Log::error("[RuleController] - Erreur lors de la suppression de la règle: " . $e->getMessage());
-            return back()->withErrors(['general' => 'Erreur lors de la suppression de la règle']);
+            return back()->withErrors(['general' => 'Error deleting the rule']);
         }
     }
 
@@ -164,10 +164,10 @@ class RuleController extends Controller
             $rule->active = !$rule->active;
             $rule->save();
             Log::info("[RuleController] - Règle " . ($rule->active ? 'activée' : 'désactivée') . ": " . $rule->name);
-            return back()->with('success', 'Règle ' . ($rule->active ? 'activée' : 'désactivée') . ' avec succès');
+            return back()->with('success', 'Rule ' . ($rule->active ? 'enabled' : 'disabled') . ' successfully');
         } catch (\Exception $e) {
             Log::error("[RuleController] - Erreur lors de l'activation/désactivation de la règle: " . $e->getMessage());
-            return back()->withErrors(['general' => 'Erreur lors de l\'activation/désactivation de la règle']);
+            return back()->withErrors(['general' => 'Error enabling/disabling the rule']);
         }
     }
 

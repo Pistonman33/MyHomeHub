@@ -4,16 +4,16 @@
         <div class="finance-all-header">
             <div>
                 <span class="finance-eyebrow">MyFinance</span>
-                <h1>Toutes les transactions</h1>
-                <p>Retrouvez, filtrez et corrigez rapidement vos mouvements.</p>
+                <h1>All transactions</h1>
+                <p>Quickly review, filter and correct your transactions.</p>
             </div>
             <a class="finance-all-back" href="{{ route('admin.finance.dashboard') }}"><i
-                    class="fa-solid fa-chart-pie"></i><span>Vue d'ensemble</span></a>
+                    class="fa-solid fa-chart-pie"></i><span>Overview</span></a>
         </div>
 
         <form class="finance-all-toolbar" method="GET" action="{{ route('admin.finance.all') }}">
             <div class="finance-filter-group">
-                <label class="finance-filter-label" for="year">Année</label>
+                <label class="finance-filter-label" for="year">Year</label>
                 <select id="year" name="year" class="finance-filter-select">
                     @foreach ($years as $year)
                         <option value="{{ $year }}" {{ (int) $selectedYear === (int) $year ? 'selected' : '' }}>
@@ -23,9 +23,9 @@
             </div>
 
             <div class="finance-filter-group">
-                <label class="finance-filter-label" for="month">Mois</label>
+                <label class="finance-filter-label" for="month">Month</label>
                 <select id="month" name="month" class="finance-filter-select">
-                    <option value="">Tous les mois</option>
+                    <option value="">All months</option>
                     @foreach ($months as $month)
                         <option value="{{ $month }}"
                             {{ (string) $selectedMonth === (string) $month ? 'selected' : '' }}>
@@ -36,9 +36,9 @@
             </div>
 
             <div class="finance-filter-group">
-                <label class="finance-filter-label" for="category">Catégorie</label>
+                <label class="finance-filter-label" for="category">Category</label>
                 <select id="category" name="category" class="finance-filter-select">
-                    <option value="">Toutes les catégories</option>
+                    <option value="">All categories</option>
                     @foreach ($all_category as $category)
                         <option value="{{ $category->id }}"
                             {{ (string) $selectedCategory === (string) $category->id ? 'selected' : '' }}>
@@ -51,21 +51,21 @@
 
             <label class="finance-search" for="search"><i class="fa-solid fa-magnifying-glass"></i>
                 <input type="search" id="search" name="search" value="{{ request('search') }}"
-                    placeholder="Rechercher une transaction..." autocomplete="off" />
+                    placeholder="Search for a transaction..." autocomplete="off" />
             </label>
 
-            <button type="submit" class="finance-filter-submit">Appliquer</button>
+            <button type="submit" class="finance-filter-submit">Apply</button>
         </form>
 
         <div class="finance-all-table-card">
             <div class="finance-all-table-heading">
                 <div>
-                    <h2>Historique</h2>
+                    <h2>History</h2>
                     <span>{{ $transactions->total() }} transaction(s)</span>
                 </div>
                 <div class="finance-all-heading-actions">
                     <button type="button" class="finance-save-all-btn" id="saveAllFinanceChanges"><i
-                            class="fa-solid fa-floppy-disk"></i> Sauvegarder</button>
+                            class="fa-solid fa-floppy-disk"></i> Save</button>
                     <i class="fa-solid fa-arrow-down-wide-short"></i>
                 </div>
             </div>
@@ -85,10 +85,10 @@
                                     <span class="finance-date-sort-icon">{{ $selectedSort === 'asc' ? '↑' : '↓' }}</span>
                                 </a>
                             </th>
-                            <th>Libellé</th>
-                            <th>Catégorie</th>
-                            <th>Groupe</th>
-                            <th class="text-right">Montant</th>
+                            <th>Label</th>
+                            <th>Category</th>
+                            <th>Group</th>
+                            <th class="text-right">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -141,7 +141,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="finance-no-data">Aucune transaction trouvée.</td>
+                                <td colspan="5" class="finance-no-data">No transactions found.</td>
                             </tr>
                         @endforelse
                     </tbody>

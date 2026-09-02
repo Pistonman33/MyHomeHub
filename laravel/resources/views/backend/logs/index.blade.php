@@ -5,19 +5,19 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <span class="admin-eyebrow">Management</span>
-                <h1 class="admin-page-title">Analyse des logs</h1>
-                <p class="text-muted mb-0">Fichier : {{ $logFile }}</p>
-                <p class="text-muted mb-0"><small>Source : application Laravel</small></p>
+                <h1 class="admin-page-title">Log Analysis</h1>
+                <p class="text-muted mb-0">File: {{ $logFile }}</p>
+                <p class="text-muted mb-0"><small>Source: Laravel application</small></p>
             </div>
             <div class="btn-group admin-page-action" role="group">
                 <a href="{{ route('admin.logs.download', ['source' => $source ?? 'auto']) }}" class="admin-secondary-action">
-                    <i class="fa-solid fa-download"></i> Télécharger
+                    <i class="fa-solid fa-download"></i> Download
                 </a>
                 <form action="{{ route('admin.logs.clear', ['source' => $source ?? 'auto']) }}" method="POST"
-                    class="d-inline" onsubmit="return confirm('Vider le fichier de log ?');">
+                    class="d-inline" onsubmit="return confirm('Clear the log file?');">
                     @csrf
                     <button type="submit" class="admin-danger-action">
-                        <i class="fa-solid fa-broom"></i> Vider
+                        <i class="fa-solid fa-broom"></i> Clear
                     </button>
                 </form>
             </div>
@@ -106,7 +106,8 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary mb-2">Filtrer</button>
+                    <button type="submit" class="admin-primary-action mb-2"><i class="fa-solid fa-filter"></i>
+                        Filter</button>
                 </form>
             </div>
         </div>
@@ -163,7 +164,7 @@
                 </div>
             </div>
         @else
-            <div class="alert alert-info mb-0">Aucun log trouvé pour cette sélection.</div>
+            <div class="alert alert-info mb-0">No logs found for this selection.</div>
         @endif
     </div>
 @endsection

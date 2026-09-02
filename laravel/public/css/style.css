@@ -34,6 +34,9 @@ footer {
   color: #17233d;
   font-family: "Open Sans", sans-serif;
 }
+.admin-main {
+  font-family: "Open Sans", sans-serif;
+}
 .admin-page-header {
   display: flex;
   align-items: flex-end;
@@ -52,7 +55,7 @@ footer {
   margin: 0.2rem 0 0.25rem;
   color: #17233d;
   font:
-    700 1.8rem/1.2 "Raleway",
+    700 1.8rem/1.2 "Open Sans",
     sans-serif;
 }
 .admin-page-subtitle {
@@ -98,6 +101,26 @@ footer {
   background: #fff;
   color: #c8434e;
   cursor: pointer;
+}
+.admin-icon-action {
+  display: inline-grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.admin-icon-action--edit {
+  color: #354158;
+}
+.admin-icon-action--delete {
+  color: #c8434e;
+}
+.admin-icon-action:hover {
+  background: #f6f9ff;
+  border-radius: 5px;
 }
 .admin-panel {
   overflow: hidden;
@@ -360,7 +383,7 @@ textarea#editor {
 .blog-posts-header h1 {
   margin: 0.2rem 0 0.25rem;
   font:
-    700 1.8rem/1.2 "Raleway",
+    700 1.8rem/1.2 "Open Sans",
     sans-serif;
 }
 .blog-posts-header p {

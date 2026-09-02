@@ -6,9 +6,9 @@
             <div class="col-md-12">
                 <h1 class="h2">
                     @if ($rule)
-                        Modifier la Règle: {{ $rule->name }}
+                        Edit Rule: {{ $rule->name }}
                     @else
-                        Créer une Nouvelle Règle
+                        Create a New Rule
                     @endif
                 </h1>
             </div>
@@ -30,7 +30,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Informations de la Règle</h5>
+                        <h5 class="mb-0">Rule Information</h5>
                     </div>
                     <div class="card-body">
                         <form
@@ -43,7 +43,7 @@
 
                             <div class="mb-3">
                                 <label for="name" class="form-label">
-                                    Nom de la Règle <span class="text-danger">*</span>
+                                    Rule Name <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
                                     id="name" name="name" value="{{ old('name', $rule?->name) }}"
@@ -51,16 +51,16 @@
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text text-muted">Un nom descriptif pour identifier la règle</small>
+                                <small class="form-text text-muted">A descriptive name to identify the rule</small>
                             </div>
 
                             <div class="mb-3">
                                 <label for="category_id" class="form-label">
-                                    Catégorie <span class="text-danger">*</span>
+                                    Category <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id" required>
-                                    <option value="">-- Sélectionner une catégorie --</option>
+                                    <option value="">-- Select a category --</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}"
                                             @if (old('category_id', $rule?->category_id) == $category->id) selected @endif
@@ -72,8 +72,7 @@
                                 @error('category_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text text-muted">La catégorie à laquelle sera assignée la
-                                    transaction</small>
+                                <small class="form-text text-muted">The category assigned to the transaction</small>
                             </div>
 
                             <div class="mb-3">
@@ -94,7 +93,7 @@
 
                             <div class="mb-3">
                                 <label for="libelle_template" class="form-label">
-                                    Modèle de Libellé <span class="badge bg-info">Optionnel</span>
+                                    Label Template <span class="badge bg-info">Optional</span>
                                 </label>
                                 <input type="text" class="form-control @error('libelle_template') is-invalid @enderror"
                                     id="libelle_template" name="libelle_template"
@@ -112,7 +111,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="priority" class="form-label">
-                                            Priorité <span class="badge bg-info">Optionnel</span>
+                                            Priority <span class="badge bg-info">Optional</span>
                                         </label>
                                         <input type="number" class="form-control @error('priority') is-invalid @enderror"
                                             id="priority" name="priority"
@@ -132,10 +131,10 @@
                                             <input class="form-check-input" type="checkbox" id="active" name="active"
                                                 value="1" @if (old('active', $rule?->active ?? true)) checked @endif>
                                             <label class="form-check-label" for="active">
-                                                Règle Active
+                                                Active Rule
                                             </label>
                                             <small class="form-text text-muted d-block">
-                                                Les règles inactives ne seront pas appliquées
+                                                Inactive rules will not be applied
                                             </small>
                                         </div>
                                     </div>
@@ -146,9 +145,9 @@
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fa-solid fa-save"></i>
                                     @if ($rule)
-                                        Mettre à jour
+                                        Update
                                     @else
-                                        Créer la Règle
+                                        Create Rule
                                     @endif
                                 </button>
                                 <a href="{{ route('admin.finance.rules.index') }}" class="btn btn-secondary btn-lg">

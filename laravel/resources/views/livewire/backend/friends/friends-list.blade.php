@@ -2,16 +2,16 @@
 
     <div class="admin-page-header">
         <div><span class="admin-eyebrow">MyFriends</span>
-            <h1 class="admin-page-title">Anniversaires</h1>
-            <p class="admin-page-subtitle">Gérez les contacts et leurs dates importantes.</p>
+            <h1 class="admin-page-title">Birthdays</h1>
+            <p class="admin-page-subtitle">Manage contacts and their important dates.</p>
         </div>
         <livewire:backend.friends.friends-new />
     </div>
 
     <div class="admin-toolbar"><label class="admin-search" for="friends-search"><i
                 class="fa-solid fa-magnifying-glass"></i><input id="friends-search" type="search"
-                placeholder="Rechercher par prénom ou nom" wire:model.live.debounce.300ms="search">
-        </label><span class="admin-live-hint"><i class="fa-solid fa-circle"></i> Filtrage instantané</span></div>
+                placeholder="Search by first or last name" wire:model.live.debounce.300ms="search">
+        </label><span class="admin-live-hint"><i class="fa-solid fa-circle"></i> Instant filtering</span></div>
 
     <div class="admin-panel admin-table-panel">
         <table class="table admin-data-table">
@@ -75,7 +75,7 @@
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-3">
                                 {{-- Edit --}}
-                                <i class="fa-solid fa-pen-to-square fa-lg mt-3 text-primary" style="cursor:pointer;"
+                                <i class="fa-solid fa-pen admin-icon-action admin-icon-action--edit"
                                     wire:click.stop="edit({{ $friend->id }})" title="Edit friend"></i>
 
                                 {{-- Delete --}}

@@ -9,12 +9,12 @@
         <div class="row mb-4">
             <div class="col-md-8">
                 <span class="admin-eyebrow">MyFinance</span>
-                <h1 class="admin-page-title">Règles de catégorisation</h1>
-                <p class="text-muted">Gérez les règles automatiques pour catégoriser les transactions bancaires</p>
+                <h1 class="admin-page-title">Categorization Rules</h1>
+                <p class="text-muted">Manage automatic rules for categorizing bank transactions</p>
             </div>
             <div class="col-md-4 text-right admin-page-action">
                 <a href="{{ route('admin.finance.rules.create') }}" class="admin-primary-action">
-                    <i class="fa-solid fa-plus"></i> Nouvelle Règle
+                    <i class="fa-solid fa-plus"></i> New Rule
                 </a>
             </div>
         </div>
@@ -37,9 +37,9 @@
             <div class="card-body border-bottom">
                 <form method="GET" action="{{ route('admin.finance.rules.index') }}" class="row g-2 align-items-end">
                     <div class="col-md-4">
-                        <label for="category" class="form-label small text-muted mb-1">Filtrer par catégorie</label>
+                        <label for="category" class="form-label small text-muted mb-1">Filter by category</label>
                         <select name="category" id="category" class="form-control form-control-sm">
-                            <option value="">Toutes les catégories</option>
+                            <option value="">All categories</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ (string) $selectedCategoryId === (string) $category->id ? 'selected' : '' }}>
@@ -49,12 +49,12 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrer</button>
+                        <button type="submit" class="finance-filter-submit"><i class="fa-solid fa-filter"></i>
+                            Filter</button>
                     </div>
                     @if ($selectedCategoryId)
                         <div class="col-md-2">
-                            <a href="{{ route('admin.finance.rules.index') }}" class="btn btn-sm btn-outline-dark">Tout
-                                voir</a>
+                            <a href="{{ route('admin.finance.rules.index') }}" class="admin-secondary-action">View all</a>
                         </div>
                     @endif
                 </form>
@@ -63,11 +63,10 @@
                 <table class="table table-sm table-hover mb-0 rules-table">
                     <thead class="bg-light">
                         <tr>
-                            <th>Nom</th>
-                            <th>Catégorie</th>
-                            <th>Mots-clés</th>
-                            <th>Priorité</th>
-                            <th>État</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Keywords</th>
+                            <th>Status</th>
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
@@ -84,7 +83,7 @@
                                             {{ $rule->category->nom }}
                                         </span>
                                     @else
-                                        <span class="badge bg-warning">Non assignée</span>
+                                        <span class="badge bg-warning">Unassigned</span>
                                     @endif
                                 </td>
                                 <td>
@@ -93,15 +92,12 @@
                                     </small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info">{{ $rule->priority }}</span>
-                                </td>
-                                <td>
                                     <form action="{{ route('admin.finance.rules.toggle', $rule->id) }}" method="POST">
                                         @csrf
                                         <button type="submit"
                                             class="admin-rule-switch {{ $rule->active ? 'is-active' : '' }}"
-                                            title="{{ $rule->active ? 'Désactiver' : 'Activer' }}"
-                                            aria-label="{{ $rule->active ? 'Désactiver' : 'Activer' }}">
+                                            title="{{ $rule->active ? 'Disable' : 'Enable' }}"
+                                            aria-label="{{ $rule->active ? 'Disable' : 'Enable' }}">
                                             <span></span>
                                         </button>
                                     </form>
@@ -109,15 +105,16 @@
                                 <td class="text-right">
                                     <div class="btn-group btn-group-sm rule-action-group" role="group">
                                         <a href="{{ route('admin.finance.rules.edit', $rule->id) }}"
-                                            class="btn btn-outline-primary" title="Modifier">
-                                            <i class="fa-solid fa-edit"></i>
+                                            class="admin-icon-action admin-icon-action--edit" title="Edit">
+                                            <i class="fa-solid fa-pen"></i>
                                         </a>
                                         <form action="{{ route('admin.finance.rules.destroy', $rule->id) }}" method="POST"
                                             style="display: inline;"
-                                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette règle ?');">
+                                            onsubmit="return confirm('Are you sure you want to delete this rule?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                            <button type="submit" class="admin-icon-action admin-icon-action--delete"
+                                                title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
@@ -126,10 +123,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4">
-                                    <p class="text-muted mb-0">Aucune règle n'a été créée pour le moment</p>
+                                <td colspan="5" class="text-center py-4">
+                                    <p class="text-muted mb-0">No rules have been created yet</p>
                                     <small>
-                                        <a href="{{ route('admin.finance.rules.create') }}">Créer la première règle</a>
+                                        <a href="{{ route('admin.finance.rules.create') }}">Create the first rule</a>
                                     </small>
                                 </td>
                             </tr>

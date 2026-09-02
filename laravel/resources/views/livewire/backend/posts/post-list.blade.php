@@ -3,18 +3,18 @@
         <div>
             <span class="blog-eyebrow">MyBlog</span>
             <h1>Posts</h1>
-            <p>Gérez les articles et leur publication depuis un seul endroit.</p>
+            <p>Manage articles and their publication from one place.</p>
         </div>
         <a href="{{ route('admin.blog.posts.create') }}" class="blog-create-button">
-            <i class="fa-solid fa-plus"></i><span>Créer un post</span>
+            <i class="fa-solid fa-plus"></i><span>Create a post</span>
         </a>
     </div>
 
     <div class="blog-posts-toolbar">
         <label class="blog-search" for="blog-post-search"><i class="fa-solid fa-magnifying-glass"></i><input
-                id="blog-post-search" type="search" placeholder="Rechercher un titre, une catégorie ou un tag..."
+                id="blog-post-search" type="search" placeholder="Search for a title, category or tag..."
                 wire:model.live.debounce.300ms="search"></label>
-        <span class="blog-result-hint"><i class="fa-solid fa-circle"></i> Filtrage instantané</span>
+        <span class="blog-result-hint"><i class="fa-solid fa-circle"></i> Instant filtering</span>
     </div>
 
     <div class="blog-posts-table-card">
@@ -41,10 +41,10 @@
                                 @endif
                             </div>
                         </th>
-                        <th>Catégories</th>
+                        <th>Categories</th>
                         <th>Tags</th>
                         <th wire:click="sortBy('created_at')" class="is-sortable">
-                            <div><span>Créé le</span>
+                            <div><span>Created on</span>
                                 @if ($sortField == 'created_at')
                                     <i class="fa-solid fa-arrow-{{ $sortDirection == 'asc' ? 'up' : 'down' }}"></i>
                                 @endif
@@ -73,9 +73,9 @@
                             </td>
                             <td class="blog-post-date">{{ $post->created_at->format('d/m/Y') }}</td>
                             <td class="blog-post-actions">
-                                <a href="{{ route('admin.blog.posts.edit', $post->id) }}" title="Modifier le post"><i
+                                <a href="{{ route('admin.blog.posts.edit', $post->id) }}" title="Edit post"><i
                                         class="fa-solid fa-pen-to-square"></i></a>
-                                <button type="button" title="Supprimer le post"
+                                <button type="button" title="Delete post"
                                     onclick="confirm('Are you sure?') || event.stopImmediatePropagation()"
                                     wire:click.stop="delete({{ $post->id }})"><i
                                         class="fa-solid fa-trash"></i></button>
@@ -84,8 +84,8 @@
                     @empty
                         <tr>
                             <td colspan="6" class="blog-empty-state"><i
-                                    class="fa-regular fa-file-lines"></i><strong>Aucun post trouvé</strong><span>Essayez
-                                    une autre recherche.</span></td>
+                                    class="fa-regular fa-file-lines"></i><strong>No posts found</strong><span>Try
+                                    another search.</span></td>
                         </tr>
                     @endforelse
                 </tbody>

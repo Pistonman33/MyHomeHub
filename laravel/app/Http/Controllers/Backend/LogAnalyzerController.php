@@ -229,7 +229,7 @@ class LogAnalyzerController extends Controller
         $logFile = $this->resolveLogFile($source);
 
         if (!file_exists($logFile)) {
-            return back()->withErrors(['message' => 'Fichier de log non trouvé']);
+            return back()->withErrors(['message' => 'Log file not found']);
         }
 
         $fileName = basename($logFile);
@@ -246,14 +246,14 @@ class LogAnalyzerController extends Controller
         $logFile = $this->resolveLogFile($source);
 
         if (!file_exists($logFile)) {
-            return back()->withErrors(['message' => 'Fichier de log non trouvé']);
+            return back()->withErrors(['message' => 'Log file not found']);
         }
 
         try {
             file_put_contents($logFile, '');
-            return back()->with('success', 'Fichier de log vidé avec succès');
+            return back()->with('success', 'Log file cleared successfully');
         } catch (\Exception $e) {
-            return back()->withErrors(['message' => 'Erreur lors du vidage du log: ' . $e->getMessage()]);
+            return back()->withErrors(['message' => 'Error clearing the log: ' . $e->getMessage()]);
         }
     }
 }
