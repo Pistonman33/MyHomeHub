@@ -622,6 +622,10 @@
 .finance-year-filter {
   position: relative;
 }
+.finance-year-select-wrap {
+  position: relative;
+  display: inline-block;
+}
 .finance-year-filter label {
   position: absolute;
   width: 1px;
@@ -638,16 +642,28 @@
   color: #17233d;
   font-weight: 600;
 }
-.finance-year-filter .fa-calendar {
+.finance-year-select-wrap .fa-calendar {
   position: absolute;
   right: 0.7rem;
   top: 0.7rem;
   pointer-events: none;
   color: #667085;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.finance-year-select-wrap .fa-calendar.is-visible {
+  opacity: 1;
 }
 .finance-dashboard-filter-button {
+  display: inline-flex;
+  width: auto;
+  height: auto;
   margin-left: 0.5rem;
   padding: 0.55rem 0.75rem;
+  align-items: center;
+  gap: 0.25rem;
+  appearance: none;
+  line-height: 1.2;
   border: 1px solid #2166cb;
   border-radius: 6px;
   background: #2166cb;

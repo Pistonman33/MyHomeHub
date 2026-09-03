@@ -9,18 +9,21 @@
             </div>
             <form method="GET" action="{{ route('admin.finance.dashboard') }}" class="finance-year-filter">
                 <label for="dashboard-year">Year</label>
-                <select id="dashboard-year" name="year" onchange="this.form.submit()">
-                    @foreach ($years as $availableYear)
-                        <option value="{{ $availableYear }}" @selected((int) $availableYear === $year)>{{ $availableYear }}</option>
-                    @endforeach
-                    @if ($years->isEmpty())
-                        <option value="{{ $year }}" selected>{{ $year }}</option>
-                    @endif
-                </select><span class="fa-regular fa-calendar"></span>
+                <span class="finance-year-select-wrap">
+                    <select id="dashboard-year" name="year" onchange="this.form.submit()">
+                        @foreach ($years as $availableYear)
+                            <option value="{{ $availableYear }}" @selected((int) $availableYear === $year)>{{ $availableYear }}</option>
+                        @endforeach
+                        @if ($years->isEmpty())
+                            <option value="{{ $year }}" selected>{{ $year }}</option>
+                        @endif
+                    </select><span class="fa-regular fa-calendar {{ $month ? 'is-visible' : '' }}"></span>
+                </span>
                 <button type="button" class="finance-dashboard-filter-button" id="dashboard-filter-button">
                     <i class="fa-solid fa-filter"></i> Filter
                 </button>
-                <select id="dashboard-month" name="month" class="finance-dashboard-month-select" aria-label="Mois">
+                <select id="dashboard-month" name="month"
+                    class="finance-dashboard-month-select {{ $month ? 'is-visible' : '' }}" aria-label="Month">
                     <option value="">Full year</option>
                     @foreach (range(1, 12) as $monthNumber)
                         <option value="{{ $monthNumber }}" @selected((int) $monthNumber === (int) ($month ?? 0))>
@@ -181,6 +184,7 @@
     <script>
         document.getElementById('dashboard-filter-button')?.addEventListener('click', function() {
             document.getElementById('dashboard-month')?.classList.toggle('is-visible');
+            document.querySelector('.finance-year-select-wrap .fa-calendar')?.classList.toggle('is-visible');
         });
         document.getElementById('dashboard-month')?.addEventListener('change', function() {
             this.form.submit();

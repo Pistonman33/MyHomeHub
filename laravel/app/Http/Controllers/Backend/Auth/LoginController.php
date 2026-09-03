@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Backend\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
@@ -25,7 +27,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/blog';
+    protected $redirectTo = '/admin/finance/dashboard';
 
     /**
      * Create a new controller instance.
@@ -39,6 +41,20 @@ class LoginController extends Controller
 
     public function username(){
         return 'username';
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        return redirect()->route('admin.finance.dashboard');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::guard()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('admin.dashboard');
     }
 
 }

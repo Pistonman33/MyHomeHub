@@ -5,7 +5,7 @@
         ],
         'MyFinance' => [
             [
-                'label' => 'Annual dashboard',
+                'label' => 'Dashboard',
                 'icon' => 'fa-chart-pie',
                 'route' => 'admin.finance.dashboard',
                 'pattern' => 'admin/finance/dashboard*',
@@ -52,6 +52,7 @@
                 'label' => 'All Movies',
                 'icon' => 'fa-film',
                 'route' => 'admin.movies.all',
+                'url' => 'https://' . env('MEDIA_SUBDOMAIN'),
                 'pattern' => 'admin/movies/all*',
             ],
             [
@@ -116,7 +117,8 @@
                     @foreach ($links as $link)
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is($link['pattern']) ? 'active' : '' }}"
-                                href="{{ route($link['route']) }}">
+                                href="{{ $link['url'] ?? route($link['route']) }}"
+                                @if (($link['route'] ?? '') === 'admin.movies.all') target="_blank" rel="noopener noreferrer" @endif>
                                 <i class="fa-solid {{ $link['icon'] }}"></i><span>{{ $link['label'] }}</span>
                                 @if (($link['route'] ?? '') === 'admin.movies.pending')
                                     <span
