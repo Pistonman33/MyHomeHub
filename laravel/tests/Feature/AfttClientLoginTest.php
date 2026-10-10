@@ -25,13 +25,14 @@ class AfttClientLoginTest extends TestCase
                 $this->assertSame('1', $request['sidebar_login']);
 
                 return Http::response(
-                    '<html><body><a href="../logout.php">logout</a></body></html>',
-                    200,
-                    [
-                        'Set-Cookie' => 'PHPSESSID=loggedin-session; path=/; secure; HttpOnly',
-                    ]
+                    '<html><body>Redirecting to the account</body></html>',
+                    200
                 );
             },
+            'https://data.aftt.be/tools/fiche.php?licenceID=167814' => Http::response(
+                '<section class="player-profile-hero"><span>167814</span><span>Points actuels</span><span>Points de base</span></section>',
+                200
+            ),
         ]);
 
         $client = new AfttClient();
@@ -40,6 +41,7 @@ class AfttClientLoginTest extends TestCase
         $session = $client->login();
 
         $this->assertArrayHasKey('cookies', $session);
+        $this->assertStringContainsString('Points actuels', $session['dashboard']);
         Http::assertSent(function ($request) {
             return $request->url() === 'https://data.aftt.be/tools/index.php'
                 && $request->method() === 'POST'
@@ -48,5 +50,28 @@ class AfttClientLoginTest extends TestCase
                 && $request['password'] === 'secret-pass'
                 && $request['sidebar_login'] === '1';
         });
+    }
+
+    public function test_login_fails_if_the_session_still_returns_the_login_page(): void
+    {
+        Http::fake([
+            'https://data.aftt.be/tools/index.php' => function ($request) {
+                return $request->method() === 'GET'
+                    ? Http::response('<input name="csrf_token" value="abc123">')
+                    : Http::response('Request received');
+            },
+            'https://data.aftt.be/tools/fiche.php?licenceID=167814' => Http::response(
+                '<form><input name="licence" placeholder="Licence ou login"><input name="sidebar_login"></form>',
+                200
+            ),
+        ]);
+
+        $client = new AfttClient();
+        $client->setCredentials(167814, 'secret-pass');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('the portal returned its login page');
+
+        $client->login();
     }
 }

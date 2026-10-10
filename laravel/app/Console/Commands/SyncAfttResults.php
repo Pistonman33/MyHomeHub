@@ -69,7 +69,7 @@ class SyncAfttResults extends Command
         $session = $client->login();
 
         // 2. fetch page
-        $html = $client->getDashboard($session['cookies'], $license);
+        $html = $session['dashboard'] ?? $client->getDashboard($session['cookies'], $license);
 
         // 3. parse general information (points, ranking, etc.)
         $data = $parser->parseDashboard($html);

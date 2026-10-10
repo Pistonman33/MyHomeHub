@@ -21,7 +21,7 @@ class AfttClient
             throw new \RuntimeException('AFTT credentials are not set.');
         }
 
-        $baseUrl = rtrim((string) env('AFTT_BASE_URL', 'https://data.aftt.be'), '/');
+        $baseUrl = $this->baseUrl();
         $loginUrl = $baseUrl . '/tools/index.php';
         $host = (string) parse_url($loginUrl, PHP_URL_HOST);
 
@@ -35,7 +35,7 @@ class AfttClient
         }
 
         $initialBody = (string) $initialResponse->body();
-        if (! preg_match('/name="csrf_token"[^>]*value="([^"]+)"/i', $initialBody, $matches)) {
+        if (! preg_match('/<input\b(?=[^>]*\bname=["\']csrf_token["\'])(?=[^>]*\bvalue=["\']([^"\']+)["\'])[^>]*>/i', $initialBody, $matches)) {
             throw new \RuntimeException('Unable to authenticate to AFTT: CSRF token was not found on the login page.');
         }
 
@@ -55,32 +55,70 @@ class AfttClient
             $cookies[$cookie['Name']] = $cookie['Value'];
         }
 
-        if (! $this->isSuccessfulLoginResponse((string) $response->body())) {
-            throw new \RuntimeException('Unable to authenticate to AFTT. The data portal did not confirm the login; check the stored AFTT license and password.');
+        $dashboardResponse = $this->requestDashboard($cookies, $this->license);
+        $dashboard = (string) $dashboardResponse->body();
+
+        if (! $this->isAuthenticatedPlayerPage($dashboard, $this->license)) {
+            $reason = $this->isLoginPage($dashboard)
+                ? 'the portal returned its login page'
+                : 'the authenticated player fiche was not returned';
+
+            throw new \RuntimeException(sprintf(
+                'Unable to authenticate to AFTT for license %d: %s (HTTP %d). Check the production AFTT URL, session handling, and stored credentials.',
+                $this->license,
+                $reason,
+                $dashboardResponse->status()
+            ));
         }
 
-        return ['cookies' => $cookies];
+        return ['cookies' => $cookies, 'dashboard' => $dashboard];
     }
 
     public function getDashboard(array $cookies, ?int $license = null): string
     {
-        $baseUrl = rtrim((string) env('AFTT_BASE_URL', 'https://data.aftt.be'), '/');
-        $url = $baseUrl . '/tools/fiche.php?licenceID=' . ($license ?? $this->license);
+        $response = $this->requestDashboard($cookies, $license ?? $this->license);
+
+        return (string) $response->body();
+    }
+
+    private function requestDashboard(array $cookies, ?int $license): \Illuminate\Http\Client\Response
+    {
+        $url = $this->baseUrl() . '/tools/fiche.php?licenceID=' . $license;
 
         return Http::withHeaders([
             'User-Agent' => 'Mozilla/5.0',
         ])
             ->withCookies($cookies, (string) parse_url($url, PHP_URL_HOST))
             ->timeout(30)
-            ->get($url)
-            ->body();
+            ->get($url);
     }
 
-    protected function isSuccessfulLoginResponse(string $body): bool
+    private function baseUrl(): string
     {
-        $normalized = strtolower($body);
+        $url = trim((string) config('services.aftt.base_url', 'https://data.aftt.be'));
 
-        return (str_contains($normalized, 'logout.php') || str_contains($normalized, 'déconnexion'))
-            && ! str_contains($normalized, 'name="sidebar_login"');
+        return rtrim($url, '/');
+    }
+
+    private function isAuthenticatedPlayerPage(string $body, int $license): bool
+    {
+        if ($this->isLoginPage($body)) {
+            return false;
+        }
+
+        $hasPlayerLicense = str_contains($body, (string) $license);
+
+        return $hasPlayerLicense
+            && str_contains(mb_strtolower($body), 'player-profile-hero')
+            && str_contains(mb_strtolower($body), 'points actuels')
+            && str_contains(mb_strtolower($body), 'points de base');
+    }
+
+    private function isLoginPage(string $body): bool
+    {
+        $normalized = mb_strtolower($body);
+
+        return str_contains($normalized, 'name="sidebar_login"')
+            || str_contains($normalized, "name='sidebar_login'");
     }
 }

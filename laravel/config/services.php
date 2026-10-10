@@ -38,5 +38,8 @@ return [
         'username' => env('WORDPRESS_HTTP_USER'),
         'password' => env('WORDPRESS_HTTP_PASSWORD'),
     ],
+        'aftt' => [
+            'base_url' => env('AFTT_BASE_URL', 'https://data.aftt.be'),
+        ],
 
 ];
