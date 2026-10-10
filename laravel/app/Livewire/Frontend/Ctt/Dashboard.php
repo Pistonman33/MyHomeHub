@@ -12,8 +12,13 @@ use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Component
 {
-    public $season = 'all';
+    public $season;
     public $player = '167818';
+
+    public function mount(): void
+    {
+        $this->season = (string) CttSeason::currentSeasonYear();
+    }
 
     public function baseQuery()
     {
@@ -47,7 +52,7 @@ class Dashboard extends Component
     {
         $s = $this->season;
         if (!$s || $s === 'all')
-            $s = date('Y');
+            $s = CttSeason::currentSeasonYear();
         $season = CttSeason::where('year', $s)->first();
         if ($season) {
             return $season->playerSeasons()
@@ -130,6 +135,7 @@ class Dashboard extends Component
                 'ctt_matches.id'
             )
             ->where('ctt_matches.player_license', $this->player)
+            ->when($this->season !== 'all', fn ($query) => $query->where('ctt_matches.season_year', $this->season))
             ->orderByDesc('ctt_player_points_history.delta_points')
             ->limit(3)
             ->get();
@@ -153,6 +159,7 @@ class Dashboard extends Component
                 'ctt_matches.id'
             )
             ->where('ctt_matches.player_license', $this->player)
+            ->when($this->season !== 'all', fn ($query) => $query->where('ctt_matches.season_year', $this->season))
             ->orderBy('ctt_player_points_history.delta_points')
             ->limit(3)
             ->get();    

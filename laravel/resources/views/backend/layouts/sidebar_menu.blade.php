@@ -47,6 +47,14 @@
                 'pattern' => 'admin/finance/rules*',
             ],
         ],
+        'MySport' => [
+            [
+                'label' => 'CTT',
+                'icon' => 'fa-table-tennis',
+                'route' => 'admin.ctt.index',
+                'pattern' => 'admin/ctt*',
+            ],
+        ],
         'MyLibrary' => [
             [
                 'label' => 'All Movies',

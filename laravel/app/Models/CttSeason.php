@@ -10,6 +10,13 @@ class CttSeason extends Model
 {
     protected $table = 'ctt_seasons';
 
+    public static function currentSeasonYear(): int
+    {
+        $now = now();
+
+        return $now->month >= 9 ? $now->year + 1 : $now->year;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Primary Key Configuration

@@ -3,43 +3,50 @@
 namespace App\Services;
 
 use Symfony\Component\DomCrawler\Crawler;
-use DOMDocument;
-use DOMXPath;
 
 class AfttParser
 {
     public function parseDashboard(string $html): array
     {
-        $crawler = new Crawler($html);
+        $normalized = preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5));
 
-        // 🎯 Points départs
-        $starting_points = $crawler
-            ->filter('.info-section')
-            ->reduce(fn($node) => str_contains($node->text(), 'Départ'))
-            ->first()
-            ->filter('h3')
-            ->text();
+        $seasonYear = null;
+        if (preg_match('/Saison\s+(\d{4})\s*[-–]\s*(\d{4})/i', $normalized, $seasonMatches)) {
+            $seasonYear = (int) $seasonMatches[2];
+        }
 
-        // 🎯 Points actuels
-        $recent_points = $crawler
-            ->filter('.info-section')
-            ->reduce(fn($node) => str_contains($node->text(), 'Actuels'))
-            ->first()
-            ->filter('h3')
-            ->text();
+        $starting_points = $this->extractNumberByLabel($normalized, [
+            'points de départ',
+            'points depart',
+            'point de départ',
+            'point depart',
+            'points de base',
+            'points de base',
+        ]);
 
-        // 🎯 Ranking
-        $ranking = $crawler
-            ->filter('.info-section')
-            ->reduce(fn($node) => str_contains($node->text(), 'Ranking'))
-            ->first()
-            ->filter('h3')
-            ->text();
+        $recent_points = $this->extractNumberByLabel($normalized, [
+            'points actuels',
+            'points actu',
+            'point actuel',
+            'points publiés',
+            'points publies',
+            'total de points',
+        ]);
+
+        $ranking = $this->extractNumberByLabel($normalized, [
+            'classement belgique',
+            'classement belge',
+            'rang belgique',
+            'rang belge',
+            'ranking belgique',
+            'ranking',
+        ], true);
 
         return [
-            'starting_points' => $this->cleanPoints($starting_points),
-            'recent_points' => $this->cleanPoints($recent_points),
-            'ranking_belgium' => $this->cleanRanking($ranking),
+            'season_year' => $seasonYear,
+            'starting_points' => $starting_points,
+            'recent_points' => $recent_points,
+            'ranking_belgium' => $ranking,
         ];
     }
 
@@ -83,20 +90,24 @@ class AfttParser
 
         $matches = [];
 
-        // chaque card match
-        $cards = $xpath->query("//div[contains(@class,'card shadow-sm')]");
+        $cards = $xpath->query(
+            "//div[contains(concat(' ', normalize-space(@class), ' '), ' day-result-card ')]"
+            . " | //div[contains(concat(' ', normalize-space(@class), ' '), ' card shadow-sm ')]"
+        );
 
         foreach ($cards as $card) {
 
-            // HEADER
-            $headerNode = $xpath->query(".//div[contains(@class,'card-header')]//h6", $card)->item(0);
+            $headerNode = $xpath->query(
+                ".//div[contains(concat(' ', normalize-space(@class), ' '), ' day-result-header ')]//h6"
+                . " | .//div[contains(concat(' ', normalize-space(@class), ' '), ' card-header ')]//h6",
+                $card
+            )->item(0);
             $headerText = $headerNode ? trim($headerNode->textContent) : null;
 
             if (!$headerText) {
-                continue; // ignore faux cards
+                continue;
             }
 
-            // DATE + MATCH_ID (ex: 17/04/2026 - PBBWH21/059 - Set-Jet Fleur Bleue)
             $date = null;
             $matchId = null;
             $title = null;
@@ -107,37 +118,51 @@ class AfttParser
                 $title = trim($m[3]);
             }
 
-            // TOTAL POINTS MATCH
-            $totalNode = $xpath->query(".//div[contains(@class,'card-header')]//span[contains(@class,'badge')]", $card)->item(0);
-            $totalText = $totalNode ? trim($totalNode->textContent) : null;
-
-            $totalPoints = null;
-            if ($totalText && preg_match('/([-+]?[0-9]+(?:\.[0-9]+)?)/', $totalText, $m)) {
-                $totalPoints = (float) $m[1];
+            if (!$date || !$matchId) {
+                continue;
             }
 
-            // PLAYERS
+            $totalNode = $xpath->query(
+                ".//span[contains(concat(' ', normalize-space(@class), ' '), ' day-points-badge ')]"
+                . " | .//div[contains(concat(' ', normalize-space(@class), ' '), ' card-header ')]//span[contains(concat(' ', normalize-space(@class), ' '), ' badge ')]",
+                $card
+            )->item(0);
+            $totalText = $totalNode ? trim($totalNode->textContent) : null;
+            $totalPoints = $this->extractNumber($totalText);
+
             $players = [];
-            $rows = $xpath->query(".//div[contains(@class,'match-card')]", $card);
+            $rows = $xpath->query(
+                ".//div[contains(concat(' ', normalize-space(@class), ' '), ' match-card-modern ')]"
+                . " | .//div[contains(concat(' ', normalize-space(@class), ' '), ' match-card ')]",
+                $card
+            );
 
             foreach ($rows as $row) {
 
-                $nameNode = $xpath->query(".//button", $row)->item(0);
+                $nameNode = $xpath->query(".//button[contains(@class, 'opponent-link')]", $row)->item(0);
+                if (!$nameNode) {
+                    $nameNode = $xpath->query(".//button", $row)->item(0);
+                }
                 $scoreNode = $xpath->query(".//h5", $row)->item(0);
-                $pointsNode = $xpath->query(".//h5/following::small[1]", $row)->item(0);
-                $deltaNode = $xpath->query(".//span[contains(@class,'badge')]", $row)->item(0);
+                $pointsNode = $xpath->query(
+                    ".//div[contains(concat(' ', normalize-space(@class), ' '), ' match-score ')]//small"
+                    . " | .//h5/following::small[1]",
+                    $row
+                )->item(0);
+                $deltaNode = $xpath->query(
+                    ".//span[contains(concat(' ', normalize-space(@class), ' '), ' match-delta ')]"
+                    . " | .//span[contains(concat(' ', normalize-space(@class), ' '), ' badge ')]",
+                    $row
+                )->item(0);
 
                 $name = $nameNode ? trim($nameNode->textContent) : null;
 
-                $opponentPoints = null;
-                if ($pointsNode && preg_match('/([0-9]+(?:\.[0-9]+)?)/', $pointsNode->textContent, $m)) {
-                    $opponentPoints = (float) $m[1];
+                if (!$name) {
+                    continue;
                 }
 
-                $delta = null;
-                if ($deltaNode && preg_match('/([-+]?[0-9]+(?:\.[0-9]+)?)/', $deltaNode->textContent, $m)) {
-                    $delta = (float) $m[1];
-                }
+                $opponentPoints = $this->extractNumber($pointsNode?->textContent);
+                $delta = $this->extractNumber($deltaNode?->textContent);
 
                 $players[] = [
                     'name' => $name,
@@ -159,6 +184,60 @@ class AfttParser
         return $matches;
     }
 
+    private function extractNumber(?string $text): ?float
+    {
+        if ($text === null) {
+            return null;
+        }
+
+        $text = str_replace('−', '-', $text);
+        if (!preg_match('/[-+]?\s*\d+(?:[.,]\d+)?/u', $text, $matches)) {
+            return null;
+        }
+
+        return (float) str_replace(',', '.', str_replace(' ', '', $matches[0]));
+    }
+
+
+    private function extractNumberByLabel(string $text, array $labels, bool $ranking = false)
+    {
+        foreach ($labels as $label) {
+            $pattern = '/'.preg_quote($label, '/').'[^0-9]{0,60}([0-9]+(?:[.,][0-9]+)?)/iu';
+            if (preg_match($pattern, $text, $matches)) {
+                $value = str_replace(',', '.', $matches[1]);
+
+                if ($ranking) {
+                    $numeric = (int) round((float) $value);
+                    if ($numeric < 5000) {
+                        return $numeric;
+                    }
+                    continue;
+                }
+
+                return (float) $value;
+            }
+        }
+
+        if ($ranking) {
+            preg_match_all('/(?:rang|classement)[^0-9]{0,60}([0-9]{1,4})/iu', $text, $rankMatches);
+            foreach (($rankMatches[1] ?? []) as $raw) {
+                $candidate = (int) $raw;
+                if ($candidate > 0 && $candidate < 5000) {
+                    return $candidate;
+                }
+            }
+        }
+
+        preg_match_all('/([0-9]+(?:[.,][0-9]+)?)/', $text, $matches);
+        if ($ranking && ! empty($matches[1])) {
+            $candidate = (int) round((float) str_replace(',', '.', $matches[1][0]));
+            if ($candidate > 0 && $candidate < 5000) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
 
     private function cleanPoints($value)
     {

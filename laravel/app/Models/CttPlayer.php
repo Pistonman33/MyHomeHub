@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
 
 class CttPlayer extends Model
@@ -36,6 +37,26 @@ class CttPlayer extends Model
             return null;
         }
 
-        return decrypt($this->password);
+        $encrypter = app('encrypter');
+
+        try {
+            $value = $encrypter->decryptString($this->password);
+
+            if (is_string($value) && preg_match('/^(?:a:|b:|i:|d:|s:|O:|N;|C:)/', trim($value))) {
+                $unserialized = @unserialize($value);
+
+                if ($unserialized !== false || $value === 'b:0;' || $value === 'N;') {
+                    return is_scalar($unserialized) ? (string) $unserialized : $value;
+                }
+            }
+
+            return $value;
+        } catch (DecryptException | \Throwable $e) {
+            try {
+                return $encrypter->decrypt($this->password);
+            } catch (DecryptException | \Throwable $innerException) {
+                return $this->password;
+            }
+        }
     }
 }

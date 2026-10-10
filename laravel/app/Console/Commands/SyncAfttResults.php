@@ -10,6 +10,7 @@ use App\Models\CttPlayer;
 use App\Models\CttSeason;
 use App\Models\CttMatch;
 use App\Models\CttPlayerPointsHistory;
+use App\Models\CttPlayerSeason;
 use Carbon\Carbon;
 
 class SyncAfttResults extends Command
@@ -68,69 +69,113 @@ class SyncAfttResults extends Command
         $session = $client->login();
 
         // 2. fetch page
-        $html = $client->getDashboard($session['cookies']);
+        $html = $client->getDashboard($session['cookies'], $license);
 
         // 3. parse general information (points, ranking, etc.)
         $data = $parser->parseDashboard($html);
 
-        $season = CttSeason::firstWhere('is_current', 1);
+        $seasonYear = $data['season_year'] ?? CttSeason::currentSeasonYear();
+        $season = CttSeason::find($seasonYear);
+        if (!$season) {
+            $this->error("Season {$seasonYear} is not in the database. Run ctt:sync {$license} {$seasonYear} first.");
+            return 1;
+        }
 
-        $playerSeason = $season->playerSeasons()->firstWhere('player_license', $license);
+        if ($data['starting_points'] === null || $data['recent_points'] === null) {
+            $this->error('AFTT page did not provide both starting and current points; no season snapshot was saved.');
+            return 1;
+        }
 
+        $playerSeason = CttPlayerSeason::firstOrCreate([
+            'year' => $seasonYear,
+            'player_license' => $license,
+        ]);
 
+        $this->info("Season AFTT détectée: {$season->name} ({$seasonYear})");
         $this->info('Points départs: ' . $data['starting_points']);
         $this->info('Points actuels: ' . $data['recent_points']);
         $this->info('Ranking: ' . $data['ranking_belgium']);
 
-        $playerSeason->fill([
-            'starting_points' => $data['starting_points'] ?? null,
-            'current_points'  => $data['recent_points'] ?? null,
-            'ranking_belgium' => $data['ranking_belgium'] ?? null,
-        ]);
-
-        $playerSeason->save();
-        
         // 4. parse matches
         $matches = $parser->parseMatches($html);
-        
-        foreach ($matches as $match) {
-            foreach ($match['players'] as $player) {
 
-                $match_date = Carbon::createFromFormat('d/m/Y', $match['date'])->format('Y-m-d');
+        $savedHistoryRows = 0;
+        foreach ($matches as $match) {
+            if (!$match['date'] || !$match['match_id']) {
+                continue;
+            }
+
+            $matchDate = Carbon::createFromFormat('d/m/Y', $match['date'])->format('Y-m-d');
+
+            foreach ($match['players'] as $player) {
+                if ($player['delta'] === null || $player['opponent_points'] === null) {
+                    continue;
+                }
 
                 $matchRow = CttMatch::where('match_id', $match['match_id'])
-                        ->whereDate('date', $match_date)
+                        ->whereDate('date', $matchDate)
+                        ->where('season_year', $seasonYear)
                         ->where('player_license', $license)
                         ->whereRaw("LOWER(CONCAT(opponent_firstname, ' ', opponent_lastname)) = ?", [
                             strtolower(trim($player['name']))
                         ])
                         ->first();
                 if (!$matchRow) {
-                    $this->error("Match not found in DB !!!!");
-                    exit;
-                }else{
-                    CttPlayerPointsHistory::updateOrCreate(
-                        ['match_id' => $matchRow->id, 'player_license' => $license],
-                        
-                        [
-                            'delta_points' => $player['delta'],
-                            'opponent_points' => $player['opponent_points'],
-                        ]
-                    );
+                    $this->error("Match {$match['match_id']} ({$matchDate}) vs {$player['name']} not found in season {$seasonYear}. Run ctt:sync {$license} {$seasonYear} first.");
+                    return 1;
                 }
+
+                CttPlayerPointsHistory::updateOrCreate(
+                    ['match_id' => $matchRow->id, 'player_license' => $license],
+                    [
+                        'delta_points' => $player['delta'],
+                        'opponent_points' => $player['opponent_points'],
+                    ]
+                );
+                $savedHistoryRows++;
             }
         }
+
+        $playerSeason->fill([
+            'starting_points' => $data['starting_points'],
+            'current_points' => $data['recent_points'],
+            'ranking_belgium' => $data['ranking_belgium'],
+        ])->save();
+
+        $this->info("Historique AFTT enregistré: {$savedHistoryRows} adversaire(s).");
         
         $this->info('Calculating points history...');
 
-        $points_in_season = $playerSeason->starting_points + $season->matches->sum(function ($match) use ($license) {
-            return optional(
-                $match->pointsHistory->firstWhere('player_license', $license)
-            )->delta_points ?? 0;
+        $matchesForSeason = $season->matches()
+            ->where('player_license', $license)
+            ->whereDate('date', '<', now()->startOfMonth()->toDateString())
+            ->with(['pointsHistory' => function ($query) use ($license) {
+                $query->where('player_license', $license);
+            }])
+            ->get();
+
+        $points_in_season = (float) $playerSeason->starting_points + $matchesForSeason->sum(function ($match) {
+            return (float) optional($match->pointsHistory->first())->delta_points;
         });
 
-        if (round($points_in_season, 2) != round($playerSeason->current_points, 2)) {
-            $this->error("Points mismatch: calculated $points_in_season, but current points is {$playerSeason->current_points}");
+        $pendingMatches = $season->matches()
+            ->where('player_license', $license)
+            ->whereDate('date', '>=', now()->startOfMonth()->toDateString())
+            ->with(['pointsHistory' => function ($query) use ($license) {
+                $query->where('player_license', $license);
+            }])
+            ->get();
+
+        $pendingPoints = $pendingMatches->sum(function ($match) {
+            return (float) optional($match->pointsHistory->first())->delta_points;
+        });
+
+        if ($pendingPoints != 0.0) {
+            $this->info('Points en attente de publication (matchs du mois en cours): ' . number_format($pendingPoints, 2, '.', ''));
+        }
+
+        if (round($points_in_season, 2) != round((float) $playerSeason->current_points, 2)) {
+            $this->warn("Points mismatch for season {$seasonYear}: calculated " . number_format($points_in_season, 2, '.', '') . ', but current points is ' . $playerSeason->current_points);
         } else {
             $this->info("Points match: calculated $points_in_season, current points is {$playerSeason->current_points}");
         }

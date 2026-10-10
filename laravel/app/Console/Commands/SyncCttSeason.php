@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\CttSyncService;
 use App\Models\CttPlayer;
+use App\Models\CttSeason;
 
 class SyncCttSeason extends Command
 {
@@ -28,7 +29,7 @@ class SyncCttSeason extends Command
     public function handle()
     {
         $license = $this->argument('license');
-        $year = $this->option('year') ?: $this->argument('year') ?: (int) date('Y');
+        $year = $this->option('year') ?: $this->argument('year') ?: CttSeason::currentSeasonYear();
 
         $this->info('Starting CTTSync for license: ' . ($license ?? 'all') . ' and year: ' . $year);
 

@@ -129,6 +129,25 @@ footer {
   background: #fff;
   box-shadow: 0 3px 12px rgba(31, 48, 75, 0.05);
 }
+.admin-ctt-page .admin-panel,
+.admin-ctt-page .card {
+  padding: 1.25rem;
+}
+.admin-ctt-page .admin-panel .card {
+  padding: 0;
+}
+.admin-ctt-page .card-header {
+  padding: 0.9rem 1rem;
+}
+.admin-ctt-page .card-body {
+  padding: 1rem;
+}
+.admin-ctt-page .admin-code-output {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #26334c;
+}
 .admin-data-table {
   margin: 0;
   color: #354158;

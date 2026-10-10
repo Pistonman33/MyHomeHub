@@ -42,9 +42,15 @@ class CttSyncService
             ['year' => $year],
             [
                 'name' => ($year-1)."-$year",
-                'is_current' => $year == date('Y')  ? true : false
+                'is_current' => $year === CttSeason::currentSeasonYear(),
             ]
         );
+
+        if ($season->is_current) {
+            CttSeason::where('is_current', true)
+                ->where('year', '!=', $season->year)
+                ->update(['is_current' => false]);
+        }
 
         // create or update player season in db
         CttPlayerSeason::updateOrCreate(

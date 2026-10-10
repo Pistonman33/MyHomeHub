@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\Auth\LoginController;
 use App\Http\Controllers\Backend\Auth\RegisterController;
+use App\Http\Controllers\Backend\CttAdminController;
 use App\Http\Controllers\Backend\RuleController;
 
 /*
@@ -70,6 +71,12 @@ Route::prefix('finance')->name('finance.')->group(function () {
     // Debug / maintenance
     Route::get('update-records', function () {
     })->name('update-records');
+});
+
+Route::prefix('ctt')->name('ctt.')->group(function () {
+    Route::get('/', [CttAdminController::class, 'index'])->name('index');
+    Route::post('sync', [CttAdminController::class, 'sync'])->name('sync');
+    Route::post('aftt-parse', [CttAdminController::class, 'parseResults'])->name('parse');
 });
 
 /*
