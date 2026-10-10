@@ -55,8 +55,29 @@ class CttPlayer extends Model
             try {
                 return $encrypter->decrypt($this->password);
             } catch (DecryptException | \Throwable $innerException) {
+                if ($this->isLaravelEncryptedPayload($this->password)) {
+                    throw new \RuntimeException(
+                        'The stored AFTT password is encrypted but cannot be decrypted with the current APP_KEY. Restore the APP_KEY used when it was saved, or re-enter the AFTT password.',
+                        0,
+                        $innerException
+                    );
+                }
+
                 return $this->password;
             }
         }
+    }
+
+    private function isLaravelEncryptedPayload(string $value): bool
+    {
+        $decoded = base64_decode($value, true);
+        if ($decoded === false) {
+            return false;
+        }
+
+        $payload = json_decode($decoded, true);
+
+        return is_array($payload)
+            && isset($payload['iv'], $payload['value'], $payload['mac']);
     }
 }

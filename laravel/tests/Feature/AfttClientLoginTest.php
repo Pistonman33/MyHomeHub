@@ -58,7 +58,7 @@ class AfttClientLoginTest extends TestCase
             'https://data.aftt.be/tools/index.php' => function ($request) {
                 return $request->method() === 'GET'
                     ? Http::response('<input name="csrf_token" value="abc123">')
-                    : Http::response('Request received');
+                    : Http::response('<div class="login-modern-alert">Licence ou mot de passe incorrect</div>');
             },
             'https://data.aftt.be/tools/fiche.php?licenceID=167814' => Http::response(
                 '<form><input name="licence" placeholder="Licence ou login"><input name="sidebar_login"></form>',
@@ -71,6 +71,7 @@ class AfttClientLoginTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('the portal returned its login page');
+    $this->expectExceptionMessage('Licence ou mot de passe incorrect');
 
         $client->login();
     }

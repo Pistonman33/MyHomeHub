@@ -62,12 +62,16 @@ class AfttClient
             $reason = $this->isLoginPage($dashboard)
                 ? 'the portal returned its login page'
                 : 'the authenticated player fiche was not returned';
+            $portalMessage = $this->extractPortalLoginMessage((string) $response->body());
 
             throw new \RuntimeException(sprintf(
-                'Unable to authenticate to AFTT for license %d: %s (HTTP %d). Check the production AFTT URL, session handling, and stored credentials.',
+                'Unable to authenticate to AFTT for license %d: %s (HTTP %d, POST HTTP %d, cookies: %s).%s Check the stored credentials, APP_KEY decryption, and production session handling.',
                 $this->license,
                 $reason,
-                $dashboardResponse->status()
+                $dashboardResponse->status(),
+                $response->status(),
+                implode(',', array_keys($cookies)) ?: 'none',
+                $portalMessage ? ' AFTT message: ' . $portalMessage . '.' : ''
             ));
         }
 
@@ -120,5 +124,17 @@ class AfttClient
 
         return str_contains($normalized, 'name="sidebar_login"')
             || str_contains($normalized, "name='sidebar_login'");
+    }
+
+    private function extractPortalLoginMessage(string $body): ?string
+    {
+        if (!preg_match('/<[^>]+class=["\'][^"\']*(?:login-modern-alert|alert-danger|alert-warning)[^"\']*["\'][^>]*>(.*?)<\/[^>]+>/is', $body, $matches)) {
+            return null;
+        }
+
+        $message = html_entity_decode(strip_tags($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $message = preg_replace('/\s+/', ' ', trim($message));
+
+        return $message !== '' ? mb_substr($message, 0, 240) : null;
     }
 }
