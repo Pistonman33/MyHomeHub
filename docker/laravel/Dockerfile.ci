@@ -1,4 +1,6 @@
-FROM php:8.3-fpm
+FROM php:8.3.36-fpm
+
+RUN printf 'session.upload_progress.enabled = Off\n' > /usr/local/etc/php/conf.d/zz-security.ini
 
 USER root
 

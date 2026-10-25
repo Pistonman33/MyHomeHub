@@ -1,5 +1,7 @@
-# PHP 8.3
-FROM php:8.3-fpm
+# PHP 8.3.36 fixes CVE-2026-109618 and CVE-2026-109619.
+FROM php:8.3.36-fpm
+
+RUN printf 'session.upload_progress.enabled = Off\n' > /usr/local/etc/php/conf.d/zz-security.ini
 
 # Install dependencies for Laravel
 RUN apt-get update && apt-get install -y \
@@ -25,6 +27,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Define WOR directory
 WORKDIR /var/www/
+
+# The shared entrypoint syncs this directory in production; dev mounts public from the workspace.
+RUN mkdir -p /tmp/public-dist
 
 # Laravel Permissions
 RUN chown -R www-data:www-data /var/www
