@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Models\Record;
 use App\Models\Categorie;
+use App\Models\Compte;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use App\Models\Display;
@@ -43,99 +44,330 @@ class FinanceController extends Controller
                                     ->with('transactions',$this->transactions);
     }
 
-            public function annualDashboard(Request $request)
-            {
-                      $years = Record::where('validate', 1)
-                        ->where('deleted', 0)
-                        ->selectRaw('YEAR(date) as year')
-                        ->distinct()
-                        ->orderByDesc('year')
-                        ->pluck('year');
+    public function annualDashboard(Request $request)
+    {
+        $years = Record::where('validate', 1)
+            ->where('deleted', 0)
+            ->selectRaw('YEAR(date) as year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
 
-                      $year = (int) ($request->input('year') ?: ($years->first() ?: date('Y')));
-                      if (!$years->contains($year)) {
-                        $year = (int) ($years->first() ?: date('Y'));
-                      }
+        $year = (int) ($request->input('year') ?: ($years->first() ?: date('Y')));
+        if (!$years->contains($year)) {
+            $year = (int) ($years->first() ?: date('Y'));
+        }
 
-                      $month = $request->filled('month') && (int) $request->input('month') >= 1 && (int) $request->input('month') <= 12
-                        ? (int) $request->input('month')
-                        : null;
-                      $currentStart = $month ? sprintf('%04d-%02d-01', $year, $month) : $year . '-01-01';
-                      $currentEnd = $month ? date('Y-m-d', strtotime($currentStart . ' +1 month')) : ($year + 1) . '-01-01';
-                      $previousStart = $month ? sprintf('%04d-%02d-01', $year - 1, $month) : ($year - 1) . '-01-01';
-                      $previousEnd = $month ? date('Y-m-d', strtotime($previousStart . ' +1 month')) : $year . '-01-01';
+        $month = $request->filled('month') && (int) $request->input('month') >= 1 && (int) $request->input('month') <= 12
+            ? (int) $request->input('month')
+            : null;
+        $dashboard = in_array($request->input('view'), ['menage', 'moi', 'evolution'], true)
+            ? $request->input('view')
+            : 'menage';
 
-                      $transactions = Record::with('category')
-                        ->where('validate', 1)
-                        ->where('deleted', 0)
-                        ->where('date', '>=', $currentStart)
-                        ->where('date', '<', $currentEnd)
-                        ->get();
-                      $previousTransactions = Record::with('category')
-                        ->where('validate', 1)
-                        ->where('deleted', 0)
-                        ->where('date', '>=', $previousStart)
-                        ->where('date', '<', $previousEnd)
-                        ->get();
+        $accounts = Compte::orderBy('nom')->get();
+        $normalize = static function ($value) {
+            return mb_strtoupper(trim((string) $value), 'UTF-8');
+        };
+        $commonAccountIds = $accounts->filter(function ($account) use ($normalize) {
+            return $normalize($account->nom) === 'COMPTE COMMUN';
+        })->pluck('compteid')->all();
+        $personalAccountIds = $accounts->filter(function ($account) use ($normalize) {
+            return $normalize($account->nom) === 'THIEBAULT MICHAEL';
+        })->pluck('compteid')->all();
 
-                      $sum = static function ($rows, $retrait = null) {
-                        return (float) $rows->when($retrait !== null, function ($collection) use ($retrait) {
-                          return $collection->where('retrait', $retrait);
-                        })->sum('montant');
-                      };
-                      $revenues = $sum($transactions, 0);
-                      $expenses = $sum($transactions, 1);
-                      $previousExpenses = $sum($previousTransactions, 1);
-                      $previousRevenues = $sum($previousTransactions, 0);
+        $accountFilter = in_array($request->input('account'), ['common', 'personal', 'all'], true)
+            ? $request->input('account')
+            : ($dashboard === 'moi' ? 'personal' : 'common');
+        if ($dashboard === 'moi') {
+            $accountFilter = 'personal';
+        }
+        $accountIds = $accountFilter === 'common'
+            ? $commonAccountIds
+            : ($accountFilter === 'personal' ? $personalAccountIds : $accounts->pluck('compteid')->all());
 
-                      $categories = $transactions->where('retrait', 1)
-                        ->groupBy('fk_id_categorie')
-                        ->map(function ($rows) {
-                          $category = $rows->first()->category;
-                          return [
-                            'name' => $category ? $category->nom : 'Sans catégorie',
-                            'color' => $category ? $category->getColor() : '#adb5bd',
-                            'amount' => (float) $rows->sum('montant'),
-                          ];
-                        })->sortByDesc('amount')->values();
+        $categoriesById = Categorie::all()->keyBy('id');
+        $categoryTypes = $categoriesById->mapWithKeys(function ($category) {
+            return [$category->id => $this->dashboardCategoryType($category)];
+        });
+        $expenseCategories = $categoriesById->filter(function ($category) {
+            return $this->dashboardCategoryType($category) === 'expense';
+        });
+        $requestedCategoryIds = collect($request->input('categories', []))
+            ->filter(function ($id) {
+                return filter_var($id, FILTER_VALIDATE_INT) !== false;
+            })
+            ->map(function ($id) {
+                return (int) $id;
+            });
+        $selectedCategoryIds = $requestedCategoryIds->isNotEmpty()
+            ? $expenseCategories->keys()->intersect($requestedCategoryIds)->values()
+            : $expenseCategories->keys()->values();
 
-                      $monthly = collect($month ? [$month] : range(1, 12))->map(function ($monthNumber) use ($transactions) {
-                        $rows = $transactions->filter(function ($transaction) use ($monthNumber) {
-                          return (int) date('n', strtotime($transaction->date)) === $monthNumber;
-                        });
-                        return [
-                          'month' => $monthNumber,
-                          'revenue' => (float) $rows->where('retrait', 0)->sum('montant'),
-                          'expense' => (float) $rows->where('retrait', 1)->sum('montant'),
-                          'savings' => (float) $rows->where('retrait', 0)->sum('montant') - (float) $rows->where('retrait', 1)->sum('montant'),
-                        ];
-                      });
+        $currentStart = $month
+            ? sprintf('%04d-%02d-01', $year, $month)
+            : $year . '-01-01';
+        $currentEnd = $month
+            ? date('Y-m-d', strtotime($currentStart . ' +1 month'))
+            : ($year + 1) . '-01-01';
+        $transactions = Record::with('category')
+            ->where('validate', 1)
+            ->where('deleted', 0)
+            ->where('date', '>=', $currentStart)
+            ->where('date', '<', $currentEnd)
+            ->whereIn('fk_id_compte', $accountIds)
+            ->get();
 
-                      $comparison = $categories->map(function ($category) use ($previousTransactions) {
-                        $previous = (float) $previousTransactions->where('retrait', 1)->filter(function ($transaction) use ($category) {
-                          return ($transaction->category ? $transaction->category->nom : 'Sans catégorie') === $category['name'];
-                        })->sum('montant');
-                        return array_merge($category, [
-                          'previous' => $previous,
-                          'evolution' => $previous > 0 ? (($category['amount'] - $previous) / $previous) * 100 : null,
-                        ]);
-                      });
+        $summary = $this->summarizeDashboardTransactions($transactions, $categoryTypes, $selectedCategoryIds);
+        $revenues = $summary['revenues'];
+        $salary = $summary['salary'];
+        $websiteRevenue = $summary['websiteRevenue'];
+        $otherRevenues = $summary['otherRevenues'];
+        $provisions = $summary['provisions'];
+        $expenses = $summary['expenses'];
+        $categories = $summary['categories'];
 
-                      return view('backend.finance.dashboard', [
-                        'year' => $year,
-                        'years' => $years,
-                        'revenues' => $revenues,
-                        'expenses' => $expenses,
-                        'savings' => $revenues - $expenses,
-                        'monthly' => $monthly,
-                        'categories' => $categories,
-                        'comparison' => $comparison,
-                        'transactionCount' => $transactions->count(),
-                        'previousRevenues' => $previousRevenues,
-                        'previousExpenses' => $previousExpenses,
-                        'month' => $month,
-                      ]);
+        $salaryCategoryIds = $categoryTypes->filter(function ($type) {
+            return $type === 'salary';
+        })->keys()->all();
+        $websiteCategoryIds = $categoryTypes->filter(function ($type) {
+            return $type === 'website';
+        })->keys()->all();
+        $historicalIncome = collect();
+        $incomeCategoryIds = array_values(array_unique(array_merge($salaryCategoryIds, $websiteCategoryIds)));
+        if ($incomeCategoryIds && $accountIds) {
+            $historicalIncome = Record::query()
+                ->join('categories', 'records.fk_id_categorie', '=', 'categories.id')
+                ->where('records.validate', 1)
+                ->where('records.deleted', 0)
+                ->where('records.retrait', 0)
+                ->whereIn('records.fk_id_compte', $accountIds)
+                ->whereIn('records.fk_id_categorie', $incomeCategoryIds)
+                ->selectRaw('YEAR(date) as year, MONTH(date) as month, fk_id_categorie, SUM(montant) as total')
+                ->groupBy('year', 'month', 'records.fk_id_categorie')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get();
+        }
+
+        $salaryByYearMonth = [];
+        $websiteByYearMonth = [];
+        foreach ($historicalIncome as $row) {
+            $target = in_array((int) $row->fk_id_categorie, $salaryCategoryIds, true)
+                ? 'salary'
+                : 'website';
+            $key = (int) $row->year . '-' . (int) $row->month;
+            if ($target === 'salary') {
+                $salaryByYearMonth[$key] = ($salaryByYearMonth[$key] ?? 0) + (float) $row->total;
+            } else {
+                $websiteByYearMonth[$key] = ($websiteByYearMonth[$key] ?? 0) + (float) $row->total;
+            }
+        }
+
+        $historicalYears = $historicalIncome
+            ->filter(function ($row) use ($salaryCategoryIds) {
+                return in_array((int) $row->fk_id_categorie, $salaryCategoryIds, true);
+            })
+            ->pluck('year')
+            ->unique()
+            ->sort()
+            ->values();
+        $salaryMonthlyHistory = collect(range(1, 12))->map(function ($monthNumber) use ($historicalYears, $salaryByYearMonth) {
+            $values = [];
+            foreach ($historicalYears as $historicalYear) {
+                $values[$historicalYear] = $salaryByYearMonth[(int) $historicalYear . '-' . $monthNumber] ?? 0;
+            }
+            return ['month' => $monthNumber, 'values' => $values];
+        });
+        $salaryTimeline = $historicalIncome
+            ->filter(function ($row) use ($salaryCategoryIds) {
+                return in_array((int) $row->fk_id_categorie, $salaryCategoryIds, true);
+            })
+            ->groupBy(function ($row) {
+                return (int) $row->year . '-' . (int) $row->month;
+            })
+            ->map(function ($rows, $key) {
+                return ['period' => $key, 'amount' => (float) $rows->sum('total')];
+            })->values();
+
+        $expenseHistory = collect();
+        if ($selectedCategoryIds->isNotEmpty() && $accountIds) {
+            $expenseHistory = Record::query()
+                ->where('validate', 1)
+                ->where('deleted', 0)
+                ->whereIn('fk_id_compte', $accountIds)
+                ->whereIn('fk_id_categorie', $selectedCategoryIds->all())
+                ->selectRaw('YEAR(date) as year, fk_id_categorie, SUM(CASE WHEN retrait = 1 THEN montant ELSE -montant END) as total')
+                ->groupBy('year', 'fk_id_categorie')
+                ->orderBy('year')
+                ->get();
+        }
+
+        $expenseComparison = $selectedCategoryIds->map(function ($categoryId) use ($categoriesById, $expenseHistory, $year) {
+            $category = $categoriesById->get($categoryId);
+            $byYear = $expenseHistory->where('fk_id_categorie', $categoryId)->keyBy('year');
+            return [
+                'name' => $category ? $category->nom : 'Sans catégorie',
+                'color' => $category ? $category->getColor() : '#adb5bd',
+                'values' => $byYear->mapWithKeys(function ($row) {
+                    return [$row->year => (float) $row->total];
+                })->all(),
+                'current' => (float) ($byYear->get($year)->total ?? 0),
+            ];
+        })->sortByDesc('current')->values();
+
+        $monthlyExpenseHistory = collect();
+        if ($selectedCategoryIds->isNotEmpty() && $accountIds) {
+            $monthlyExpenseHistory = Record::query()
+                ->where('validate', 1)
+                ->where('deleted', 0)
+                ->where('date', '>=', $year . '-01-01')
+                ->where('date', '<', ($year + 1) . '-01-01')
+                ->whereIn('fk_id_compte', $accountIds)
+                ->whereIn('fk_id_categorie', $selectedCategoryIds->all())
+                ->selectRaw('MONTH(date) as month, fk_id_categorie, SUM(CASE WHEN retrait = 1 THEN montant ELSE -montant END) as total')
+                ->groupBy('month', 'fk_id_categorie')
+                ->orderBy('month')
+                ->get();
+        }
+        $monthlyExpenseComparison = $selectedCategoryIds->map(function ($categoryId) use ($categoriesById, $monthlyExpenseHistory) {
+            $category = $categoriesById->get($categoryId);
+            $byMonth = $monthlyExpenseHistory->where('fk_id_categorie', $categoryId)->keyBy('month');
+
+            return [
+                'name' => $category ? $category->nom : 'Sans catégorie',
+                'color' => $category ? $category->getColor() : '#adb5bd',
+                'values' => collect(range(1, 12))->mapWithKeys(function ($monthNumber) use ($byMonth) {
+                    return [$monthNumber => (float) ($byMonth->get($monthNumber)->total ?? 0)];
+                }),
+            ];
+        })->sortByDesc(function ($category) {
+            return $category['values']->sum();
+        })->values();
+
+        return view('backend.finance.dashboard', [
+            'dashboard' => $dashboard,
+            'year' => $year,
+            'years' => $years,
+            'month' => $month,
+            'accountFilter' => $accountFilter,
+            'commonAccountConfigured' => !empty($commonAccountIds),
+            'personalAccountConfigured' => !empty($personalAccountIds),
+            'revenues' => $revenues,
+            'salary' => $salary,
+            'websiteRevenue' => $websiteRevenue,
+            'otherRevenues' => $otherRevenues,
+            'provisions' => $provisions,
+            'expenses' => $expenses,
+            'categories' => $categories,
+            'expenseCategories' => $expenseCategories,
+            'selectedCategoryIds' => $selectedCategoryIds,
+            'expenseComparison' => $expenseComparison,
+            'monthlyExpenseComparison' => $monthlyExpenseComparison,
+            'historicalYears' => $historicalYears,
+            'salaryMonthlyHistory' => $salaryMonthlyHistory,
+            'salaryTimeline' => $salaryTimeline,
+            'websiteByYearMonth' => $websiteByYearMonth,
+            'transactionCount' => $transactions->count(),
+        ]);
+    }
+
+    private function dashboardCategoryType(?Categorie $category): string
+    {
+        if (!$category) {
+            return 'expense';
+        }
+
+        $name = mb_strtoupper(trim($category->nom), 'UTF-8');
+        if ($name === 'PROVISION') {
+            return 'provision';
+        }
+        if (in_array($name, ['SALAIRE', 'SALAIRES'], true)) {
+            return 'salary';
+        }
+        if (in_array($name, ['WEBSITE', 'NOM DE DOMAINE', 'NOM DE DOMAINES'], true)) {
+            return 'website';
+        }
+        if (mb_strtolower(trim((string) $category->group), 'UTF-8') === 'income') {
+            return 'income';
+        }
+
+        return 'expense';
+    }
+
+    private function summarizeDashboardTransactions(
+        \Illuminate\Support\Collection $transactions,
+        \Illuminate\Support\Collection $categoryTypes,
+        \Illuminate\Support\Collection $selectedCategoryIds
+    ): array {
+        $summary = [
+            'revenues' => 0.0,
+            'salary' => 0.0,
+            'websiteRevenue' => 0.0,
+            'otherRevenues' => 0.0,
+            'provisions' => 0.0,
+            'expenses' => 0.0,
+            'categories' => collect(),
+        ];
+        $expenseTotals = [];
+
+        foreach ($transactions as $transaction) {
+            $categoryId = (int) $transaction->fk_id_categorie;
+            $type = $categoryTypes->get($categoryId, 'expense');
+            $amount = (float) $transaction->montant;
+
+            if ($type === 'provision') {
+                if ($transaction->retrait) {
+                    $summary['provisions'] += $amount;
+                }
+                continue;
+            }
+
+            if (in_array($type, ['salary', 'website', 'income'], true)) {
+                if (!$transaction->retrait) {
+                    $summary['revenues'] += $amount;
+                    if ($type === 'salary') {
+                        $summary['salary'] += $amount;
+                    } elseif ($type === 'website') {
+                        $summary['websiteRevenue'] += $amount;
+                    } else {
+                        $summary['otherRevenues'] += $amount;
                     }
+                }
+                continue;
+            }
+
+            if (!in_array($categoryId, $selectedCategoryIds->all(), true)) {
+                continue;
+            }
+
+            $key = $categoryId ?: 'uncategorized';
+            if (!isset($expenseTotals[$key])) {
+                $category = $transaction->category;
+                $expenseTotals[$key] = [
+                    'id' => $transaction->fk_id_categorie,
+                    'name' => $category ? $category->nom : 'Sans catégorie',
+                    'color' => $category ? $category->getColor() : '#adb5bd',
+                    'spent' => 0.0,
+                    'refunds' => 0.0,
+                ];
+            }
+
+            if ($transaction->retrait) {
+                $expenseTotals[$key]['spent'] += $amount;
+            } else {
+                $expenseTotals[$key]['refunds'] += $amount;
+            }
+        }
+
+        $summary['categories'] = collect($expenseTotals)->map(function ($category) {
+            $category['amount'] = $category['spent'] - $category['refunds'];
+            return $category;
+        })->sortByDesc('amount')->values();
+        $summary['expenses'] = (float) $summary['categories']->sum('amount');
+
+        return $summary;
+    }
 
     private function home_manage_year_field($request){
       $records = Record::selectRaw(DB::raw('YEAR(date) as year'))
