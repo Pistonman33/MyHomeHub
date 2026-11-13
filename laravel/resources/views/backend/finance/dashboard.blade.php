@@ -7,64 +7,86 @@
             5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
             9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre',
         ];
-        $activeAccountLabel = [
-            'common' => 'Compte commun',
-            'personal' => 'Mon compte personnel',
-            'all' => 'Tous les comptes importés',
-        ][$accountFilter];
-        $salaryChartMax = max((float) $salaryTimeline->max('amount'), 1);
+        $activeAccountLabel = $dashboard === 'evolution'
+            ? 'Revenus personnels · dépenses du compte commun'
+            : ($dashboard === 'moi' ? 'Mon compte personnel' : 'Compte commun');
+        $periodLabel = $month ? $monthNames[$month] . ' ' . $year : $year;
+        $percentChange = function ($current, $previous) {
+            return $previous > 0 ? (($current - $previous) / $previous) * 100 : null;
+        };
+        $incomeChange = $percentChange($revenues, $previousRevenues);
+        $expenseChange = $percentChange($expenses, $previousExpenses);
+        $positiveExpenses = $categories->sum(function ($category) {
+            return max((float) $category['amount'], 0);
+        });
+        $donutStart = 0;
+        $donutStops = [];
+        foreach ($categories as $category) {
+            $amount = max((float) $category['amount'], 0);
+            $donutEnd = $donutStart + ($positiveExpenses > 0 ? ($amount / $positiveExpenses) * 100 : 0);
+            if ($donutEnd > $donutStart) {
+                $donutStops[] = $category['color'] . ' ' . $donutStart . '% ' . $donutEnd . '%';
+            }
+            $donutStart = $donutEnd;
+        }
+        $donutBackground = $donutStops ? implode(', ', $donutStops) : '#e8edf4 0 100%';
+        $monthlyMax = max((float) $monthly->max('revenue'), (float) $monthly->max('expense'), 1);
+        $maxCategory = max((float) $categories->max('amount'), 1);
     @endphp
 
     <div class="finance-dashboard">
         <header class="finance-dashboard__header">
             <div>
                 <h1>Dashboard Finance</h1>
-                <p>Analyse des comptes importés — {{ $activeAccountLabel }}</p>
+                <p>{{ $activeAccountLabel }} · {{ $periodLabel }}</p>
             </div>
-        </header>
-
-        <nav class="finance-dashboard-tabs" aria-label="Vues du dashboard financier">
-            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories']), ['view' => 'menage'])) }}"
-                class="{{ $dashboard === 'menage' ? 'is-active' : '' }}">Ménage</a>
-            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories']), ['view' => 'moi'])) }}"
-                class="{{ $dashboard === 'moi' ? 'is-active' : '' }}">Moi</a>
-            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories']), ['view' => 'evolution'])) }}"
-                class="{{ $dashboard === 'evolution' ? 'is-active' : '' }}">Évolution</a>
-        </nav>
-
-        <form method="GET" action="{{ route('admin.finance.dashboard') }}" class="finance-dashboard-filters">
-            <input type="hidden" name="view" value="{{ $dashboard }}">
-            <label>
-                Année
-                <select name="year" onchange="this.form.submit()">
-                    @foreach ($years as $availableYear)
-                        <option value="{{ $availableYear }}" @selected((int) $availableYear === $year)>{{ $availableYear }}</option>
-                    @endforeach
-                    @if ($years->isEmpty())
-                        <option value="{{ $year }}" selected>{{ $year }}</option>
-                    @endif
-                </select>
-            </label>
-            <label>
-                Mois
-                <select name="month" onchange="this.form.submit()">
+            <form method="GET" action="{{ route('admin.finance.dashboard') }}" class="finance-year-filter">
+                <input type="hidden" name="view" value="{{ $dashboard }}">
+                <label for="dashboard-year">Année</label>
+                <span class="finance-year-select-wrap">
+                    <select id="dashboard-year" name="year" onchange="this.form.submit()">
+                        @foreach ($years as $availableYear)
+                            <option value="{{ $availableYear }}" @selected((int) $availableYear === $year)>{{ $availableYear }}</option>
+                        @endforeach
+                        @if ($years->isEmpty())
+                            <option value="{{ $year }}" selected>{{ $year }}</option>
+                        @endif
+                    </select><span class="fa-regular fa-calendar {{ $month ? 'is-visible' : '' }}"></span>
+                </span>
+                <button type="button" class="finance-dashboard-filter-button" id="dashboard-filter-button">
+                    <i class="fa-solid fa-filter"></i> Filtrer
+                </button>
+                <select id="dashboard-month" name="month"
+                    class="finance-dashboard-month-select {{ $month ? 'is-visible' : '' }}" aria-label="Mois"
+                    onchange="this.form.submit()">
                     <option value="">Toute l'année</option>
                     @foreach ($monthNames as $monthNumber => $monthName)
                         <option value="{{ $monthNumber }}" @selected($month === $monthNumber)>{{ $monthName }}</option>
                     @endforeach
                 </select>
-            </label>
-            @if ($dashboard !== 'moi')
-                <label>
-                    Comptes
-                    <select name="account" onchange="this.form.submit()">
-                        <option value="common" @selected($accountFilter === 'common')>Compte commun</option>
-                        <option value="personal" @selected($accountFilter === 'personal')>Mon compte personnel</option>
-                        <option value="all" @selected($accountFilter === 'all')>Tous les comptes importés</option>
-                    </select>
-                </label>
-            @endif
-            @if ($dashboard === 'evolution')
+                @if ($dashboard === 'evolution')
+                    @foreach ($selectedCategoryIds as $selectedCategoryId)
+                        <input type="hidden" name="categories[]" value="{{ $selectedCategoryId }}">
+                    @endforeach
+                @endif
+            </form>
+        </header>
+
+        <nav class="finance-dashboard-tabs" aria-label="Vues du dashboard financier">
+            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories', 'account']), ['view' => 'menage'])) }}"
+                class="{{ $dashboard === 'menage' ? 'is-active' : '' }}">Ménage</a>
+            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories', 'account']), ['view' => 'moi'])) }}"
+                class="{{ $dashboard === 'moi' ? 'is-active' : '' }}">Moi</a>
+            <a href="{{ route('admin.finance.dashboard', array_merge(request()->except(['view', 'categories', 'account']), ['view' => 'evolution'])) }}"
+                class="{{ $dashboard === 'evolution' ? 'is-active' : '' }}">Évolution</a>
+            <a href="{{ route('admin.finance.dashboard', ['view' => 'maison']) }}">Maison</a>
+        </nav>
+
+        @if ($dashboard === 'evolution')
+            <form method="GET" action="{{ route('admin.finance.dashboard') }}" class="finance-dashboard-filters">
+                <input type="hidden" name="view" value="{{ $dashboard }}">
+                <input type="hidden" name="year" value="{{ $year }}">
+                <input type="hidden" name="month" value="{{ $month }}">
                 <label class="finance-category-filter">
                     Catégories de dépenses
                     <select name="categories[]" multiple size="4" aria-label="Catégories de dépenses">
@@ -76,10 +98,10 @@
                     </select>
                 </label>
                 <button type="submit">Appliquer</button>
-            @endif
-        </form>
+            </form>
+        @endif
 
-        @if ($dashboard === 'menage' && !$commonAccountConfigured && $accountFilter === 'common')
+        @if ($dashboard === 'menage' && !$commonAccountConfigured)
             <div class="finance-dashboard-notice" role="status">
                 Aucun compte nommé « COMPTE COMMUN » n'a été trouvé. Vérifie le nom du compte dans la table des comptes.
             </div>
@@ -87,96 +109,150 @@
             <div class="finance-dashboard-notice" role="status">
                 Aucun compte nommé « THIEBAULT MICHAEL » n'a été trouvé. Vérifie le nom du compte dans la table des comptes.
             </div>
+        @elseif ($dashboard === 'evolution' && (!$commonAccountConfigured || !$personalAccountConfigured))
+            <div class="finance-dashboard-notice" role="status">
+                @if (!$personalAccountConfigured)
+                    Le compte « THIEBAULT MICHAEL » est introuvable : les revenus de l'évolution ne seront pas disponibles.
+                @endif
+                @if (!$commonAccountConfigured)
+                    Le compte « COMPTE COMMUN » est introuvable : les dépenses de l'évolution ne seront pas disponibles.
+                @endif
+            </div>
         @endif
 
         @if ($dashboard === 'menage')
-            <section class="finance-dashboard-intro">
-                <h2>Dépenses du ménage</h2>
-                <p>Par défaut, seules les dépenses du compte commun sont affichées. Les provisions et les revenus sont exclus.</p>
-                <p class="finance-dashboard-note">Les dépenses et revenus du compte personnel de votre conjointe ne sont pas inclus, car ses transactions ne sont pas importées.</p>
-            </section>
-            <div class="finance-kpis">
-                <article class="finance-kpi finance-kpi--red">
-                    <span class="finance-kpi__icon">€</span>
-                    <div><small>Dépenses nettes</small><strong>{{ number_format($expenses, 2, ',', ' ') }} €</strong>
-                        <em>{{ $month ? $monthNames[$month] . ' ' : '' }}{{ $year }}</em></div>
-                </article>
-                <article class="finance-kpi finance-kpi--purple">
-                    <span class="finance-kpi__icon">#</span>
-                    <div><small>Catégories</small><strong>{{ $categories->count() }}</strong>
-                        <em>Remboursements déduits de la catégorie correspondante</em></div>
-                </article>
-                <article class="finance-kpi finance-kpi--blue">
-                    <span class="finance-kpi__icon">↔</span>
-                    <div><small>Mouvements analysés</small><strong>{{ $transactionCount }}</strong>
-                        <em>Transactions validées</em></div>
-                </article>
-            </div>
-            <section class="finance-panel">
-                <h2>Dépenses par catégorie</h2>
-                @forelse ($categories as $category)
-                    <div class="expense-row">
-                        <span class="category-dot" style="background: {{ $category['color'] }}"></span>
-                        <span>{{ $category['name'] }}
-                            @if ($category['refunds'] > 0)
-                                <small class="finance-expense-detail">{{ number_format($category['spent'], 2, ',', ' ') }} € dépensés · {{ number_format($category['refunds'], 2, ',', ' ') }} € remboursés</small>
-                            @endif
-                        </span>
-                        <div class="expense-track"><i
-                                style="width: {{ min(max(($category['amount'] / max($expenses, 1)) * 100, 0), 100) }}%; background: {{ $category['color'] }}"></i>
-                        </div>
-                        <b>{{ number_format($category['amount'], 2, ',', ' ') }} €</b>
-                    </div>
-                @empty
-                    <p class="finance-dashboard-empty">Aucune dépense catégorisée pour cette période et ce périmètre.</p>
-                @endforelse
-                @if ($categories->isNotEmpty())
-                    <div class="finance-dashboard-total"><span>Total des dépenses nettes</span><strong>{{ number_format($expenses, 2, ',', ' ') }} €</strong></div>
-                @endif
-            </section>
+            <p class="finance-dashboard-note">
+                Les dépenses du ménage sont basées sur le compte commun. Les provisions ne sont ni des revenus ni des dépenses.
+                Les transactions du compte personnel de votre conjointe ne sont pas importées.
+            </p>
         @elseif ($dashboard === 'moi')
-            <section class="finance-dashboard-intro">
-                <h2>Mon compte personnel</h2>
-                <p>Les revenus sont identifiés par la catégorie. Les provisions vers le compte commun sont présentées à part et ne sont ni des revenus ni des dépenses.</p>
-                <p class="finance-dashboard-note">Les transactions du compte personnel de votre conjointe ne sont pas importées et ne sont donc pas incluses.</p>
+            <p class="finance-dashboard-note">
+                Les provisions sont isolées des revenus et dépenses. Les transactions du compte personnel de votre conjointe ne sont pas importées.
+            </p>
+        @else
+            <p class="finance-dashboard-note">
+                Les revenus (dont salaire et WEBSITE) et provisions viennent de votre compte personnel ; les dépenses par catégorie viennent du compte commun.
+                L'épargne globale du ménage n'est pas calculée faute de transactions du compte personnel de votre conjointe.
+            </p>
+        @endif
+
+        <div class="finance-kpis">
+            <article class="finance-kpi finance-kpi--green">
+                <span class="finance-kpi__icon">↗</span>
+                <div>
+                    <small>Revenus réels</small>
+                    <strong>{{ number_format($revenues, 0, ',', ' ') }} €</strong>
+                    <em>{{ $dashboard === 'evolution' ? 'Mon compte personnel' : ($incomeChange !== null ? sprintf('%+.1f %% vs %s', $incomeChange, $month ? $monthNames[$month] . ' ' . ($year - 1) : $year - 1) : 'Pas de période précédente comparable') }}</em>
+                </div>
+            </article>
+            <article class="finance-kpi finance-kpi--red">
+                <span class="finance-kpi__icon">↘</span>
+                <div>
+                    <small>Dépenses nettes</small>
+                    <strong>{{ number_format($expenses, 0, ',', ' ') }} €</strong>
+                    <em>{{ $dashboard === 'evolution' ? 'Compte commun' : ($expenseChange !== null ? sprintf('%+.1f %% vs %s', $expenseChange, $month ? $monthNames[$month] . ' ' . ($year - 1) : $year - 1) : 'Remboursements déduits par catégorie') }}</em>
+                </div>
+            </article>
+            <article class="finance-kpi finance-kpi--blue">
+                <span class="finance-kpi__icon">●</span>
+                <div>
+                    <small>{{ $dashboard === 'evolution' ? 'Salaire — compte personnel' : ($dashboard === 'moi' ? 'Reste après dépenses et provisions' : 'Écart revenus / dépenses') }}</small>
+                    <strong>{{ $dashboard === 'evolution' ? number_format($salary, 0, ',', ' ') . ' €' : number_format($savings, 0, ',', ' ') . ' €' }}</strong>
+                    <em>{{ $dashboard === 'evolution' ? 'Catégorie SALAIRE uniquement' : ($dashboard === 'moi' ? 'Les provisions restent hors dépenses' : 'Les revenus de la conjointe ne sont pas inclus') }}</em>
+                </div>
+            </article>
+            <article class="finance-kpi finance-kpi--purple">
+                <span class="finance-kpi__icon">%</span>
+                <div>
+                    <small>{{ $dashboard === 'evolution' ? 'Revenus WEBSITE — compte personnel' : 'Taux d’épargne' }}</small>
+                    <strong>{{ $dashboard === 'evolution' ? number_format($websiteRevenue, 0, ',', ' ') . ' €' : number_format($savingRate, 1, ',', ' ') . ' %' }}</strong>
+                    <em>{{ $dashboard === 'evolution' ? 'Suivis séparément du salaire' : ($transactionCount . ' transaction(s) validée(s) · ' . ($dashboard === 'moi' ? number_format($provisions, 0, ',', ' ') . ' € de provisions' : 'Provisions exclues')) }}</em>
+                </div>
+            </article>
+            <article class="finance-kpi finance-kpi--orange">
+                <span class="finance-kpi__icon">€</span>
+                <div>
+                    <small>{{ $dashboard === 'evolution' ? 'Versements au compte commun' : 'Dépenses moyennes / mois' }}</small>
+                    <strong>{{ number_format($dashboard === 'evolution' ? $provisions : $averageMonthly, 0, ',', ' ') }} €</strong>
+                    <em>{{ $dashboard === 'evolution' ? 'Depuis mon compte personnel' : ($month ? 'Sur le mois sélectionné' : 'Sur ' . $year) }}</em>
+                </div>
+            </article>
+        </div>
+
+        <div class="finance-grid finance-grid--top">
+            <section class="finance-panel finance-panel--categories">
+                <h2>Dépenses par catégorie <span>({{ $periodLabel }})</span></h2>
+                <div class="category-chart-wrap">
+                    <div class="category-donut" style="background: conic-gradient({{ $donutBackground }})">
+                        <div><strong>{{ number_format($expenses, 0, ',', ' ') }} €</strong><small>Total net</small></div>
+                    </div>
+                    <div class="category-legend">
+                        @forelse ($categories as $category)
+                            <div>
+                                <span class="category-dot" style="background: {{ $category['color'] }}"></span>
+                                <span>{{ $category['name'] }}</span>
+                                <b>{{ number_format($category['amount'], 0, ',', ' ') }} €</b>
+                                <small>{{ $positiveExpenses > 0 ? number_format((max($category['amount'], 0) / $positiveExpenses) * 100, 0) : 0 }}%</small>
+                            </div>
+                        @empty
+                            <p class="finance-dashboard-empty">Aucune dépense catégorisée pour cette période.</p>
+                        @endforelse
+                    </div>
+                </div>
             </section>
-            <div class="finance-kpis">
-                <article class="finance-kpi finance-kpi--green">
-                    <span class="finance-kpi__icon">↗</span>
-                    <div><small>Revenus réels</small><strong>{{ number_format($revenues, 2, ',', ' ') }} €</strong>
-                        <em>Hors provisions et remboursements</em></div>
-                </article>
-                <article class="finance-kpi finance-kpi--red">
-                    <span class="finance-kpi__icon">↘</span>
-                    <div><small>Dépenses nettes</small><strong>{{ number_format($expenses, 2, ',', ' ') }} €</strong>
-                        <em>Remboursements déduits par catégorie</em></div>
-                </article>
-                <article class="finance-kpi finance-kpi--orange">
-                    <span class="finance-kpi__icon">→</span>
-                    <div><small>Versements au compte commun</small><strong>{{ number_format($provisions, 2, ',', ' ') }} €</strong>
-                        <em>Flux sortant, exclu des revenus et dépenses</em></div>
-                </article>
-            </div>
+            <section class="finance-panel">
+                <h2>Évolution mensuelle <span>({{ $year }})</span></h2>
+                <div class="finance-chart-legend">
+                    <span class="legend-green">{{ $dashboard === 'evolution' ? 'Revenus personnels' : 'Revenus réels' }}</span>
+                    <span class="legend-red">{{ $dashboard === 'evolution' ? 'Dépenses compte commun' : 'Dépenses nettes' }}</span>
+                    @if ($dashboard !== 'evolution')
+                        <span class="legend-blue">Solde net</span>
+                    @endif
+                </div>
+                <div class="monthly-chart">
+                    @foreach ($monthly as $monthData)
+                        <div class="monthly-column">
+                            <div class="monthly-bars">
+                                <i class="bar-green" title="Revenus : {{ number_format($monthData['revenue'], 2, ',', ' ') }} €"
+                                    style="height: {{ min(($monthData['revenue'] / $monthlyMax) * 100, 100) }}%"></i>
+                                <i class="bar-red" title="Dépenses : {{ number_format($monthData['expense'], 2, ',', ' ') }} €"
+                                    style="height: {{ min((max($monthData['expense'], 0) / $monthlyMax) * 100, 100) }}%"></i>
+                                @if ($dashboard !== 'evolution')
+                                    <i class="bar-blue" title="Solde : {{ number_format($monthData['savings'], 2, ',', ' ') }} €"
+                                        style="height: {{ min((max($monthData['savings'], 0) / $monthlyMax) * 100, 100) }}%"></i>
+                                @endif
+                            </div>
+                            <small>{{ $monthNames[$monthData['month']] }}</small>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        </div>
+
+        @if ($dashboard === 'moi')
             <div class="finance-grid finance-grid--bottom">
                 <section class="finance-panel">
-                    <h2>Revenus par catégorie</h2>
+                    <h2>Revenus par catégorie <span>({{ $periodLabel }})</span></h2>
                     <div class="finance-dashboard-line"><span>Salaire</span><strong>{{ number_format($salary, 2, ',', ' ') }} €</strong></div>
                     <div class="finance-dashboard-line"><span>WEBSITE / revenus web</span><strong>{{ number_format($websiteRevenue, 2, ',', ' ') }} €</strong></div>
                     @if ($otherRevenues > 0)
                         <div class="finance-dashboard-line"><span>Autres revenus catégorisés</span><strong>{{ number_format($otherRevenues, 2, ',', ' ') }} €</strong></div>
                     @endif
                     <div class="finance-dashboard-total"><span>Total des revenus réels</span><strong>{{ number_format($revenues, 2, ',', ' ') }} €</strong></div>
+                    <div class="finance-dashboard-line"><span>Versements au compte commun</span><strong>{{ number_format($provisions, 2, ',', ' ') }} €</strong></div>
                 </section>
                 <section class="finance-panel">
                     <h2>Dépenses personnelles par catégorie</h2>
                     @forelse ($categories as $category)
-                        <div class="finance-dashboard-line">
-                            <span><i class="category-dot" style="background: {{ $category['color'] }}"></i>{{ $category['name'] }}
+                        <div class="expense-row">
+                            <span class="category-dot" style="background: {{ $category['color'] }}"></span>
+                            <span>{{ $category['name'] }}
                                 @if ($category['refunds'] > 0)
                                     <small class="finance-expense-detail">{{ number_format($category['spent'], 2, ',', ' ') }} € dépensés · {{ number_format($category['refunds'], 2, ',', ' ') }} € remboursés</small>
                                 @endif
                             </span>
-                            <strong>{{ number_format($category['amount'], 2, ',', ' ') }} €</strong>
+                            <div class="expense-track"><i style="width: {{ min((max($category['amount'], 0) / $maxCategory) * 100, 100) }}%; background: {{ $category['color'] }}"></i></div>
+                            <b>{{ number_format($category['amount'], 2, ',', ' ') }} €</b>
                         </div>
                     @empty
                         <p class="finance-dashboard-empty">Aucune dépense catégorisée pour cette période.</p>
@@ -184,17 +260,55 @@
                 </section>
             </div>
         @else
-            <section class="finance-dashboard-intro">
-                <h2>Évolution des revenus et des dépenses</h2>
-                <p>Le salaire utilise exclusivement la catégorie SALAIRE. WEBSITE est suivi à part. Les provisions ne sont jamais intégrées aux revenus.</p>
-            </section>
+            <div class="finance-grid finance-grid--bottom">
+                <section class="finance-panel">
+                    <h2>{{ $dashboard === 'menage' ? 'Dépenses du compte commun' : 'Dépenses nettes par catégorie' }}</h2>
+                    @forelse ($categories as $category)
+                        <div class="expense-row">
+                            <span class="category-dot" style="background: {{ $category['color'] }}"></span>
+                            <span>{{ $category['name'] }}
+                                @if ($category['refunds'] > 0)
+                                    <small class="finance-expense-detail">{{ number_format($category['spent'], 2, ',', ' ') }} € dépensés · {{ number_format($category['refunds'], 2, ',', ' ') }} € remboursés</small>
+                                @endif
+                            </span>
+                            <div class="expense-track"><i style="width: {{ min((max($category['amount'], 0) / $maxCategory) * 100, 100) }}%; background: {{ $category['color'] }}"></i></div>
+                            <b>{{ number_format($category['amount'], 2, ',', ' ') }} €</b>
+                        </div>
+                    @empty
+                        <p class="finance-dashboard-empty">Aucune dépense catégorisée pour cette période.</p>
+                    @endforelse
+                </section>
+                <section class="finance-panel finance-table-panel">
+                    <h2>Comparaison de période par catégorie</h2>
+                    <table>
+                        <thead><tr><th>Catégorie</th><th>{{ $month ? $monthNames[$month] . ' ' . ($year - 1) : $year - 1 }}</th><th>{{ $periodLabel }}</th><th>Évolution</th></tr></thead>
+                        <tbody>
+                            @forelse ($comparison as $category)
+                                <tr>
+                                    <td><span class="category-dot" style="background: {{ $category['color'] }}"></span>{{ $category['name'] }}</td>
+                                    <td>{{ number_format($category['previous'], 0, ',', ' ') }} €</td>
+                                    <td>{{ number_format($category['amount'], 0, ',', ' ') }} €</td>
+                                    <td class="{{ ($category['evolution'] ?? 0) > 0 ? 'is-up' : 'is-down' }}">
+                                        {{ $category['evolution'] === null ? 'n/a' : sprintf('%+.1f %%', $category['evolution']) }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4">Aucune dépense catégorisée pour cette période.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        @endif
+
+        @if ($dashboard === 'evolution')
             <section class="finance-panel finance-evolution-panel">
                 <h2>Évolution du salaire par mois</h2>
                 @if ($salaryTimeline->isNotEmpty())
                     <div class="finance-salary-chart" role="img" aria-label="Évolution du salaire dans le temps">
                         @foreach ($salaryTimeline as $point)
                             <div class="finance-salary-point" title="{{ $point['period'] }} : {{ number_format($point['amount'], 2, ',', ' ') }} €">
-                                <span style="height: {{ max(($point['amount'] / $salaryChartMax) * 100, 2) }}%"></span>
+                                <span style="height: {{ max(($point['amount'] / max((float) $salaryTimeline->max('amount'), 1)) * 100, 2) }}%"></span>
                                 <small>{{ $point['period'] }}</small>
                             </div>
                         @endforeach
@@ -203,7 +317,7 @@
                     <p class="finance-dashboard-empty">Aucun revenu de catégorie SALAIRE trouvé pour les comptes sélectionnés.</p>
                 @endif
             </section>
-            <section class="finance-panel finance-table-panel">
+            <section class="finance-panel finance-table-panel finance-evolution-panel">
                 <h2>Comparaison du salaire par mois et par année</h2>
                 <div class="finance-dashboard-table-wrap">
                     <table>
@@ -224,7 +338,7 @@
                     </table>
                 </div>
             </section>
-            <section class="finance-panel finance-table-panel">
+            <section class="finance-panel finance-table-panel finance-evolution-panel">
                 <h2>WEBSITE / revenus web par mois ({{ $year }})</h2>
                 <div class="finance-dashboard-table-wrap">
                     <table>
@@ -237,13 +351,11 @@
                     </table>
                 </div>
             </section>
-            <section class="finance-panel finance-table-panel">
+            <section class="finance-panel finance-table-panel finance-evolution-panel">
                 <h2>Évolution mensuelle des dépenses par catégorie ({{ $year }})</h2>
                 <div class="finance-dashboard-table-wrap">
                     <table>
-                        <thead>
-                            <tr><th>Catégorie</th>@foreach ($monthNames as $monthName)<th>{{ $monthName }}</th>@endforeach<th>Total</th></tr>
-                        </thead>
+                        <thead><tr><th>Catégorie</th>@foreach ($monthNames as $monthName)<th>{{ $monthName }}</th>@endforeach<th>Total</th></tr></thead>
                         <tbody>
                             @forelse ($monthlyExpenseComparison as $category)
                                 <tr>
@@ -260,7 +372,7 @@
                     </table>
                 </div>
             </section>
-            <section class="finance-panel finance-table-panel">
+            <section class="finance-panel finance-table-panel finance-evolution-panel">
                 <h2>Dépenses par catégorie et comparaison annuelle</h2>
                 <div class="finance-dashboard-table-wrap">
                     <table>
@@ -280,28 +392,17 @@
                     </table>
                 </div>
             </section>
-            <section class="finance-panel">
-                <h2>Dépenses par catégorie — {{ $month ? $monthNames[$month] . ' ' : '' }}{{ $year }}</h2>
-                @forelse ($categories as $category)
-                    <div class="expense-row">
-                        <span class="category-dot" style="background: {{ $category['color'] }}"></span>
-                        <span>{{ $category['name'] }}
-                            @if ($category['refunds'] > 0)
-                                <small class="finance-expense-detail">{{ number_format($category['spent'], 2, ',', ' ') }} € dépensés · {{ number_format($category['refunds'], 2, ',', ' ') }} € remboursés</small>
-                            @endif
-                        </span>
-                        <div class="expense-track"><i
-                                style="width: {{ min(max(($category['amount'] / max($expenses, 1)) * 100, 0), 100) }}%; background: {{ $category['color'] }}"></i>
-                        </div>
-                        <b>{{ number_format($category['amount'], 2, ',', ' ') }} €</b>
-                    </div>
-                @empty
-                    <p class="finance-dashboard-empty">Aucune dépense pour cette période.</p>
-                @endforelse
-                <div class="finance-dashboard-total"><span>Total des dépenses nettes</span><strong>{{ number_format($expenses, 2, ',', ' ') }} €</strong></div>
-            </section>
         @endif
 
-        <footer class="finance-dashboard__footer">Montants en euros (€) · Les montants positifs dans une catégorie de dépense réduisent cette dépense, ils ne deviennent pas des revenus.</footer>
+        <footer class="finance-dashboard__footer">
+            Montants en euros (€) · Les montants positifs dans une catégorie de dépense réduisent cette dépense, ils ne deviennent pas des revenus.
+        </footer>
     </div>
+
+    <script>
+        document.getElementById('dashboard-filter-button')?.addEventListener('click', function() {
+            document.getElementById('dashboard-month')?.classList.toggle('is-visible');
+            document.querySelector('.finance-year-select-wrap .fa-calendar')?.classList.toggle('is-visible');
+        });
+    </script>
 @endsection

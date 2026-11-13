@@ -750,6 +750,126 @@
 .finance-dashboard-table-wrap .finance-table-panel table {
   min-width: 100%;
 }
+.finance-house-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.finance-house-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e8edf4;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(31, 48, 75, 0.05);
+}
+.finance-house-card--highlight {
+  border-color: #b9d1f6;
+  background: #f3f7ff;
+}
+.finance-house-card small {
+  color: #65718a;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.finance-house-card strong {
+  color: #17233d;
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+.finance-house-card span {
+  color: #78839a;
+  font-size: 0.68rem;
+}
+.finance-house-progress {
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #e4eaf3;
+}
+.finance-house-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #3975db;
+}
+.finance-house-details > .finance-panel {
+  flex: 1.4;
+}
+.finance-house-rate-notice {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #f1d59c;
+  border-radius: 8px;
+  background: #fff8e8;
+  color: #765516;
+  font-size: 0.75rem;
+}
+.finance-house-rate-notice strong {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #5f4513;
+}
+.finance-house-rate-notice p {
+  margin: 0.4rem 0;
+}
+.finance-house-schedule {
+  margin-bottom: 1rem;
+}
+.finance-house-schedule__heading {
+  margin-bottom: 0.8rem;
+}
+.finance-house-schedule__heading h2 {
+  margin-bottom: 0.25rem;
+}
+.finance-house-schedule__heading p {
+  margin: 0;
+  color: #78839a;
+  font-size: 0.7rem;
+}
+.finance-house-schedule .finance-dashboard-table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+}
+.finance-house-schedule table {
+  min-width: 760px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.68rem;
+}
+.finance-house-schedule th,
+.finance-house-schedule td {
+  padding: 0.48rem 0.55rem;
+  border-bottom: 1px solid #edf1f5;
+  text-align: right;
+  white-space: nowrap;
+}
+.finance-house-schedule thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f7f9fc;
+  color: #56627a;
+}
+.finance-house-schedule th:first-child,
+.finance-house-schedule td:first-child,
+.finance-house-schedule th:nth-child(2),
+.finance-house-schedule td:nth-child(2),
+.finance-house-schedule th:last-child,
+.finance-house-schedule td:last-child {
+  text-align: left;
+}
+.finance-house-schedule tbody tr.is-paid {
+  background: #f1f8f3;
+}
+.finance-house-schedule tbody tr:hover {
+  background: #eef4fc;
+}
 @media (max-width: 700px) {
   .finance-dashboard-tabs {
     gap: 0;
@@ -766,6 +886,16 @@
   .finance-dashboard-filters select,
   .finance-dashboard-filters .finance-category-filter select {
     width: 100%;
+  }
+  .finance-house-summary {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  .finance-house-card {
+    padding: 0.8rem;
+  }
+  .finance-house-details {
+    flex-direction: column;
   }
 }
 
@@ -797,6 +927,10 @@
   font-size: 0.85rem;
 }
 .finance-year-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
   position: relative;
 }
 .finance-year-select-wrap {
@@ -867,6 +1001,16 @@
 .finance-dashboard-month-select.is-visible {
   display: inline-block;
 }
+.finance-category-filter select {
+  min-width: 12rem;
+  max-width: 15rem;
+  padding: 0.35rem;
+  border: 1px solid #dce3ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #17233d;
+  font-size: 0.7rem;
+}
 .finance-kpis {
   margin-bottom: 1rem;
 }
@@ -909,7 +1053,7 @@
   color: #2caa55;
   font-size: 0.65rem;
   font-style: normal;
-  white-space: nowrap;
+  line-height: 1.35;
 }
 .finance-kpi--red em {
   color: #ed5258;
@@ -1195,6 +1339,14 @@
   .finance-dashboard__header {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .finance-year-filter {
+    width: 100%;
+  }
+  .finance-category-filter,
+  .finance-category-filter select {
+    width: 100%;
+    max-width: none;
   }
   .finance-kpi {
     flex-basis: 100%;

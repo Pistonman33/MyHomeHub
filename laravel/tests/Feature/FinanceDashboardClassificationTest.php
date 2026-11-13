@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\Backend\FinanceController;
 use App\Models\Categorie;
 use App\Models\Record;
+use Carbon\CarbonImmutable;
 use ReflectionMethod;
 use Tests\TestCase;
 
@@ -55,6 +56,31 @@ class FinanceDashboardClassificationTest extends TestCase
         $this->assertSame(1200.0, $summary['provisions']);
         $this->assertSame(150.0, $summary['expenses']);
         $this->assertSame(150.0, $summary['categories']->first()['refunds']);
+    }
+
+    public function test_mortgage_schedule_tracks_paid_and_remaining_installments(): void
+    {
+        $method = new ReflectionMethod(FinanceController::class, 'buildMortgageSchedule');
+        $mortgage = $method->invoke(
+            new FinanceController,
+            265000.00,
+            1125.28,
+            0.00168,
+            300,
+            CarbonImmutable::parse('2018-12-30'),
+            CarbonImmutable::parse('2026-11-13')
+        );
+
+        $this->assertCount(300, $mortgage['schedule']);
+        $this->assertSame(95, $mortgage['paid_installments']);
+        $this->assertSame(205, $mortgage['remaining_installments']);
+        $this->assertSame('2018-12-30', $mortgage['schedule'][0]['date']->format('Y-m-d'));
+        $this->assertSame('2019-02-28', $mortgage['schedule'][2]['date']->format('Y-m-d'));
+        $this->assertSame('2026-11-30', $mortgage['next_payment_date']->format('Y-m-d'));
+        $this->assertSame('2043-11-30', $mortgage['payoff_date']->format('Y-m-d'));
+        $this->assertGreaterThan(0, $mortgage['remaining_principal']);
+        $this->assertGreaterThan($mortgage['remaining_principal'], $mortgage['remaining_payments']);
+        $this->assertSame(0.0, $mortgage['schedule'][299]['balance']);
     }
 
     private function categoryType(string $name, string $group): string

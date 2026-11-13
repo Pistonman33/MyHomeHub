@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\Debug\Exception\FatalErrorException;
 use App\Models\Display;
 use Illuminate\Support\Str;
+use Carbon\CarbonImmutable;
 
 class FinanceController extends Controller
 {
@@ -61,9 +62,27 @@ class FinanceController extends Controller
         $month = $request->filled('month') && (int) $request->input('month') >= 1 && (int) $request->input('month') <= 12
             ? (int) $request->input('month')
             : null;
-        $dashboard = in_array($request->input('view'), ['menage', 'moi', 'evolution'], true)
+        $dashboard = in_array($request->input('view'), ['menage', 'moi', 'evolution', 'maison'], true)
             ? $request->input('view')
             : 'menage';
+
+        if ($dashboard === 'maison') {
+            $mortgage = $this->buildMortgageSchedule(
+                265000.00,
+                1125.28,
+                0.00168,
+                300,
+                CarbonImmutable::parse('2018-12-30'),
+                CarbonImmutable::today()
+            );
+
+            return view('backend.finance.house', [
+                'dashboard' => $dashboard,
+                'mortgage' => $mortgage,
+                'annualRate' => 2.03,
+                'monthlyRatePercent' => 0.168,
+            ]);
+        }
 
         $accounts = Compte::orderBy('nom')->get();
         $normalize = static function ($value) {
@@ -76,15 +95,13 @@ class FinanceController extends Controller
             return $normalize($account->nom) === 'THIEBAULT MICHAEL';
         })->pluck('compteid')->all();
 
-        $accountFilter = in_array($request->input('account'), ['common', 'personal', 'all'], true)
-            ? $request->input('account')
-            : ($dashboard === 'moi' ? 'personal' : 'common');
-        if ($dashboard === 'moi') {
-            $accountFilter = 'personal';
-        }
-        $accountIds = $accountFilter === 'common'
+        $incomeAccountIds = $dashboard === 'moi' || $dashboard === 'evolution'
+            ? $personalAccountIds
+            : $commonAccountIds;
+        $expenseAccountIds = $dashboard === 'evolution' || $dashboard === 'menage'
             ? $commonAccountIds
-            : ($accountFilter === 'personal' ? $personalAccountIds : $accounts->pluck('compteid')->all());
+            : $personalAccountIds;
+        $accountIds = array_values(array_unique(array_merge($incomeAccountIds, $expenseAccountIds)));
 
         $categoriesById = Categorie::all()->keyBy('id');
         $categoryTypes = $categoriesById->mapWithKeys(function ($category) {
@@ -118,7 +135,21 @@ class FinanceController extends Controller
             ->whereIn('fk_id_compte', $accountIds)
             ->get();
 
-        $summary = $this->summarizeDashboardTransactions($transactions, $categoryTypes, $selectedCategoryIds);
+        $incomeTransactions = $transactions->whereIn('fk_id_compte', $incomeAccountIds);
+        $expenseTransactions = $transactions->whereIn('fk_id_compte', $expenseAccountIds);
+        $incomeSummary = $this->summarizeDashboardTransactions($incomeTransactions, $categoryTypes, $selectedCategoryIds);
+        $expenseSummary = $this->summarizeDashboardTransactions($expenseTransactions, $categoryTypes, $selectedCategoryIds);
+        $summary = $dashboard === 'evolution'
+            ? [
+                'revenues' => $incomeSummary['revenues'],
+                'salary' => $incomeSummary['salary'],
+                'websiteRevenue' => $incomeSummary['websiteRevenue'],
+                'otherRevenues' => $incomeSummary['otherRevenues'],
+                'provisions' => $incomeSummary['provisions'],
+                'expenses' => $expenseSummary['expenses'],
+                'categories' => $expenseSummary['categories'],
+            ]
+            : $incomeSummary;
         $revenues = $summary['revenues'];
         $salary = $summary['salary'];
         $websiteRevenue = $summary['websiteRevenue'];
@@ -126,6 +157,98 @@ class FinanceController extends Controller
         $provisions = $summary['provisions'];
         $expenses = $summary['expenses'];
         $categories = $summary['categories'];
+
+        $previousStart = $month
+            ? sprintf('%04d-%02d-01', $year - 1, $month)
+            : ($year - 1) . '-01-01';
+        $previousEnd = $month
+            ? date('Y-m-d', strtotime($previousStart . ' +1 month'))
+            : $year . '-01-01';
+        $previousTransactions = Record::with('category')
+            ->where('validate', 1)
+            ->where('deleted', 0)
+            ->where('date', '>=', $previousStart)
+            ->where('date', '<', $previousEnd)
+            ->whereIn('fk_id_compte', $accountIds)
+            ->get();
+        $previousIncomeSummary = $this->summarizeDashboardTransactions(
+            $previousTransactions->whereIn('fk_id_compte', $incomeAccountIds),
+            $categoryTypes,
+            $selectedCategoryIds
+        );
+        $previousExpenseSummary = $dashboard === 'evolution'
+            ? $this->summarizeDashboardTransactions(
+                $previousTransactions->whereIn('fk_id_compte', $expenseAccountIds),
+                $categoryTypes,
+                $selectedCategoryIds
+            )
+            : $previousIncomeSummary;
+        $previousSummary = $dashboard === 'evolution'
+            ? array_merge($previousIncomeSummary, [
+                'expenses' => $previousExpenseSummary['expenses'],
+                'categories' => $previousExpenseSummary['categories'],
+            ])
+            : $previousIncomeSummary;
+        $previousRevenues = $previousSummary['revenues'];
+        $previousExpenses = $previousSummary['expenses'];
+        $savings = $dashboard === 'evolution'
+            ? null
+            : $revenues - $expenses - ($dashboard === 'moi' ? $provisions : 0);
+        $savingRate = $savings !== null && $revenues > 0 ? ($savings / $revenues) * 100 : null;
+        $averageMonthly = $expenses / ($month ? 1 : 12);
+
+        $comparison = $categories->map(function ($category) use ($previousSummary) {
+            $previousCategory = $previousSummary['categories']->first(function ($item) use ($category) {
+                return $item['id'] === $category['id'];
+            });
+            $previousAmount = $previousCategory ? $previousCategory['amount'] : 0.0;
+            $currentAmount = (float) $category['amount'];
+
+            return array_merge($category, [
+                'previous' => $previousAmount,
+                'evolution' => $previousAmount > 0
+                    ? (($currentAmount - $previousAmount) / $previousAmount) * 100
+                    : null,
+            ]);
+        });
+
+        $monthly = collect($month ? [$month] : range(1, 12))->map(function ($monthNumber) use (
+            $incomeTransactions,
+            $expenseTransactions,
+            $categoryTypes,
+            $selectedCategoryIds,
+            $dashboard
+        ) {
+            $monthIncomeTransactions = $incomeTransactions->filter(function ($transaction) use ($monthNumber) {
+                return (int) date('n', strtotime($transaction->date)) === $monthNumber;
+            });
+            $monthExpenseTransactions = $expenseTransactions->filter(function ($transaction) use ($monthNumber) {
+                return (int) date('n', strtotime($transaction->date)) === $monthNumber;
+            });
+            $monthIncomeSummary = $this->summarizeDashboardTransactions(
+                $monthIncomeTransactions,
+                $categoryTypes,
+                $selectedCategoryIds
+            );
+            $monthExpenseSummary = $dashboard === 'evolution'
+                ? $this->summarizeDashboardTransactions(
+                    $monthExpenseTransactions,
+                    $categoryTypes,
+                    $selectedCategoryIds
+                )
+                : $monthIncomeSummary;
+
+            return [
+                'month' => $monthNumber,
+                'revenue' => $monthIncomeSummary['revenues'],
+                'expense' => $monthExpenseSummary['expenses'],
+                'savings' => $dashboard === 'evolution'
+                    ? null
+                    : $monthIncomeSummary['revenues']
+                        - $monthIncomeSummary['expenses']
+                        - ($dashboard === 'moi' ? $monthIncomeSummary['provisions'] : 0),
+            ];
+        });
 
         $salaryCategoryIds = $categoryTypes->filter(function ($type) {
             return $type === 'salary';
@@ -135,13 +258,13 @@ class FinanceController extends Controller
         })->keys()->all();
         $historicalIncome = collect();
         $incomeCategoryIds = array_values(array_unique(array_merge($salaryCategoryIds, $websiteCategoryIds)));
-        if ($incomeCategoryIds && $accountIds) {
+        if ($incomeCategoryIds && $incomeAccountIds) {
             $historicalIncome = Record::query()
                 ->join('categories', 'records.fk_id_categorie', '=', 'categories.id')
                 ->where('records.validate', 1)
                 ->where('records.deleted', 0)
                 ->where('records.retrait', 0)
-                ->whereIn('records.fk_id_compte', $accountIds)
+                ->whereIn('records.fk_id_compte', $incomeAccountIds)
                 ->whereIn('records.fk_id_categorie', $incomeCategoryIds)
                 ->selectRaw('YEAR(date) as year, MONTH(date) as month, fk_id_categorie, SUM(montant) as total')
                 ->groupBy('year', 'month', 'records.fk_id_categorie')
@@ -191,11 +314,11 @@ class FinanceController extends Controller
             })->values();
 
         $expenseHistory = collect();
-        if ($selectedCategoryIds->isNotEmpty() && $accountIds) {
+        if ($selectedCategoryIds->isNotEmpty() && $expenseAccountIds) {
             $expenseHistory = Record::query()
                 ->where('validate', 1)
                 ->where('deleted', 0)
-                ->whereIn('fk_id_compte', $accountIds)
+                ->whereIn('fk_id_compte', $expenseAccountIds)
                 ->whereIn('fk_id_categorie', $selectedCategoryIds->all())
                 ->selectRaw('YEAR(date) as year, fk_id_categorie, SUM(CASE WHEN retrait = 1 THEN montant ELSE -montant END) as total')
                 ->groupBy('year', 'fk_id_categorie')
@@ -217,13 +340,13 @@ class FinanceController extends Controller
         })->sortByDesc('current')->values();
 
         $monthlyExpenseHistory = collect();
-        if ($selectedCategoryIds->isNotEmpty() && $accountIds) {
+        if ($selectedCategoryIds->isNotEmpty() && $expenseAccountIds) {
             $monthlyExpenseHistory = Record::query()
                 ->where('validate', 1)
                 ->where('deleted', 0)
                 ->where('date', '>=', $year . '-01-01')
                 ->where('date', '<', ($year + 1) . '-01-01')
-                ->whereIn('fk_id_compte', $accountIds)
+                ->whereIn('fk_id_compte', $expenseAccountIds)
                 ->whereIn('fk_id_categorie', $selectedCategoryIds->all())
                 ->selectRaw('MONTH(date) as month, fk_id_categorie, SUM(CASE WHEN retrait = 1 THEN montant ELSE -montant END) as total')
                 ->groupBy('month', 'fk_id_categorie')
@@ -250,7 +373,6 @@ class FinanceController extends Controller
             'year' => $year,
             'years' => $years,
             'month' => $month,
-            'accountFilter' => $accountFilter,
             'commonAccountConfigured' => !empty($commonAccountIds),
             'personalAccountConfigured' => !empty($personalAccountIds),
             'revenues' => $revenues,
@@ -259,6 +381,13 @@ class FinanceController extends Controller
             'otherRevenues' => $otherRevenues,
             'provisions' => $provisions,
             'expenses' => $expenses,
+            'savings' => $savings,
+            'savingRate' => $savingRate,
+            'averageMonthly' => $averageMonthly,
+            'previousRevenues' => $previousRevenues,
+            'previousExpenses' => $previousExpenses,
+            'comparison' => $comparison,
+            'monthly' => $monthly,
             'categories' => $categories,
             'expenseCategories' => $expenseCategories,
             'selectedCategoryIds' => $selectedCategoryIds,
@@ -270,6 +399,79 @@ class FinanceController extends Controller
             'websiteByYearMonth' => $websiteByYearMonth,
             'transactionCount' => $transactions->count(),
         ]);
+    }
+
+    private function buildMortgageSchedule(
+        float $principal,
+        float $monthlyPayment,
+        float $monthlyRate,
+        int $installments,
+        CarbonImmutable $firstPaymentDate,
+        CarbonImmutable $asOfDate
+    ): array {
+        $balance = round($principal, 2);
+        $schedule = [];
+        $paidInstallments = 0;
+        $amountPaid = 0.0;
+        $principalPaid = 0.0;
+        $interestPaid = 0.0;
+        $remainingPayments = 0.0;
+        $totalInterest = 0.0;
+        $remainingPrincipal = $balance;
+        $nextPaymentDate = null;
+        $payoffDate = $firstPaymentDate;
+
+        for ($number = 1; $number <= $installments && $balance > 0; $number++) {
+            $month = $firstPaymentDate->startOfMonth()->addMonths($number - 1);
+            $dueDate = $month->setDay(min($firstPaymentDate->day, $month->daysInMonth));
+            $interest = round($balance * $monthlyRate, 2);
+            $principalPart = min($balance, round($monthlyPayment - $interest, 2));
+            $payment = round($interest + $principalPart, 2);
+            $balance = round(max($balance - $principalPart, 0), 2);
+            $paid = $dueDate->lessThanOrEqualTo($asOfDate);
+
+            $totalInterest += $interest;
+            $payoffDate = $dueDate;
+            if ($paid) {
+                $paidInstallments++;
+                $amountPaid += $payment;
+                $principalPaid += $principalPart;
+                $interestPaid += $interest;
+                $remainingPrincipal = $balance;
+            } else {
+                $remainingPayments += $payment;
+                $nextPaymentDate = $nextPaymentDate ?: $dueDate;
+            }
+
+            $schedule[] = [
+                'number' => $number,
+                'date' => $dueDate,
+                'payment' => $payment,
+                'principal' => $principalPart,
+                'interest' => $interest,
+                'balance' => $balance,
+                'paid' => $paid,
+            ];
+        }
+
+        return [
+            'principal' => round($principal, 2),
+            'monthly_payment' => round($monthlyPayment, 2),
+            'monthly_rate' => $monthlyRate,
+            'total_installments' => $installments,
+            'first_payment_date' => $firstPaymentDate,
+            'payoff_date' => $payoffDate,
+            'paid_installments' => $paidInstallments,
+            'remaining_installments' => max($installments - $paidInstallments, 0),
+            'amount_paid' => round($amountPaid, 2),
+            'principal_paid' => round($principalPaid, 2),
+            'interest_paid' => round($interestPaid, 2),
+            'remaining_principal' => round($remainingPrincipal, 2),
+            'remaining_payments' => round($remainingPayments, 2),
+            'total_interest' => round($totalInterest, 2),
+            'next_payment_date' => $nextPaymentDate,
+            'schedule' => $schedule,
+        ];
     }
 
     private function dashboardCategoryType(?Categorie $category): string
