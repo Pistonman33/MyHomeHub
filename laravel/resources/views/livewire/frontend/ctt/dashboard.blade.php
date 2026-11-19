@@ -156,68 +156,9 @@
         </div>
     </div>
 
-    {{-- TOP 10 OPPONENTS --}}
-    <h2 class="text-lg font-semibold mb-6 text-white">Top 10 adversaires rencontrés</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        @foreach ($this->getTopOpponents() as $index => $opponent)
-            @php
-                $total = $opponent->total_matches;
-                $winsPercent = $total ? round(($opponent->wins / $total) * 100) : 0;
-                $lossesPercent = $total ? round(($opponent->losses / $total) * 100) : 0;
-            @endphp
-            <div class="bg-gray-700/40 rounded-xl shadow-lg p-4 flex gap-4 items-stretch">
-
-                {{-- POSITION LEFT --}}
-                <div class="w-12 flex flex-col justify-center items-center font-bold text-gray-300 text-lg">
-                    #{{ $index + 1 }}
-                </div>
-
-                {{-- RIGHT CONTENT --}}
-                <div class="flex-1 flex flex-col justify-between">
-                    {{-- TOP ROW: NAME + CLUB + RANKING --}}
-                    <div class="flex justify-between items-center gap-4">
-                        <div>
-                            <div class="text-sm font-bold text-white">{{ $opponent->opponent_firstname }}
-                                {{ $opponent->opponent_lastname }}</div>
-                            <div class="text-xs text-gray-400">{{ $opponent->opponent_club }}</div>
-                            <div class="text-xs text-gray-500">{{ $total }} matchs</div>
-                        </div>
-
-                        {{-- RANKING --}}
-                        <div>
-                            <div
-                                class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                                @if ($opponent->last_ranking < $season_detail->ranking) bg-orange-400 text-white
-                                @elseif ($opponent->last_ranking > $season_detail->ranking) bg-teal-400 text-white
-                                @else bg-gray-500 text-white @endif">
-                                {{ $opponent->last_ranking }}
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- BOTTOM ROW: WINS/LOSSES + PROGRESS BAR --}}
-                    <div class="flex flex-col gap-1 mt-2">
-                        <div class="flex justify-between text-xs font-medium">
-                            <span class="text-green-500">{{ $opponent->wins }} Victoires ({{ $winsPercent }}%)</span>
-                            <span class="text-red-400">{{ $opponent->losses }} Défaites
-                                ({{ $lossesPercent }}%)
-                            </span>
-                        </div>
-
-                        <!-- Progress bar juste en dessous -->
-                        <div class="relative w-full h-2 bg-gray-700/40 rounded-full overflow-hidden">
-                            <div class="absolute h-full rounded-full"
-                                style="width: {{ $winsPercent }}%; background-color: #22c55e;"></div>
-                            <div class="absolute h-full rounded-full"
-                                style="width: {{ $lossesPercent }}%; background-color: #ef4444; left: {{ $winsPercent }}%;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        @endforeach
-    </div>
+    @php
+        $opponentHistoryByLicense = $opponentHistory->keyBy('opponent_license');
+    @endphp
 
     {{-- TOP / FLOP adversaires --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -225,105 +166,209 @@
         <!-- TOP -->
         <div class="bg-gray-800/70 rounded-xl shadow-lg p-6 text-white">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold">🏆 Top 3 adversaires</h2>
+                <h2 class="text-lg font-semibold text-white">🏆 Top 3 adversaires</h2>
                 <span class="text-xs text-gray-400">points gagnés</span>
             </div>
 
-            <ul class="space-y-3">
+            <div class="grid grid-cols-1 gap-3">
                 @foreach ($topOpponents as $opp)
-                    <li class="flex items-center justify-between gap-8 pb-3">
-                        <!-- LEFT: ranking badge -->
-                        <div class="flex-shrink-0">
-                            <span
-                                class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
-            @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
-            @elseif ($opp->opponent_ranking > $season_detail->ranking)
-                bg-teal-400 text-white
-            @else
-                bg-gray-500 text-white @endif">
-                                {{ $opp->opponent_ranking }}
+                    <div class="rounded-xl border border-gray-700/70 bg-gray-800/70 px-4 py-3 text-white">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-300">
+                                    #{{ $loop->iteration }}
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="truncate text-sm font-semibold text-white">
+                                            {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
+                                        </span>
+                                        @if ($opp->opponent_ranking)
+                                            <span
+                                                class="flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold
+                                                @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400/20 text-orange-200 ring-1 ring-inset ring-orange-400/30
+                                                @elseif ($opp->opponent_ranking > $season_detail->ranking) bg-teal-400/20 text-teal-200 ring-1 ring-inset ring-teal-400/30
+                                                @else bg-gray-500/20 text-gray-300 ring-1 ring-inset ring-gray-500/30 @endif">
+                                                {{ $opp->opponent_ranking }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-1 flex min-w-0 items-center gap-2 text-xs text-gray-400">
+                                        @if ($opp->opponent_club)
+                                            <span class="truncate">{{ $opp->opponent_club }}</span>
+                                            <span>•</span>
+                                        @endif
+                                        <span class="flex-shrink-0">{{ $opp->opponent_points ?? 'N/A' }} pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="flex-shrink-0 text-right text-sm font-bold text-green-400">
+                                +{{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
                             </span>
                         </div>
-                        <!-- CENTER: player info -->
-                        <div class="flex-1 min-w-0">
-                            <div class="text-gray-200 font-medium truncate">
-                                {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
-                            </div>
-
-                            <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                                @if (!empty($opp->opponent_club))
-                                    <span class="truncate">{{ $opp->opponent_club }}</span>
-                                    <span>•</span>
-                                @endif
-
-                                <span>{{ $opp->opponent_points ?? 'N/A' }} pts</span>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT -->
-                        <div class="text-right">
-                            <div class="text-green-400 font-bold">
-                                +{{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
-                            </div>
-                        </div>
-
-                    </li>
+                    </div>
                 @endforeach
-            </ul>
+            </div>
         </div>
 
         <!-- FLOP -->
         <div class="bg-gray-800/70 rounded-xl shadow-lg p-6 text-white">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold">💀 Flop 3 adversaires</h2>
+                <h2 class="text-lg font-semibold text-white">💀 Flop 3 adversaires</h2>
                 <span class="text-xs text-gray-400">points perdus</span>
             </div>
 
-            <ul class="space-y-3">
+            <div class="grid grid-cols-1 gap-3">
                 @foreach ($flopOpponents as $opp)
-                    <li class="flex items-center justify-between gap-8 pb-3">
-                        <!-- LEFT: ranking badge -->
-                        <div class="flex-shrink-0">
-                            <span
-                                class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold
-            @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
-            @elseif ($opp->opponent_ranking > $season_detail->ranking)
-                bg-teal-400 text-white
-            @else
-                bg-gray-500 text-white @endif">
-                                {{ $opp->opponent_ranking }}
+                    <div class="rounded-xl border border-gray-700/70 bg-gray-800/70 px-4 py-3 text-white">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-300">
+                                    #{{ $loop->iteration }}
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="truncate text-sm font-semibold text-white">
+                                            {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
+                                        </span>
+                                        @if ($opp->opponent_ranking)
+                                            <span
+                                                class="flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold
+                                                @if ($opp->opponent_ranking < $season_detail->ranking) bg-orange-400/20 text-orange-200 ring-1 ring-inset ring-orange-400/30
+                                                @elseif ($opp->opponent_ranking > $season_detail->ranking) bg-teal-400/20 text-teal-200 ring-1 ring-inset ring-teal-400/30
+                                                @else bg-gray-500/20 text-gray-300 ring-1 ring-inset ring-gray-500/30 @endif">
+                                                {{ $opp->opponent_ranking }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-1 flex min-w-0 items-center gap-2 text-xs text-gray-400">
+                                        @if ($opp->opponent_club)
+                                            <span class="truncate">{{ $opp->opponent_club }}</span>
+                                            <span>•</span>
+                                        @endif
+                                        <span class="flex-shrink-0">{{ $opp->opponent_points ?? 'N/A' }} pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="flex-shrink-0 text-right text-sm font-bold text-red-400">
+                                {{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
                             </span>
                         </div>
-                        <!-- CENTER: player info -->
-                        <div class="flex-1 min-w-0">
-                            <div class="text-gray-200 font-medium truncate">
-                                {{ $opp->opponent_firstname }} {{ $opp->opponent_lastname }}
-                            </div>
-
-                            <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">
-                                @if (!empty($opp->opponent_club))
-                                    <span class="truncate">{{ $opp->opponent_club }}</span>
-                                    <span>•</span>
-                                @endif
-
-                                <span>{{ $opp->opponent_points ?? 'N/A' }} pts</span>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT -->
-                        <div class="text-right">
-                            <div class="text-red-400 font-bold">
-                                {{ number_format($opp->total_delta ?? $opp->delta_points, 2) }}
-                            </div>
-                        </div>
-
-                    </li>
+                    </div>
                 @endforeach
-            </ul>
+            </div>
         </div>
 
     </div>
 
+    @if ($season === 'all')
+    {{-- TOP 10 ALL-TIME HEAD-TO-HEAD OPPONENTS --}}
+    <section>
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+            <div>
+                <h2 class="text-lg font-semibold text-white">Top 12 adversaires rencontrés</h2>
+                <p class="text-xs text-gray-400 mt-1">Toutes saisons confondues · survolez un joueur pour voir les rencontres</p>
+            </div>
+            <span class="text-xs text-gray-500">{{ min(12, $opponentHistory->count()) }} adversaires</span>
+        </div>
+
+        @if ($opponentHistory->isEmpty())
+            <div class="bg-gray-800/70 rounded-xl p-5 text-sm text-gray-400">
+                Aucun historique de rencontre disponible.
+            </div>
+        @else
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                @foreach ($opponentHistory->take(12) as $opponent)
+                    @php
+                        $tooltipId = 'ctt-opponent-history-' . $loop->index;
+                    @endphp
+                    <div class="relative group">
+                        <button
+                            type="button"
+                            aria-describedby="{{ $tooltipId }}"
+                            class="w-full rounded-xl border border-gray-700/70 bg-gray-800/70 px-4 py-3 text-left text-white transition hover:border-blue-400/50 hover:bg-gray-700/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                        >
+                            <span class="flex items-center justify-between gap-3">
+                                <span class="flex min-w-0 items-center gap-3">
+                                    <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-300">
+                                        #{{ $loop->iteration }}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="flex items-center gap-2">
+                                            <span class="truncate text-sm font-semibold">
+                                                {{ $opponent['firstname'] }} {{ $opponent['lastname'] }}
+                                            </span>
+                                            @if ($opponent['ranking'])
+                                                <span
+                                                    class="flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold
+                                                    @if ($opponent['ranking'] < $season_detail->ranking) bg-orange-400/20 text-orange-200 ring-1 ring-inset ring-orange-400/30
+                                                    @elseif ($opponent['ranking'] > $season_detail->ranking) bg-teal-400/20 text-teal-200 ring-1 ring-inset ring-teal-400/30
+                                                    @else bg-gray-500/20 text-gray-300 ring-1 ring-inset ring-gray-500/30 @endif">
+                                                    {{ $opponent['ranking'] }}
+                                                </span>
+                                            @endif
+                                        </span>
+                                        @if ($opponent['club'])
+                                            <span class="mt-1 block truncate text-xs text-gray-400">{{ $opponent['club'] }}</span>
+                                        @endif
+                                    </span>
+                                </span>
+                                <span class="flex-shrink-0 text-right">
+                                    <span class="block text-lg font-bold text-blue-300">{{ $opponent['total_matches'] }}</span>
+                                    <span class="block text-[10px] uppercase tracking-wide text-gray-400">
+                                        {{ $opponent['total_matches'] === 1 ? 'match' : 'matchs' }}
+                                    </span>
+                                </span>
+                            </span>
+                            <span class="mt-2 flex gap-3 text-xs">
+                                <span class="text-green-400">{{ $opponent['wins'] }} victoire{{ $opponent['wins'] === 1 ? '' : 's' }}</span>
+                                <span class="text-red-400">{{ $opponent['losses'] }} défaite{{ $opponent['losses'] === 1 ? '' : 's' }}</span>
+                            </span>
+                        </button>
+
+                        <div
+                            id="{{ $tooltipId }}"
+                            role="tooltip"
+                            class="invisible absolute left-1/2 top-full z-30 w-72 max-w-[calc(100vw-2rem)] -translate-x-1/2 pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                        >
+                            <div class="overflow-hidden rounded-xl border border-gray-600 bg-gray-900 shadow-2xl">
+                                <div class="border-b border-gray-700 px-3 py-2">
+                                    <div class="text-xs font-semibold text-white">
+                                        {{ $opponent['firstname'] }} {{ $opponent['lastname'] }}
+                                    </div>
+                                    <div class="text-[11px] text-gray-400">
+                                        {{ $opponent['total_matches'] }} rencontre{{ $opponent['total_matches'] === 1 ? '' : 's' }}
+                                        · {{ $opponent['wins'] }} V / {{ $opponent['losses'] }} D
+                                    </div>
+                                </div>
+                                <ol class="max-h-56 divide-y divide-gray-800 overflow-y-auto px-3">
+                                    @foreach ($opponent['matches'] as $match)
+                                        <li class="flex items-center justify-between gap-3 py-2 text-xs">
+                                            <span class="min-w-0">
+                                                <span class="block truncate text-gray-200">
+                                                    {{ $match->season?->name ?? 'Saison ' . $match->season_year }}
+                                                </span>
+                                                <span class="text-[10px] text-gray-500">{{ $match->date?->format('d/m/Y') }}</span>
+                                            </span>
+                                            <span class="flex flex-shrink-0 items-center gap-2">
+                                                <span class="rounded px-1.5 py-0.5 font-bold {{ $match->result === 'V' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300' }}">
+                                                    {{ $match->result === 'V' ? 'Gagné' : 'Perdu' }}
+                                                </span>
+                                                <span class="w-10 text-right font-semibold text-white">
+                                                    {{ $match->set_for }}–{{ $match->set_against }}
+                                                </span>
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </section>
+    @else
     {{-- LAST MATCHES --}}
     <h2 class="font-semibold mb-4 text-white">Derniers matches</h2>
     <div class="space-y-3">
@@ -361,15 +406,71 @@
                                 {{-- OPPONENT + RANKING --}}
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                                        @if ($match->opponent_ranking < $season_detail->ranking) bg-orange-400 text-white
-                                        @elseif ($match->opponent_ranking > $season_detail->ranking) bg-teal-400 text-white
-                                        @else bg-gray-500 text-white @endif">
+                                        class="w-8 h-8 rounded-md flex items-center justify-center text-sm font-bold
+                                        @if ($match->opponent_ranking < $season_detail->ranking) bg-orange-400/20 text-orange-200 ring-1 ring-inset ring-orange-400/30
+                                        @elseif ($match->opponent_ranking > $season_detail->ranking) bg-teal-400/20 text-teal-200 ring-1 ring-inset ring-teal-400/30
+                                        @else bg-gray-500/20 text-gray-300 ring-1 ring-inset ring-gray-500/30 @endif">
                                         {{ $match->opponent_ranking }}
                                     </div>
                                     <div>
-                                        <div class="font-medium text-white">
-                                            {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-medium text-white">
+                                                {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
+                                            </span>
+                                            @php
+                                                $history = $opponentHistoryByLicense->get($match->opponent_license);
+                                                $tooltipId = 'ctt-match-history-' . $match->id;
+                                            @endphp
+                                            @if ($history && $history['total_matches'] > 1)
+                                                <span class="relative inline-flex group">
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Voir l'historique des rencontres contre {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}"
+                                                        aria-describedby="{{ $tooltipId }}"
+                                                        class="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-300 transition hover:bg-blue-400/10 hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4" />
+                                                        </svg>
+                                                    </button>
+                                                    <span
+                                                        id="{{ $tooltipId }}"
+                                                        role="tooltip"
+                                                        class="invisible absolute left-0 top-full z-30 w-72 max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                                                    >
+                                                        <span class="block overflow-hidden rounded-xl border border-gray-600 bg-gray-900 text-left shadow-2xl">
+                                                            <span class="block border-b border-gray-700 px-3 py-2">
+                                                                <span class="block text-xs font-semibold text-white">
+                                                                    {{ $history['firstname'] }} {{ $history['lastname'] }}
+                                                                </span>
+                                                                <span class="block text-[11px] text-gray-400">
+                                                                    {{ $history['total_matches'] }} rencontres · {{ $history['wins'] }} V / {{ $history['losses'] }} D
+                                                                </span>
+                                                            </span>
+                                                            <span class="block max-h-56 divide-y divide-gray-800 overflow-y-auto px-3">
+                                                                @foreach ($history['matches'] as $historyMatch)
+                                                                    <span class="flex items-center justify-between gap-3 py-2 text-xs">
+                                                                        <span class="min-w-0">
+                                                                            <span class="block truncate text-gray-200">
+                                                                                {{ $historyMatch->season?->name ?? 'Saison ' . $historyMatch->season_year }}
+                                                                            </span>
+                                                                            <span class="text-[10px] text-gray-500">{{ $historyMatch->date?->format('d/m/Y') }}</span>
+                                                                        </span>
+                                                                        <span class="flex flex-shrink-0 items-center gap-2">
+                                                                            <span class="rounded px-1.5 py-0.5 font-bold {{ $historyMatch->result === 'V' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300' }}">
+                                                                                {{ $historyMatch->result === 'V' ? 'Gagné' : 'Perdu' }}
+                                                                            </span>
+                                                                            <span class="w-10 text-right font-semibold text-white">
+                                                                                {{ $historyMatch->set_for }}–{{ $historyMatch->set_against }}
+                                                                            </span>
+                                                                        </span>
+                                                                    </span>
+                                                                @endforeach
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                            @endif
                                         </div>
 
                                         @if ($match->pointsHistoryForPlayer($license))
@@ -410,6 +511,7 @@
             @endforeach
         </div>
     </div>
+    @endif
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class Dashboard extends Component
 {
     public $season;
+
     public $player = '167818';
 
     public function mount(): void
@@ -48,6 +49,7 @@ class Dashboard extends Component
             'percentage' => $total ? round($wins/$total*100) : 0
         ];
     }
+
     public function getSeasonInfo()
     {
         $s = $this->season;
@@ -167,7 +169,7 @@ class Dashboard extends Component
 
     public function getTopOpponents()
     {
-        $query = \App\Models\CttMatch::selectRaw('
+        $query = CttMatch::selectRaw('
                 opponent_license,
                 opponent_firstname,
                 opponent_lastname,
@@ -189,6 +191,44 @@ class Dashboard extends Component
         return $query->get();
     }    
 
+    public function getOpponentHistory()
+    {
+        return CttMatch::query()
+            ->with('season')
+            ->where('player_license', $this->player)
+            ->orderByDesc('date')
+            ->get([
+                'opponent_license',
+                'opponent_firstname',
+                'opponent_lastname',
+                'opponent_club',
+                'opponent_ranking',
+                'season_year',
+                'date',
+                'result',
+                'set_for',
+                'set_against',
+            ])
+            ->groupBy('opponent_license')
+            ->map(function ($matches) {
+                $latestMatch = $matches->first();
+
+                return [
+                    'opponent_license' => $latestMatch->opponent_license,
+                    'firstname' => $latestMatch->opponent_firstname,
+                    'lastname' => $latestMatch->opponent_lastname,
+                    'club' => $latestMatch->opponent_club,
+                    'ranking' => $latestMatch->opponent_ranking,
+                    'total_matches' => $matches->count(),
+                    'wins' => $matches->where('result', 'V')->count(),
+                    'losses' => $matches->where('result', 'D')->count(),
+                    'matches' => $matches,
+                ];
+            })
+            ->sortByDesc('total_matches')
+            ->values();
+    }
+
     public function render()
     {
         return view('livewire.frontend.ctt.dashboard', [
@@ -199,6 +239,7 @@ class Dashboard extends Component
             'seasons' => $this->getSeasons(),
             'topOpponents' => $this->getTop3Opponents(),
             'flopOpponents' => $this->getFlop3Opponents(),
+            'opponentHistory' => $this->getOpponentHistory(),
             'season_detail' => $this->getSeasonInfo(),
             'license' => $this->player,
         ]);    
