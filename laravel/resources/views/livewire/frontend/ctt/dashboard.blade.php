@@ -427,6 +427,7 @@
                                                         type="button"
                                                         aria-label="Voir l'historique des rencontres contre {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}"
                                                         aria-describedby="{{ $tooltipId }}"
+                                                        aria-expanded="false"
                                                         class="inline-flex h-6 w-6 items-center justify-center rounded-full text-blue-300 transition hover:bg-blue-400/10 hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -436,7 +437,7 @@
                                                     <span
                                                         id="{{ $tooltipId }}"
                                                         role="tooltip"
-                                                        class="ctt-match-history-tooltip invisible absolute left-0 top-full z-30 w-72 max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                                                        class="ctt-match-history-tooltip invisible absolute left-0 top-full z-30 w-72 max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100"
                                                     >
                                                         <span class="block overflow-hidden rounded-xl border border-gray-600 bg-gray-900 text-left shadow-2xl">
                                                             <span class="block border-b border-gray-700 px-3 py-2">
@@ -518,6 +519,44 @@
 
 <script>
     let winLossChart = null
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('.ctt-match-history-trigger button')
+        const openTooltips = document.querySelectorAll('.ctt-match-history-tooltip.is-open')
+
+        if (trigger) {
+            const tooltip = trigger.parentElement.querySelector('.ctt-match-history-tooltip')
+            const shouldOpen = !tooltip.classList.contains('is-open')
+
+            openTooltips.forEach((openTooltip) => {
+                openTooltip.classList.remove('is-open')
+                openTooltip.parentElement.querySelector('button')?.setAttribute('aria-expanded', 'false')
+            })
+
+            if (shouldOpen) {
+                tooltip.classList.add('is-open')
+                trigger.setAttribute('aria-expanded', 'true')
+            }
+
+            return
+        }
+
+        if (event.target.closest('.ctt-match-history-tooltip')) return
+
+        openTooltips.forEach((tooltip) => {
+            tooltip.classList.remove('is-open')
+            tooltip.parentElement.querySelector('button')?.setAttribute('aria-expanded', 'false')
+        })
+    })
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return
+
+        document.querySelectorAll('.ctt-match-history-tooltip.is-open').forEach((tooltip) => {
+            tooltip.classList.remove('is-open')
+            tooltip.parentElement.querySelector('button')?.setAttribute('aria-expanded', 'false')
+        })
+    })
 
     document.addEventListener("livewire:init", () => {
         loadCharts(@json($stats['wins']), @json($stats['losses']))

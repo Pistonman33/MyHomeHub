@@ -51,6 +51,11 @@
         transform: translate(-50%, -50%);
     }
 
+    .ctt-dashboard .ctt-match-history-tooltip.is-open {
+        visibility: visible;
+        opacity: 1;
+    }
+
     .ctt-dashboard .ctt-match-history-tooltip > span {
         max-height: min(80dvh, 32rem);
     }
