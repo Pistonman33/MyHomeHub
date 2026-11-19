@@ -6,3 +6,52 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+
+@media (max-width: 639px) {
+    .ctt-dashboard {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        padding: 1rem;
+    }
+
+    .ctt-dashboard .ctt-match-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .ctt-dashboard .ctt-match-opponent {
+        flex: 1 1 12rem;
+        min-width: 0;
+        gap: 0.5rem;
+    }
+
+    .ctt-dashboard .ctt-match-opponent-info {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ctt-dashboard .ctt-match-opponent-name {
+        overflow-wrap: anywhere;
+    }
+
+    .ctt-dashboard .ctt-match-result {
+        margin-left: auto;
+    }
+
+    .ctt-dashboard .ctt-match-history-tooltip {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 60;
+        width: min(20rem, calc(100vw - 2rem));
+        max-width: calc(100vw - 2rem);
+        padding-top: 0;
+        transform: translate(-50%, -50%);
+    }
+
+    .ctt-dashboard .ctt-match-history-tooltip > span {
+        max-height: min(80dvh, 32rem);
+    }
+}

@@ -1,4 +1,4 @@
-<div class="p-6 max-w-7xl mx-auto space-y-8">
+<div class="ctt-dashboard p-6 max-w-7xl mx-auto space-y-8">
 
     {{-- HEADER --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -402,9 +402,9 @@
                     {{-- MATCHES LIST --}}
                     <div class="space-y-2">
                         @foreach ($matches as $match)
-                            <div class="flex justify-between items-center">
+                            <div class="ctt-match-row flex justify-between items-center">
                                 {{-- OPPONENT + RANKING --}}
-                                <div class="flex items-center gap-3">
+                                <div class="ctt-match-opponent flex items-center gap-3">
                                     <div
                                         class="w-8 h-8 rounded-md flex items-center justify-center text-sm font-bold
                                         @if ($match->opponent_ranking < $season_detail->ranking) bg-orange-400/20 text-orange-200 ring-1 ring-inset ring-orange-400/30
@@ -412,9 +412,9 @@
                                         @else bg-gray-500/20 text-gray-300 ring-1 ring-inset ring-gray-500/30 @endif">
                                         {{ $match->opponent_ranking }}
                                     </div>
-                                    <div>
+                                    <div class="ctt-match-opponent-info">
                                         <div class="flex items-center gap-1.5">
-                                            <span class="font-medium text-white">
+                                            <span class="ctt-match-opponent-name font-medium text-white">
                                                 {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}
                                             </span>
                                             @php
@@ -422,7 +422,7 @@
                                                 $tooltipId = 'ctt-match-history-' . $match->id;
                                             @endphp
                                             @if ($history && $history['total_matches'] > 1)
-                                                <span class="relative inline-flex group">
+                                                <span class="ctt-match-history-trigger relative inline-flex group">
                                                     <button
                                                         type="button"
                                                         aria-label="Voir l'historique des rencontres contre {{ $match->opponent_firstname }} {{ $match->opponent_lastname }}"
@@ -436,7 +436,7 @@
                                                     <span
                                                         id="{{ $tooltipId }}"
                                                         role="tooltip"
-                                                        class="invisible absolute left-0 top-full z-30 w-72 max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                                                        class="ctt-match-history-tooltip invisible absolute left-0 top-full z-30 w-72 max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
                                                     >
                                                         <span class="block overflow-hidden rounded-xl border border-gray-600 bg-gray-900 text-left shadow-2xl">
                                                             <span class="block border-b border-gray-700 px-3 py-2">
@@ -494,7 +494,7 @@
                                 </div>
 
                                 {{-- RESULT + SCORE --}}
-                                <div class="flex items-center gap-2">
+                                <div class="ctt-match-result flex items-center gap-2">
                                     <span
                                         class="w-6 text-center px-2 py-1 text-xs rounded text-white
                                         {{ $match->result == 'V' ? 'bg-green-500' : 'bg-red-500' }}">
